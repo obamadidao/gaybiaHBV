@@ -7,11 +7,11 @@
       <img
         src="{{ asset('dist/assets/img/AdminLTELogo.png') }}"
         alt="AdminLTE Logo"
-        class="brand-image opacity-75 shadow"
-      />
+        class="brand-image opacity-75 shadow" />
       <!--end::Brand Image-->
       <!--begin::Brand Text-->
       <span class="brand-text fw-light">SHOP-BIDA</span>
+      <span class="brand-text fw-light">HBV BilliardShop</span>
       <!--end::Brand Text-->
     </a>
     <!--end::Brand Link-->
@@ -25,8 +25,7 @@
         class="nav sidebar-menu flex-column"
         data-lte-toggle="treeview"
         role="menu"
-        data-accordion="false"
-      >
+        data-accordion="false">
         <li class="nav-item">
           <a href="{{ route('admin.dashboard') }}" class="nav-link">
             <i class="nav-icon bi bi-palette"></i>
@@ -36,8 +35,38 @@
 
         <li class="nav-item">
           <a href="" class="nav-link">
+            <a href="{{ route('admin.categories.index') }}" class="nav-link">
+              <i class="nav-icon bi bi-palette"></i>
+              <p>Danh mục</p>
+            </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="" class="nav-link">
+            <i class="nav-icon bi bi-images"></i>
+            <p>Banner</p>
+          </a>
+        <li class="nav-item">
+          <a href="{{ route('admin.products.index') }}" class="nav-link">
             <i class="nav-icon bi bi-palette"></i>
-            <p>Danh mục</p>
+            <p>Sản phẩm</p>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="" class="nav-link">
+            <i class="nav-icon bi bi-palette"></i>
+            <p>Sản phẩm</p>
+            <a href="{{ route('admin.customers.index') }}" class="nav-link">
+              <i class="nav-icon bi bi-people"></i>
+              <p>Khách hàng</p>
+            </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="{{ route('admin.product-reviews.index') }}" class="nav-link">
+            <i class="nav-icon bi bi-chat-square-text"></i>
+            <p>Đánh giá</p>
           </a>
         </li>
 
@@ -48,47 +77,41 @@
           </a>
         </li>
 
-        <li class="nav-item">
-          <a href="" class="nav-link">
-            <i class="nav-icon bi bi-palette"></i>
-            <p>Sản phẩm</p>
-          </a>
-        </li>
+
 
         {{-- <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="nav-icon bi bi-speedometer"></i>
-            <p>
-              Dashboard
-              <i class="nav-arrow bi bi-chevron-right"></i>
-            </p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="../index.html" class="nav-link">
-                <i class="nav-icon bi bi-circle"></i>
-                <p>Dashboard v1</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="../index2.html" class="nav-link">
-                <i class="nav-icon bi bi-circle"></i>
-                <p>Dashboard v2</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="../index3.html" class="nav-link">
-                <i class="nav-icon bi bi-circle"></i>
-                <p>Dashboard v3</p>
-              </a>
-            </li>
-          </ul>
-        </li> --}}
-        
-        
+         <a href="#" class="nav-link">
+           <i class="nav-icon bi bi-speedometer"></i>
+           <p>
+             Dashboard
+             <i class="nav-arrow bi bi-chevron-right"></i>
+           </p>
+         </a>
+         <ul class="nav nav-treeview">
+           <li class="nav-item">
+             <a href="../index.html" class="nav-link">
+               <i class="nav-icon bi bi-circle"></i>
+               <p>Dashboard v1</p>
+             </a>
+           </li>
+           <li class="nav-item">
+             <a href="../index2.html" class="nav-link">
+               <i class="nav-icon bi bi-circle"></i>
+               <p>Dashboard v2</p>
+             </a>
+           </li>
+           <li class="nav-item">
+             <a href="../index3.html" class="nav-link">
+               <i class="nav-icon bi bi-circle"></i>
+               <p>Dashboard v3</p>
+             </a>
+           </li>
+         </ul>
+       </li> --}}
+
+
       </ul>
       <!--end::Sidebar Menu-->
     </nav>
   </div>
   <!--end::Sidebar Wrapper-->
-</aside>

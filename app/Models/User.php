@@ -52,4 +52,62 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    /**
+     * Relationship với CustomerProfile
+     */
+    public function customerProfile()
+    {
+        return $this->hasOne(CustomerProfile::class);
+    }
+
+    /**
+     * Relationship với Orders
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Relationship với Transactions
+     */
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Relationship với ProductReviews
+     */
+    public function productReviews()
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    /**
+     * Kiểm tra user có phải là admin không
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role && $this->role->name === 'admin';
+    }
+
+    /**
+     * Kiểm tra user có phải là customer không
+     */
+    public function isCustomer(): bool
+    {
+        return $this->role && $this->role->name === 'customer';
+    }
+
+    /**
+     * Lấy tên hiển thị (ưu tiên tên từ profile)
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        if ($this->customerProfile && $this->customerProfile->full_name) {
+            return $this->customerProfile->full_name;
+        }
+        return $this->name;
+    }
 }
