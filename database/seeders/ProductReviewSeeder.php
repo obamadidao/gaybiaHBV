@@ -1,4 +1,3 @@
-@@ -0,0 +1,107 @@
 <?php
 
 namespace Database\Seeders;
@@ -25,13 +24,13 @@ class ProductReviewSeeder extends Seeder
                 'password' => bcrypt('password'),
                 'role_id' => 2
             ]);
-
+            
             User::firstOrCreate(['email' => 'user2@example.com'], [
-                'name' => 'User Two',
+                'name' => 'User Two', 
                 'password' => bcrypt('password'),
                 'role_id' => 2
             ]);
-
+            
             $users = User::all();
         }
 
@@ -70,19 +69,19 @@ class ProductReviewSeeder extends Seeder
 
         foreach ($products as $product) {
             // Lấy users chưa review sản phẩm này
-            $availableUsers = $users->filter(function ($user) use ($product) {
+            $availableUsers = $users->filter(function($user) use ($product) {
                 return !ProductReview::where('product_id', $product->id)
-                    ->where('user_id', $user->id)
-                    ->exists();
+                                   ->where('user_id', $user->id)
+                                   ->exists();
             });
-
+            
             if ($availableUsers->count() > 0) {
                 $numReviews = min(2, $availableUsers->count());
                 $selectedUsers = $availableUsers->random($numReviews);
-
+                
                 foreach ($selectedUsers as $user) {
                     $template = $templates[array_rand($templates)];
-
+                    
                     ProductReview::create([
                         'product_id' => $product->id,
                         'user_id' => $user->id,
@@ -105,4 +104,4 @@ class ProductReviewSeeder extends Seeder
             }
         }
     }
-}
+} 

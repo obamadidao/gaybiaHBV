@@ -1,4 +1,3 @@
-@@ -0,0 +1,267 @@
 <?php
 
 namespace Database\Seeders;
