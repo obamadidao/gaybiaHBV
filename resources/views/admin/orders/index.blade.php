@@ -81,10 +81,11 @@ value="{{ request('search') }}" placeholder="Số đơn hoặc tên khách hàng
 Danh sách đơn hàng ({{ $orders->total() }} đơn hàng)
 </h6>
             <div class="card-tools">
-                <a href="{{ route('admin.orders.export', request()->query()) }}" class="btn btn-success">
-                    <i class="fas fa-file-excel"></i> Xuất Excel
-                </a>
-            </div>
+            <div class="card-tools ms-auto">
+<a href="{{ route('admin.orders.export', request()->query()) }}" class="btn btn-success">
+<i class="fas fa-file-excel"></i> Xuất Excel
+</a>
+</div>
 </div>
 <div class="card-body p-0">
 @if($orders->count() > 0)
