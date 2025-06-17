@@ -10,6 +10,11 @@
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
                     <li class="breadcrumb-item active">Quản lý kho hàng</li>
+                    <div class="mb-3 text-end">Add commentMore actions
+                <a href="{{ route('admin.inventory.export', request()->query()) }}" class="btn btn-success">
+                    <i class="fas fa-file-excel"></i> Xuất Excel
+                </a>
+            </div>
                 </ol>
             </nav>
         </div>

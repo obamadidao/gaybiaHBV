@@ -412,6 +412,14 @@
                        placeholder="Ví dụ: Gỗ Ebony" required>
             </div>
             <div class="col-md-6 mb-3">
+                <label class="form-label">SKU</label>
+                <input type="text" class="form-control" name="variants[__INDEX__][sku]" 
+                       placeholder="Mã SKU của biến thể">
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
                 <label class="form-label">Điều chỉnh giá</label>
                 <div class="input-group">
                     <input type="number" class="form-control" name="variants[__INDEX__][price_adjustment]" 
@@ -419,17 +427,9 @@
                     <span class="input-group-text">VNĐ</span>
                 </div>
             </div>
-        </div>
-        
-        <div class="row">
             <div class="col-md-6 mb-3">
                 <label class="form-label">Số lượng tồn kho</label>
                 <input type="number" class="form-control" name="variants[__INDEX__][stock_quantity]" 
-                       value="0" min="0">
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Thứ tự</label>
-                <input type="number" class="form-control" name="variants[__INDEX__][sort_order]" 
                        value="0" min="0">
             </div>
         </div>
