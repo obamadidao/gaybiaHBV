@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\ProductReviewController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Admin\InventoryController;
+use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -38,6 +40,8 @@ Route::post('products/{product}/toggle-status', [ProductController::class, 'togg
 Route::post('products/{product}/toggle-featured', [ProductController::class, 'toggleFeatured'])->name('products.toggle-featured');
 Route::post('products/bulk-action', [ProductController::class, 'bulkAction'])->name('products.bulk-action');
 Route::get('products/{product}/reviews', [ProductController::class, 'reviews'])->name('products.reviews');
+        Route::get('/products/{product}/variants', [ProductController::class, 'getVariants'])->name('products.variants');
+        Route::put('/product-variants/{variant}/sku', [ProductVariantController::class, 'updateSku'])->name('product-variants.update-sku');
 
 // Product Review routes
 Route::prefix('product-reviews')->name('product-reviews.')->group(function () {
@@ -65,15 +69,19 @@ Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('dest
 
 // Order management routes
 Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-        Route::get('/orders/export', [OrderController::class, 'export'])->name('orders.export');
+Route::get('/orders/export', [OrderController::class, 'export'])->name('orders.export');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-        Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
-        Route::patch('/orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.update-payment-status');
 Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
 Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
-        Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
-        Route::patch('/orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.update-payment-status');
+Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
+Route::patch('/orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.update-payment-status');
 
+        // Inventory management routes
+        Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+        Route::get('/inventory/export', [InventoryController::class, 'export'])->name('inventory.export');
+        Route::get('/inventory/{variant}/edit', [InventoryController::class, 'edit'])->name('inventory.edit');
+        Route::put('/inventory/{variant}', [InventoryController::class, 'update'])->name('inventory.update');
+        
 // Route::resource('users', UserController::class);
 });
 
