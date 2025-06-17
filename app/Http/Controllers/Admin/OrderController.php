@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Exports\OrdersExport;
-use Maatwebsite\Excel\Facades\Excel;
 
 class OrderController extends Controller
 {
@@ -158,91 +156,54 @@ public function updatePaymentStatus(Request $request, Order $order)
 // TODO: Implement update payment status
 }
 
-public function update(Request $request, Order $order)
-{
-$request->validate([
-'shipping_address.name' => 'required|string|max:255',
-'shipping_address.phone' => 'required|string|max:20',
-'shipping_address.address' => 'required|string|max:255',
-'shipping_address.ward' => 'required|string|max:255',
-'shipping_address.district' => 'required|string|max:255',
-'shipping_address.city' => 'required|string|max:255',
-'admin_notes' => 'nullable|string|max:1000',
-]);
-
-try {
-DB::beginTransaction();
-
-// Cập nhật thông tin người nhận
-$shippingAddress = $order->shipping_address;
-$shippingAddress['name'] = $request->shipping_address['name'];
-$shippingAddress['phone'] = $request->shipping_address['phone'];
-$shippingAddress['address'] = $request->shipping_address['address'];
-$shippingAddress['ward'] = $request->shipping_address['ward'];
-$shippingAddress['district'] = $request->shipping_address['district'];
-$shippingAddress['city'] = $request->shipping_address['city'];
-
-$order->shipping_address = $shippingAddress;
-$order->admin_notes = $request->admin_notes;
-$order->save();
-
-// Thêm vào lịch sử trạng thái
-$order->addStatusHistory(
-$order->status,
-'Cập nhật thông tin đơn hàng: ' . ($request->admin_notes ?? 'Không có ghi chú'),
-auth()->id()
-);
-
-DB::commit();
-return redirect()->back()->with('success', 'Cập nhật thông tin đơn hàng thành công');
-} catch (\Exception $e) {
-DB::rollBack();
-return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
-}
-}
-
-public function edit(Order $order)
-{
-return response()->json([
-'shipping_address' => $order->shipping_address,
-'admin_notes' => $order->admin_notes
-]);
-}
-
-    public function export(Request $request)
+    public function update(Request $request, Order $order)
     {
-        $query = Order::with(['user', 'orderItems.product'])
-            ->latest();
+        $request->validate([
+            'shipping_address.name' => 'required|string|max:255',
+            'shipping_address.phone' => 'required|string|max:20',
+            'shipping_address.address' => 'required|string|max:255',
+            'shipping_address.ward' => 'required|string|max:255',
+            'shipping_address.district' => 'required|string|max:255',
+            'shipping_address.city' => 'required|string|max:255',
+            'admin_notes' => 'nullable|string|max:1000',
+        ]);
 
-        // Áp dụng các bộ lọc
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        try {
+            DB::beginTransaction();
+
+            // Cập nhật thông tin người nhận
+            $shippingAddress = $order->shipping_address;
+            $shippingAddress['name'] = $request->shipping_address['name'];
+            $shippingAddress['phone'] = $request->shipping_address['phone'];
+            $shippingAddress['address'] = $request->shipping_address['address'];
+            $shippingAddress['ward'] = $request->shipping_address['ward'];
+            $shippingAddress['district'] = $request->shipping_address['district'];
+            $shippingAddress['city'] = $request->shipping_address['city'];
+
+            $order->shipping_address = $shippingAddress;
+            $order->admin_notes = $request->admin_notes;
+            $order->save();
+
+            // Thêm vào lịch sử trạng thái
+            $order->addStatusHistory(
+                $order->status,
+                'Cập nhật thông tin đơn hàng: ' . ($request->admin_notes ?? 'Không có ghi chú'),
+                auth()->id()
+            );
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Cập nhật thông tin đơn hàng thành công');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
+    }
 
-        if ($request->filled('payment_status')) {
-            $query->where('payment_status', $request->payment_status);
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('order_number', 'like', "%{$search}%")
-                  ->orWhereHas('user', function($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                  });
-            });
-        }
-
-        if ($request->filled(['start_date', 'end_date'])) {
-            $query->whereBetween('created_at', [
-                $request->start_date . ' 00:00:00',
-                $request->end_date . ' 23:59:59'
-            ]);
-        }
-
-        $orders = $query->get();
-
-        return Excel::download(new OrdersExport($orders), 'danh-sach-don-hang.xlsx');
+    public function edit(Order $order)
+    {
+        return response()->json([
+            'shipping_address' => $order->shipping_address,
+            'admin_notes' => $order->admin_notes
+        ]);
     }
 } 

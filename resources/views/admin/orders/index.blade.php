@@ -80,12 +80,6 @@ value="{{ request('search') }}" placeholder="Số đơn hoặc tên khách hàng
 <h6 class="m-0 font-weight-bold text-primary">
 Danh sách đơn hàng ({{ $orders->total() }} đơn hàng)
 </h6>
-            <div class="card-tools">
-            <div class="card-tools ms-auto">
-<a href="{{ route('admin.orders.export', request()->query()) }}" class="btn btn-success">
-<i class="fas fa-file-excel"></i> Xuất Excel
-</a>
-</div>
 </div>
 <div class="card-body p-0">
 @if($orders->count() > 0)
@@ -130,17 +124,19 @@ Danh sách đơn hàng ({{ $orders->total() }} đơn hàng)
 </td>
 <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
 <td class="text-center">
-<div class="btn-group">
-<a href="{{ route('admin.orders.show', $order) }}" 
-class="btn btn-sm btn-info" title="Xem chi tiết">
+                                <div class="btn-group" role="group">
+                                    <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-outline-info" title="Xem chi tiết">
+                                <div class="btn-group">
+                                    <a href="{{ route('admin.orders.show', $order) }}" 
+                                       class="btn btn-sm btn-info" title="Xem chi tiết">
 <i class="fas fa-eye"></i>
 </a>
-<button type="button" 
-class="btn btn-sm btn-primary" 
-title="Chỉnh sửa"
-onclick="showEditModal({{ $order->id }})">
-<i class="fas fa-edit"></i>
-</button>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-primary" 
+                                            title="Chỉnh sửa"
+                                            onclick="showEditModal({{ $order->id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
 </div>
 </td>
 </tr>
@@ -166,85 +162,85 @@ onclick="showEditModal({{ $order->id }})">
 
 <!-- Modal Chỉnh sửa thông tin -->
 <div class="modal fade" id="editModal" tabindex="-1">
-<div class="modal-dialog modal-lg">
-<div class="modal-content">
-<div class="modal-header">
-<h5 class="modal-title">Chỉnh sửa thông tin đơn hàng</h5>
-<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-</div>
-<form id="editForm" method="POST">
-@csrf
-@method('PUT')
-<div class="modal-body">
-<div class="row mb-3">
-<div class="col-md-6">
-<label class="form-label">Tên người nhận <span class="text-danger">*</span></label>
-<input type="text" name="shipping_address[name]" class="form-control" required>
-</div>
-<div class="col-md-6">
-<label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-<input type="text" name="shipping_address[phone]" class="form-control" required>
-</div>
-</div>
-<div class="mb-3">
-<label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
-<input type="text" name="shipping_address[address]" class="form-control" required>
-</div>
-<div class="row mb-3">
-<div class="col-md-4">
-<label class="form-label">Phường/Xã <span class="text-danger">*</span></label>
-<input type="text" name="shipping_address[ward]" class="form-control" required>
-</div>
-<div class="col-md-4">
-<label class="form-label">Quận/Huyện <span class="text-danger">*</span></label>
-<input type="text" name="shipping_address[district]" class="form-control" required>
-</div>
-<div class="col-md-4">
-<label class="form-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
-<input type="text" name="shipping_address[city]" class="form-control" required>
-</div>
-</div>
-<div class="mb-3">
-<label class="form-label">Ghi chú admin</label>
-<textarea name="admin_notes" class="form-control" rows="3"></textarea>
-</div>
-</div>
-<div class="modal-footer">
-<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-<button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-</div>
-</form>
-</div>
-</div>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh sửa thông tin đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tên người nhận <span class="text-danger">*</span></label>
+                            <input type="text" name="shipping_address[name]" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                            <input type="text" name="shipping_address[phone]" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                        <input type="text" name="shipping_address[address]" class="form-control" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Phường/Xã <span class="text-danger">*</span></label>
+                            <input type="text" name="shipping_address[ward]" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Quận/Huyện <span class="text-danger">*</span></label>
+                            <input type="text" name="shipping_address[district]" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+                            <input type="text" name="shipping_address[city]" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ghi chú admin</label>
+                        <textarea name="admin_notes" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
 <script>
 function showEditModal(orderId) {
-   // Lấy thông tin đơn hàng qua API
-   fetch(`/admin/orders/${orderId}/edit`)
-       .then(response => response.json())
-       .then(data => {
-           // Cập nhật form
-           const form = document.getElementById('editForm');
-           form.action = `/admin/orders/${orderId}`;
-           
-           // Điền thông tin vào form
-           form.querySelector('[name="shipping_address[name]"]').value = data.shipping_address.name;
-           form.querySelector('[name="shipping_address[phone]"]').value = data.shipping_address.phone;
-           form.querySelector('[name="shipping_address[address]"]').value = data.shipping_address.address;
-           form.querySelector('[name="shipping_address[ward]"]').value = data.shipping_address.ward;
-           form.querySelector('[name="shipping_address[district]"]').value = data.shipping_address.district;
-           form.querySelector('[name="shipping_address[city]"]').value = data.shipping_address.city;
-           form.querySelector('[name="admin_notes"]').value = data.admin_notes;
+    // Lấy thông tin đơn hàng qua API
+    fetch(`/admin/orders/${orderId}/edit`)
+        .then(response => response.json())
+        .then(data => {
+            // Cập nhật form
+            const form = document.getElementById('editForm');
+            form.action = `/admin/orders/${orderId}`;
+            
+            // Điền thông tin vào form
+            form.querySelector('[name="shipping_address[name]"]').value = data.shipping_address.name;
+            form.querySelector('[name="shipping_address[phone]"]').value = data.shipping_address.phone;
+            form.querySelector('[name="shipping_address[address]"]').value = data.shipping_address.address;
+            form.querySelector('[name="shipping_address[ward]"]').value = data.shipping_address.ward;
+            form.querySelector('[name="shipping_address[district]"]').value = data.shipping_address.district;
+            form.querySelector('[name="shipping_address[city]"]').value = data.shipping_address.city;
+            form.querySelector('[name="admin_notes"]').value = data.admin_notes;
 
-           // Hiển thị modal
-           new bootstrap.Modal(document.getElementById('editModal')).show();
-       })
-       .catch(error => {
-           console.error('Error:', error);
-           alert('Có lỗi xảy ra khi tải thông tin đơn hàng');
-       });
+            // Hiển thị modal
+            new bootstrap.Modal(document.getElementById('editModal')).show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi tải thông tin đơn hàng');
+        });
 }
 </script>
 @endpush
