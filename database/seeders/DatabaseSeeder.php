@@ -16,12 +16,14 @@ public function run(): void
 $this->call(RoleSeeder::class);
 
 // Sau đó chạy UserSeeder để tạo người dùng với vai trò tương ứng
+        // $this->call(UserSeeder::class);
 $this->call(UserSeeder::class);
 
-        $this->call(CategorySeeder::class);
-        $this->call(ProductSeeder::class);
-        $this->call(ProductReviewSeeder::class);
-        $this->call(CustomerSeeder::class);
-        $this->call(OrderSeeder::class);
+$this->call(CategorySeeder::class);
+$this->call(ProductSeeder::class);
+$this->call(ProductReviewSeeder::class);
+$this->call(CustomerSeeder::class);
+$this->call(OrderSeeder::class);
+        $this->call(CouponSeeder::class);
 }
 }
