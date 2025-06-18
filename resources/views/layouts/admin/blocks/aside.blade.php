@@ -48,6 +48,13 @@ data-accordion="false"
 </a>        
 </li>
 
+<li class="nav-item">          
+<a href="{{ route('admin.inventory.index') }}" class="nav-link">            
+<i class="nav-icon bi bi-palette"></i>            
+<p>Kho hàng</p>          
+</a>        
+</li>
+
 <li class="nav-item">
 <a href="{{ route('admin.customers.index') }}" class="nav-link">
 <i class="nav-icon bi bi-people"></i>
@@ -60,15 +67,14 @@ data-accordion="false"
 <i class="nav-icon bi bi-chat-square-text"></i>            
 <p>Đánh giá</p>          
 </a>        
-        </li>        
-        </li>   
+</li>   
 
-        <li class="nav-item">          
-          <a href="{{ route('admin.orders.index') }}" class="nav-link">            
-            <i class="nav-icon bi bi-cart"></i>            
-            <p>Đơn hàng</p>          
-          </a>        
-        </li>     
+<li class="nav-item">          
+<a href="{{ route('admin.orders.index') }}" class="nav-link">            
+<i class="nav-icon bi bi-cart"></i>            
+<p>Đơn hàng</p>          
+</a>        
+</li>     
 
 <li class="nav-item">          
 <a href="" class="nav-link">            
@@ -77,9 +83,15 @@ data-accordion="false"
 </a>        
 </li>
 
-
-
         
+        <li class="nav-item">          
+          <a href="{{ route('admin.coupons.index') }}" class="nav-link">            
+            <i class="nav-icon bi bi-images"></i>            
+            <p>Mã giảm giá</p>          
+          </a>        
+        </li>
+
+
 
 {{-- <li class="nav-item">
          <a href="#" class="nav-link">
