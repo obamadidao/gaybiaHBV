@@ -85,7 +85,16 @@ Route::post('/inventory/{variant}', [InventoryController::class, 'update'])->nam
 
 // Quản lý danh sách mã giảm giá
 Route::get('/coupons', [CouponController::class, 'index'])->name('coupons.index');
-        Route::post('/coupons', [CouponController::class, 'store'])->name('coupons.store');
+Route::post('/coupons', [CouponController::class, 'store'])->name('coupons.store');
+        Route::get('/coupons/{coupon}', [CouponController::class, 'show'])->name('coupons.show');
+        Route::put('/coupons/{coupon}', [CouponController::class, 'update'])->name('coupons.update');
 });
 
 // Các route cho user thường
+Route::middleware(['auth', CheckRole::class.':user'])
+->prefix('user')
+->name('user.')
+->group(function () {
+Route::get('/', function () {
+return 'Đây là user dashboard';
+})->name('dashboard');
