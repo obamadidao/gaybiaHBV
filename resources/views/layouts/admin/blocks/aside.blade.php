@@ -1,6 +1,7 @@
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
 <!--begin::Sidebar Brand-->
 <div class="sidebar-brand">
+  
 <!--begin::Brand Link-->
 <a href="{{ route('home') }}" class="brand-link">
 <!--begin::Brand Image-->
@@ -29,28 +30,28 @@ data-accordion="false"
 >
 <li class="nav-item">
 <a href="{{ route('admin.dashboard') }}" class="nav-link">
-<i class="nav-icon bi bi-palette"></i>
+<i class="nav-icon bi bi-speedometer2"></i>
 <p>Trang chủ</p>
 </a>
 </li>
 
 <li class="nav-item">
 <a href="{{ route('admin.categories.index') }}" class="nav-link">
-<i class="nav-icon bi bi-palette"></i>
+<i class="nav-icon bi bi-list-ul"></i>
 <p>Danh mục</p>
 </a>
 </li>
 
 <li class="nav-item">          
 <a href="{{ route('admin.products.index') }}" class="nav-link">            
-<i class="nav-icon bi bi-palette"></i>            
+<i class="nav-icon bi bi-box"></i>       
 <p>Sản phẩm</p>          
 </a>        
 </li>
 
 <li class="nav-item">          
 <a href="{{ route('admin.inventory.index') }}" class="nav-link">            
-<i class="nav-icon bi bi-palette"></i>            
+<i class="nav-icon bi bi-building"></i>           
 <p>Kho hàng</p>          
 </a>        
 </li>
@@ -77,51 +78,23 @@ data-accordion="false"
 </li>     
 
 <li class="nav-item">          
-<a href="" class="nav-link">            
-<i class="nav-icon bi bi-images"></i>            
-<p>Banner</p>          
+<a href="{{ route('admin.coupons.index') }}" class="nav-link">Add commentMore actions
+            <i class="nav-icon bi bi-ticket-perforated"></i>            
+            <p>Mã giảm giá</p>             
 </a>        
 </li>
 
         
-        <li class="nav-item">          
-          <a href="{{ route('admin.coupons.index') }}" class="nav-link">            
-            <i class="nav-icon bi bi-images"></i>            
-            <p>Mã giảm giá</p>          
+<a href="{{ route('admin.banners.index') }}" class="nav-link">Add commentMore actions
+            <i class="nav-icon bi bi-image"></i>            
+            <p>Banner</p>         
           </a>        
         </li>
 
 
+       
 
-{{-- <li class="nav-item">
-         <a href="#" class="nav-link">
-           <i class="nav-icon bi bi-speedometer"></i>
-           <p>
-             Dashboard
-             <i class="nav-arrow bi bi-chevron-right"></i>
-           </p>
-         </a>
-         <ul class="nav nav-treeview">
-           <li class="nav-item">
-             <a href="../index.html" class="nav-link">
-               <i class="nav-icon bi bi-circle"></i>
-               <p>Dashboard v1</p>
-             </a>
-           </li>
-           <li class="nav-item">
-             <a href="../index2.html" class="nav-link">
-               <i class="nav-icon bi bi-circle"></i>
-               <p>Dashboard v2</p>
-             </a>
-           </li>
-           <li class="nav-item">
-             <a href="../index3.html" class="nav-link">
-               <i class="nav-icon bi bi-circle"></i>
-               <p>Dashboard v3</p>
-             </a>
-           </li>
-         </ul>
-       </li> --}}
+     
 
 
 </ul>

@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CouponController;
@@ -82,6 +82,10 @@ Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory
 Route::get('/inventory/export', [InventoryController::class, 'export'])->name('inventory.export');
 Route::get('/inventory/{variant}/edit', [InventoryController::class, 'edit'])->name('inventory.edit');
 Route::post('/inventory/{variant}', [InventoryController::class, 'update'])->name('inventory.update');
+        // Banner routes
+        Route::resource('banners', BannerController::class);
+        Route::post('banners/{banner}/toggle-status', [BannerController::class, 'toggleStatus'])->name('banners.toggle-status');
+        Route::post('banners/update-position', [BannerController::class, 'updatePosition'])->name('banners.update-position');
 // Route::resource('users', UserController::class);
 
         // Quản lý danh sách mã giảm giá
@@ -96,3 +100,4 @@ Route::middleware(['auth', CheckRole::class.':user'])
 Route::get('/', function () {
 return 'Đây là user dashboard';
 })->name('dashboard');
+});

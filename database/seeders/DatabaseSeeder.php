@@ -25,5 +25,6 @@ $this->call(ProductReviewSeeder::class);
 $this->call(CustomerSeeder::class);
 $this->call(OrderSeeder::class);
         $this->call(CouponSeeder::class);
+        $this->call(BannerSeeder::class);
 }
 }
