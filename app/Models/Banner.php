@@ -72,4 +72,15 @@ class Banner extends Model
     {
         return !empty($this->link);
     }
+
+    /**
+     * Accessor: Lấy URL đầy đủ của hình ảnh
+     */
+    public function getImageUrlFullAttribute()
+    {
+        if ($this->image_url) {
+            return asset('storage/' . $this->image_url);
+        }
+        return null;
+    }
 } 

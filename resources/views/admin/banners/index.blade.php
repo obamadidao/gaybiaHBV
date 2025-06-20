@@ -65,6 +65,7 @@
                         @foreach($banners as $banner)
                         <tr>
                             <td>
+                            <a href="{{ route('admin.banners.show', $banner) }}" class="text-decoration-none">
                                 <h6>{{ $banner->title }}</h6>
                                 @if($banner->description)
                                 <small class="text-muted">{{ Str::limit($banner->description, 80) }}</small>
