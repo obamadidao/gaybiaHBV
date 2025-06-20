@@ -28,6 +28,18 @@ Route::middleware(['auth', CheckRole::class.':admin'])
 ->name('admin.')
 ->group(function () {
 Route::get('/', [AdminController::class, 'index'])->name('dashboard');
+<<<<<<< HEAD
+
+        // Route cho biểu đồ doanh thu
+        Route::get('/revenue-chart', [AdminController::class, 'getRevenueChart'])->name('revenue-chart');
+        
+// Category routes
+Route::resource('categories', CategoryController::class);
+Route::post('categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
+Route::post('categories/bulk-action', [CategoryController::class, 'bulkAction'])->name('categories.bulk-action');
+Route::get('categories-children', [CategoryController::class, 'getChildren'])->name('categories.children');
+
+=======
 
 // Category routes
 Route::resource('categories', CategoryController::class);
@@ -35,6 +47,7 @@ Route::post('categories/{category}/toggle-status', [CategoryController::class, '
 Route::post('categories/bulk-action', [CategoryController::class, 'bulkAction'])->name('categories.bulk-action');
 Route::get('categories-children', [CategoryController::class, 'getChildren'])->name('categories.children');
 
+>>>>>>> 7bb88181035276992f44d2fb2a5d19f91c3ed7bb
 // Product routes
 Route::resource('products', ProductController::class);
 Route::post('products/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggle-status');
@@ -86,8 +99,13 @@ Route::post('/inventory/{variant}', [InventoryController::class, 'update'])->nam
 // Quản lý danh sách mã giảm giá
 Route::get('/coupons', [CouponController::class, 'index'])->name('coupons.index');
 Route::post('/coupons', [CouponController::class, 'store'])->name('coupons.store');
+<<<<<<< HEAD
+Route::get('/coupons/{coupon}', [CouponController::class, 'show'])->name('coupons.show');
+Route::put('/coupons/{coupon}', [CouponController::class, 'update'])->name('coupons.update');
+=======
         Route::get('/coupons/{coupon}', [CouponController::class, 'show'])->name('coupons.show');
         Route::put('/coupons/{coupon}', [CouponController::class, 'update'])->name('coupons.update');
+>>>>>>> 7bb88181035276992f44d2fb2a5d19f91c3ed7bb
 });
 
 // Các route cho user thường
