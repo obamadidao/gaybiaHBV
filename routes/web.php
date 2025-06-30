@@ -109,5 +109,6 @@ Route::middleware(['auth', CheckRole::class.':user'])
 
     // Client routes
     Route::get('/', function () {
-        return view('client.index');
+        Route::get('/login-user', [ClientController::class, 'loginUser'])->name('login-user');
+        Route::get('/register-user', [ClientController::class, 'registerUser'])->name('register-user');
     });
