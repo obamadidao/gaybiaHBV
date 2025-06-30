@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\ProductVariantController;
+use App\Http\Controllers\Client\ClientController;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -22,21 +23,21 @@ Auth::routes();
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 // Các route cho admin
-Route::middleware(['auth', CheckRole::class.':admin'])
+Route::middleware(['auth', CheckRole::class . ':admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
         Route::get('/', [AdminController::class, 'index'])->name('dashboard');
-        
+
         // Route cho biểu đồ doanh thu
         Route::get('/revenue-chart', [AdminController::class, 'getRevenueChart'])->name('revenue-chart');
-        
+
         // Category routes
         Route::resource('categories', CategoryController::class);
         Route::post('categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
         Route::post('categories/bulk-action', [CategoryController::class, 'bulkAction'])->name('categories.bulk-action');
         Route::get('categories-children', [CategoryController::class, 'getChildren'])->name('categories.children');
-        
+
         // Product routes
         Route::resource('products', ProductController::class);
         Route::post('products/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggle-status');
@@ -44,7 +45,7 @@ Route::middleware(['auth', CheckRole::class.':admin'])
         Route::post('products/bulk-action', [ProductController::class, 'bulkAction'])->name('products.bulk-action');
         Route::get('products/{product}/reviews', [ProductController::class, 'reviews'])->name('products.reviews');
         Route::get('/products/{product}/variants', [ProductController::class, 'getVariants'])->name('products.variants');
-        
+
         // Product Review routes
         Route::prefix('product-reviews')->name('product-reviews.')->group(function () {
             Route::get('/', [ProductReviewController::class, 'index'])->name('index');
@@ -58,7 +59,7 @@ Route::middleware(['auth', CheckRole::class.':admin'])
             Route::post('/bulk-action', [ProductReviewController::class, 'bulkAction'])->name('bulk-action');
             Route::get('/statistics', [ProductReviewController::class, 'statistics'])->name('statistics');
         });
-        
+
         // Customer routes
         Route::prefix('customers')->name('customers.')->group(function () {
             Route::get('/', [CustomerController::class, 'index'])->name('index');
@@ -68,7 +69,7 @@ Route::middleware(['auth', CheckRole::class.':admin'])
             Route::post('/{customer}/unverify', [CustomerController::class, 'unverify'])->name('unverify');
             Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
         });
-        
+
         // Order management routes
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/export', [OrderController::class, 'export'])->name('orders.export');
@@ -77,7 +78,7 @@ Route::middleware(['auth', CheckRole::class.':admin'])
         Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
         Route::patch('/orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.update-payment-status');
-        
+
         // Inventory management routes
         Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
         Route::get('/inventory/export', [InventoryController::class, 'export'])->name('inventory.export');
@@ -90,7 +91,7 @@ Route::middleware(['auth', CheckRole::class.':admin'])
         Route::post('/coupons', [CouponController::class, 'store'])->name('coupons.store');
         Route::get('/coupons/{coupon}', [CouponController::class, 'show'])->name('coupons.show');
         Route::put('/coupons/{coupon}', [CouponController::class, 'update'])->name('coupons.update');
-        
+
         // Banner routes
         Route::resource('banners', BannerController::class);
         Route::post('banners/{banner}/toggle-status', [BannerController::class, 'toggleStatus'])->name('banners.toggle-status');
@@ -98,17 +99,34 @@ Route::middleware(['auth', CheckRole::class.':admin'])
     });
 
 // Các route cho user thường
-Route::middleware(['auth', CheckRole::class.':user'])
-    ->prefix('user')
+Route::middleware(['auth', CheckRole::class . ':user'])
+    ->prefix('')
     ->name('user.')
     ->group(function () {
-        Route::get('/', function () {
-            return 'Đây là user dashboard';
-        })->name('dashboard');
+        Route::get('/', [ClientController::class, 'index'])->name('client.index');
     });
 
-    // Client routes
-    Route::get('/', function () {
+// Client routes
+Route::prefix('')->name('client.')->group(function () {
+    Route::get('/', [ClientController::class, 'index'])->name('index');
+    Route::get('/category/{slug}', [ClientController::class, 'category'])->name('category');
+    Route::get('/{slug}', [ClientController::class, 'category'])->name('category');
+    Route::get('/product/{slug}', [ClientController::class, 'product'])->name('product');
+
+    // Auth routes cho khách hàng (guest only)
+    Route::middleware('guest')->group(function () {
         Route::get('/login-user', [ClientController::class, 'loginUser'])->name('login-user');
+        Route::post('/login-user', [ClientController::class, 'handleLogin'])->name('handle-login');
         Route::get('/register-user', [ClientController::class, 'registerUser'])->name('register-user');
+        Route::post('/register-user', [ClientController::class, 'handleRegister'])->name('handle-register');
     });
+
+    // Auth routes cho khách hàng đã đăng nhập
+    Route::middleware('auth')->group(function () {
+        Route::post('/logout-user', [ClientController::class, 'logout'])->name('logout-user');
+        Route::get('/profile-user', [ClientController::class, 'profile'])->name('profile-user');
+        Route::put('/profile-user', [ClientController::class, 'updateProfile'])->name('update-profile-user');
+    });
+
+    Route::get('/contact', [ClientController::class, 'contact'])->name('contact');
+});
