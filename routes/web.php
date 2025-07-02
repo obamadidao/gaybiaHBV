@@ -100,7 +100,7 @@ Route::middleware(['auth', CheckRole::class . ':admin'])
 
 // Các route cho user thường
 Route::middleware(['auth', CheckRole::class . ':user'])
-    ->prefix('')
+->prefix('')
     ->name('user.')
     ->group(function () {
         Route::get('/', [ClientController::class, 'index'])->name('client.index');
