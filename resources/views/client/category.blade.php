@@ -41,6 +41,7 @@
     </div>
     <!--End Category Slider-->
 
+    @if($products->count() > 0)
     <!--Toolbar-->
     <div class="toolbar toolbar-wrapper shop-toolbar">
         <div class="row align-items-center">
@@ -82,114 +83,160 @@
     <!--End Toolbar-->
 
     <div class="row">
-        <!--Products-->
-        <div class="col-12 col-sm-12 col-md-12 col-lg-12 main-col">
-            <!--Product Grid-->
-            <div class="grid-products grid-view-items">
-                <div class="row col-row product-options row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-3 row-cols-2">
-                    @foreach ($products as $product)
-                    <div class="item col-item">
-                        <div class="product-box">
-                            <!-- Start Product Image -->
-                            <div class="product-image">
+        <div class="row mb-5">
+            <!--Products-->
+            <div class="col-12 col-sm-12 col-md-12 col-lg-12 main-col">
+                <!--Product Grid-->
+                <div class="grid-products grid-view-items">
+                    <div class="row col-row product-options row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-3 row-cols-2">
+                        @foreach ($products as $product)
+                        <div class="item col-item">
+                            <div class="product-box">
                                 <!-- Start Product Image -->
-                                <a href="product-layout1.html" class="product-img rounded-0"><img class="rounded-0 blur-up lazyload" src="assets/images/products/product1.jpg" alt="Product" title="Product" width="625" height="808" /></a>
-                                <!-- End Product Image -->
-                                <!-- Product label -->
-                                <div class="product-labels"><span class="lbl on-sale">Sale</span></div>
-                                <!-- End Product label -->
-                                <!--Countdown Timer-->
-                                <div class="saleTime" data-countdown="2025/01/01"></div>
-                                <!--End Countdown Timer-->
-                                <!--Product Button-->
-                                <div class="button-set style1">
-                                    <!--Cart Button-->
-                                    <a href="#quickshop-modal" class="btn-icon addtocart quick-shop-modal" data-bs-toggle="modal" data-bs-target="#quickshop_modal">
-                                        <span class="icon-wrap d-flex-justify-center h-100 w-100" data-bs-toggle="tooltip" data-bs-placement="left" title="Quick Shop"><i class="icon anm anm-cart-l"></i><span class="text">Quick Shop</span></span>
-                                    </a>
-                                    <!--End Cart Button-->
-                                    <!--Quick View Button-->
-                                    <a href="#quickview-modal" class="btn-icon quickview quick-view-modal" data-bs-toggle="modal" data-bs-target="#quickview_modal">
-                                        <span class="icon-wrap d-flex-justify-center h-100 w-100" data-bs-toggle="tooltip" data-bs-placement="left" title="Quick View"><i class="icon anm anm-search-plus-l"></i><span class="text">Quick View</span></span>
-                                    </a>
-                                    <!--End Quick View Button-->
-                                    <!--Wishlist Button-->
-                                    <a href="wishlist-style2.html" class="btn-icon wishlist" data-bs-toggle="tooltip" data-bs-placement="left" title="Add To Wishlist"><i class="icon anm anm-heart-l"></i><span class="text">Add To Wishlist</span></a>
-                                    <!--End Wishlist Button-->
-                                    <!--Compare Button-->
-                                    <a href="compare-style2.html" class="btn-icon compare" data-bs-toggle="tooltip" data-bs-placement="left" title="Add to Compare"><i class="icon anm anm-random-r"></i><span class="text">Add to Compare</span></a>
-                                    <!--End Compare Button-->
+                                <div class="product-image">
+                                    <!-- Start Product Image -->
+                                    <a href="product-layout1.html" class="product-img rounded-0"><img class="rounded-0 blur-up lazyload" src="assets/images/products/product1.jpg" alt="Product" title="Product" width="625" height="808" /></a>
+                                    <a href="{{ route('client.product', ['slug'=>$product->slug]) }}" class="product-img rounded-0"><img style="min-height: 250px;" class="rounded-0 blur-up lazyload" src="{{ $product->primaryImage->url }}" alt="{{ $product->name }}" title="{{ $product->name }}" width="625" height="808" /></a>
+                                    <!-- End Product Image -->
+                                    <!-- Product label -->
+                                    <div class="product-labels"><span class="lbl on-sale">Sale</span></div>
+                                    <div class="product-labels">
+                                        @if($product->base_price !== $product->compare_price)
+                                        <span class="lbl on-sale">Giảm giá</span>
+                                        @endif
+                                        @if($product->is_featured)
+                                        <span class="lbl pr-label2">Nổi bật</span>
+                                        @endif
+                                    </div>
+                                    <!-- End Product label -->
+                                    <!--Countdown Timer-->
+                                    <div class="saleTime" data-countdown="2025/01/01"></div>
+                                    <!--End Countdown Timer-->
+                                    <!--Product Button-->
+                                    <div class="button-set style1">
+                                        <!--Cart Button-->
+                                        <a href="#quickshop-modal" class="btn-icon addtocart quick-shop-modal" data-bs-toggle="modal" data-bs-target="#quickshop_modal">
+                                            <span class="icon-wrap d-flex-justify-center h-100 w-100" data-bs-toggle="tooltip" data-bs-placement="left" title="Quick Shop"><i class="icon anm anm-cart-l"></i><span class="text">Quick Shop</span></span>
+                                        </a>
+                                        <!--End Cart Button-->
+                                        <!--Quick View Button-->
+                                        <a href="#quickview-modal" class="btn-icon quickview quick-view-modal" data-bs-toggle="modal" data-bs-target="#quickview_modal">
+                                            <span class="icon-wrap d-flex-justify-center h-100 w-100" data-bs-toggle="tooltip" data-bs-placement="left" title="Quick View"><i class="icon anm anm-search-plus-l"></i><span class="text">Quick View</span></span>
+                                        </a>
+                                        <!--End Quick View Button-->
+                                        <!--Wishlist Button-->
+                                        <a href="wishlist-style2.html" class="btn-icon wishlist" data-bs-toggle="tooltip" data-bs-placement="left" title="Add To Wishlist"><i class="icon anm anm-heart-l"></i><span class="text">Add To Wishlist</span></a>
+                                        <!--End Wishlist Button-->
+                                        <!--Compare Button-->
+                                        <a href="compare-style2.html" class="btn-icon compare" data-bs-toggle="tooltip" data-bs-placement="left" title="Add to Compare"><i class="icon anm anm-random-r"></i><span class="text">Add to Compare</span></a>
+                                        <!--End Compare Button-->
+                                        <div class="button-set style2">
+                                            <a href="#" class="btn btn-primary">Mua ngay</a>
+                                        </div>
+                                        <!--End Product Button-->
+                                    </div>
+                                    <!-- End Product Image -->
+                                    <!-- Start Product Details -->
+                                    <div class="product-details text-left">
+                                        <!--Product Vendor-->
+                                        <div class="product-vendor">Tops</div>
+                                        <div class="product-vendor">{{$product->category->name}}</div>
+                                        <!--End Product Vendor-->
+                                        <!-- Product Name -->
+                                        <div class="product-name">
+                                            <a href="product-layout1.html">Oxford Cuban Shirt</a>
+                                            <a href="{{ route('client.product', ['slug'=>$product->slug]) }}">{{$product->name}}</a>
+                                        </div>
+                                        <!-- End Product Name -->
+                                        <!-- Product Price -->
+                                        <div class="product-price">
+                                            <span class="price old-price">$114.00</span><span class="price">$99.00</span>
+                                            @if($product->base_price !== $product->compare_price)
+                                            <span class="price old-price">{{number_format($product->compare_price, 0, ',', '.')}}đ</span><span class="price">{{number_format($product->base_price, 0, ',', '.')}}đ</span>
+                                            @else
+                                            <span class="price">{{number_format($product->base_price, 0, ',', '.')}}đ</span>
+                                            @endif
+                                        </div>
+                                        <!-- End Product Price -->
+                                        <!-- Product Review -->
+                                        <div class="product-review">
+                                            <i class="icon anm anm-star"></i><i class="icon anm anm-star"></i><i class="icon anm anm-star"></i><i class="icon anm anm-star"></i><i class="icon anm anm-star-o"></i>
+                                            <span class="caption hidden ms-1">3 Reviews</span>
+                                            <span class="caption hidden ms-1">{{$product->reviews->count()}} đánh giá</span>
+                                        </div>
+                                        <!-- End Product Review -->
+                                        <!--Sort Description-->
+                                        <p class="sort-desc hidden">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage...</p>
+                                        <!--End Sort Description-->
+                                        <!--Color Variant -->
+                                        <ul class="variants-clr swatches">
+                                            <li class="swatch medium radius"><span class="swatchLbl" data-bs-toggle="tooltip" data-bs-placement="top" title="Navy"><img src="assets/images/products/product1.jpg" alt="img" width="625" height="808"></span></li>
+                                            <li class="swatch medium radius"><span class="swatchLbl" data-bs-toggle="tooltip" data-bs-placement="top" title="Green"><img src="assets/images/products/product1-1.jpg" alt="img" width="625" height="808"></span></li>
+                                            <li class="swatch medium radius"><span class="swatchLbl" data-bs-toggle="tooltip" data-bs-placement="top" title="Gray"><img src="assets/images/products/product1-2.jpg" alt="img" width="625" height="808"></span></li>
+                                            <li class="swatch medium radius"><span class="swatchLbl" data-bs-toggle="tooltip" data-bs-placement="top" title="Orange"><img src="assets/images/products/product1-3.jpg" alt="img" width="625" height="808"></span></li>
+                                        </ul>
+                                        <!-- End Variant -->
+                                        <!-- Product Button -->
+                                        <div class="button-action hidden">
+                                            <div class="addtocart-btn">
+                                                <form class="addtocart" action="#" method="post">
+                                                    <a href="#quickshop-modal" class="btn btn-md quick-shop quick-shop-modal" data-bs-toggle="modal" data-bs-target="#quickshop_modal">
+                                                        <i class="icon anm anm-cart-l me-2"></i><span class="text">Quick Shop</span>
+                                                    </a>
+                                                    <form class="addtocart" action="{{ route('client.product', ['slug'=>$product->slug]) }}" method="post">
+                                                        <button type="submit" class="btn btn-md quick-shop quick-shop-modal">
+                                                            <i class="icon anm anm-cart-l me-2"></i><span class="text">Xem chi tiết</span>
+                                                        </button>
+                                                    </form>
+                                            </div>
+                                        </div>
+                                        <!-- End Product Button -->
+                                    </div>
+                                    <!-- End product details -->
                                 </div>
-                                <!--End Product Button-->
                             </div>
-                            <!-- End Product Image -->
-                            <!-- Start Product Details -->
-                            <div class="product-details text-left">
-                                <!--Product Vendor-->
-                                <div class="product-vendor">Tops</div>
-                                <!--End Product Vendor-->
-                                <!-- Product Name -->
-                                <div class="product-name">
-                                    <a href="product-layout1.html">Oxford Cuban Shirt</a>
-                                </div>
-                                <!-- End Product Name -->
-                                <!-- Product Price -->
-                                <div class="product-price">
-                                    <span class="price old-price">$114.00</span><span class="price">$99.00</span>
-                                </div>
-                                <!-- End Product Price -->
-                                <!-- Product Review -->
-                                <div class="product-review">
-                                    <i class="icon anm anm-star"></i><i class="icon anm anm-star"></i><i class="icon anm anm-star"></i><i class="icon anm anm-star"></i><i class="icon anm anm-star-o"></i>
-                                    <span class="caption hidden ms-1">3 Reviews</span>
-                                </div>
-                                <!-- End Product Review -->
-                                <!--Sort Description-->
-                                <p class="sort-desc hidden">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage...</p>
-                                <!--End Sort Description-->
-                                <!--Color Variant -->
-                                <ul class="variants-clr swatches">
-                                    <li class="swatch medium radius"><span class="swatchLbl" data-bs-toggle="tooltip" data-bs-placement="top" title="Navy"><img src="assets/images/products/product1.jpg" alt="img" width="625" height="808"></span></li>
-                                    <li class="swatch medium radius"><span class="swatchLbl" data-bs-toggle="tooltip" data-bs-placement="top" title="Green"><img src="assets/images/products/product1-1.jpg" alt="img" width="625" height="808"></span></li>
-                                    <li class="swatch medium radius"><span class="swatchLbl" data-bs-toggle="tooltip" data-bs-placement="top" title="Gray"><img src="assets/images/products/product1-2.jpg" alt="img" width="625" height="808"></span></li>
-                                    <li class="swatch medium radius"><span class="swatchLbl" data-bs-toggle="tooltip" data-bs-placement="top" title="Orange"><img src="assets/images/products/product1-3.jpg" alt="img" width="625" height="808"></span></li>
-                                </ul>
-                                <!-- End Variant -->
-                                <!-- Product Button -->
-                                <div class="button-action hidden">
-                                    <div class="addtocart-btn">
-                                        <form class="addtocart" action="#" method="post">
-                                            <a href="#quickshop-modal" class="btn btn-md quick-shop quick-shop-modal" data-bs-toggle="modal" data-bs-target="#quickshop_modal">
-                                                <i class="icon anm anm-cart-l me-2"></i><span class="text">Quick Shop</span>
-                                            </a>
-                                        </form>
+                            @endforeach
+                        </div>
+
+                        <!-- Pagination -->
+                        <nav class="clearfix pagination-bottom">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item disabled"><a class="page-link" href="#"><i class="icon anm anm-angle-left-l"></i></a></li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+                                <li class="page-item"><a class="page-link" href="#">5</a></li>
+                                <li class="page-item"><a class="page-link" href="#"><i class="icon anm anm-angle-right-l"></i></a></li>
+                                {{ $products->links() }}
+                            </ul>
+                        </nav>
+                        <!-- End Pagination -->
+                    </div>
+                    <!--End Product Grid-->
+                </div>
+                <!--End Products-->
+            </div>
+            @else
+            <div class="row">
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 main-col text-center">
+                    <div class="grid-products grid-view-items">
+                        <div class="row col-row product-options">
+                            <div class="item col-item text-center">
+                                <div class="product-box">
+                                    <div class="product-details text-center">
+                                        <div class="product-name text-center py-5">
+                                            <h3 class="text-muted mb-3">Không có sản phẩm trong danh mục này</h3>
+                                            <i class="fas fa-box-open fa-3x text-secondary mb-3"></i>
+                                            <p class="text-secondary">Vui lòng quay lại sau hoặc xem các danh mục khác</p>
+                                        </div>
                                     </div>
                                 </div>
-                                <!-- End Product Button -->
                             </div>
-                            <!-- End product details -->
                         </div>
                     </div>
-                    @endforeach
                 </div>
-
-                <!-- Pagination -->
-                <nav class="clearfix pagination-bottom">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item disabled"><a class="page-link" href="#"><i class="icon anm anm-angle-left-l"></i></a></li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                        <li class="page-item"><a class="page-link" href="#">5</a></li>
-                        <li class="page-item"><a class="page-link" href="#"><i class="icon anm anm-angle-right-l"></i></a></li>
-                    </ul>
-                </nav>
-                <!-- End Pagination -->
             </div>
-            <!--End Product Grid-->
+            @endif
         </div>
-        <!--End Products-->
-    </div>
-</div>
-<!--End Main Content-->
-@endsection
+        <!--End Main Content-->
+        @endsection
