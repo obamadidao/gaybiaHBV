@@ -12,6 +12,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+    public function index()
+    {
+        return view('client.index');
+        $banners = Banner::where('is_active', 1)
+        ->orderBy('position', 'asc')
+        ->get();
+        return view('client.index', compact('banners'));
+    }
 class ClientController extends Controller
 {
     /**
