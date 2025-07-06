@@ -61,7 +61,7 @@ class BannerController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [Add commentMore actions
+        $validator = Validator::make($request->all(), [
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
         'image_url' => 'required|string|max:500',

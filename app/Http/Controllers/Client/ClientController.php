@@ -98,54 +98,60 @@ return view('client.login');
 
 public function handleLogin(Request $request)
 {
-// Validate dữ liệu đầu vào
-$request->validate([
-'email' => 'required|email',
-'password' => 'required|min:6'
-], [
-'email.required' => 'Vui lòng nhập email',
-'email.email' => 'Email không hợp lệ',
-'password.required' => 'Vui lòng nhập mật khẩu',
-'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự'
-]);
+    //  Validate dữ liệu đầu vào
+    $request->validate([
+        'email' => ['required', 'email'],
+        'password' => ['required', 'min:6']
+    ], [
+        'email.required' => 'Vui lòng nhập email',
+        'email.email' => 'Email không hợp lệ',
+        'password.required' => 'Vui lòng nhập mật khẩu',
+        'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự'
+    ]);
 
-$credentials = $request->only('email', 'password');
-$remember = $request->has('remember');
+    $credentials = $request->only('email', 'password');
+    $remember = $request->boolean('remember'); // tốt hơn: boolean thay vì has()
 
-// Kiểm tra đăng nhập
-if (Auth::attempt($credentials, $remember)) {
-$user = Auth::user();
+    //  Kiểm tra đăng nhập
+    if (Auth::attempt($credentials, $remember)) {
+        $request->session()->regenerate(); // regenerate phiên để tránh session fixation
+        $user = Auth::user();
 
-// Kiểm tra role_id = 2 (customer)
-if ($user->role_id == 2) {
-$request->session()->regenerate();
+        //  Chỉ cho phép role_id = 2 (khách hàng)
+        if ($user->role_id == 2) {
+            return redirect()->intended(route('client.index'))
+                ->with('success', 'Đăng nhập thành công! Chào mừng ' . $user->name);
+        }
 
-return redirect()->intended(route('client.index'))
-->with('success', 'Đăng nhập thành công! Chào mừng ' . $user->name);
-} else {
-// Đăng xuất nếu không phải customer
-Auth::logout();
-$request->session()->invalidate();
-$request->session()->regenerateToken();
+        //  Nếu không đúng quyền, đăng xuất ngay
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-return back()->with('error', 'Tài khoản này không có quyền truy cập vào trang khách hàng.');
-}
-}
+        return redirect()->route('login') // về lại trang login
+            ->with('error', 'Tài khoản không có quyền truy cập.');
+    }
 
-return back()->withErrors([
-'email' => 'Thông tin đăng nhập không chính xác.',
-])->withInput($request->only('email'));
+    // Sai thông tin đăng nhập
+    return back()->withErrors([
+        'email' => 'Email hoặc mật khẩu không đúng.'
+    ])->withInput($request->only('email'));
 }
 
 public function logout(Request $request)
 {
-Auth::logout();
+    if (Auth::check()) {
+        $user = Auth::user();
+        \Log::info('User logged out', ['id' => $user->id, 'email' => $user->email]);
+    }
 
-$request->session()->invalidate();
-$request->session()->regenerateToken();
+    Auth::logout();
 
-return redirect()->route('client.index')
-->with('success', 'Đăng xuất thành công!');
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('client.index')
+        ->with('success', 'Bạn đã đăng xuất thành công!');
 }
 
 public function registerUser()
@@ -155,40 +161,46 @@ return view('client.register');
 
 public function handleRegister(Request $request)
 {
-// Validate dữ liệu đăng ký
-$request->validate([
-'name' => 'required|string|max:255',
-'email' => 'required|string|email|max:255|unique:users',
-'password' => 'required|string|min:6|confirmed',
-], [
-'name.required' => 'Vui lòng nhập họ tên',
-'email.required' => 'Vui lòng nhập email',
-'email.email' => 'Email không hợp lệ',
-'email.unique' => 'Email này đã được sử dụng',
-'password.required' => 'Vui lòng nhập mật khẩu',
-'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
-'password.confirmed' => 'Xác nhận mật khẩu không khớp',
-]);
+    //  Validate dữ liệu đăng ký
+    $validator = \Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users,email',
+        'password' => 'required|string|min:6|confirmed',
+    ], [
+        'name.required' => 'Vui lòng nhập họ tên',
+        'email.required' => 'Vui lòng nhập email',
+        'email.email' => 'Email không hợp lệ',
+        'email.unique' => 'Email này đã được sử dụng',
+        'password.required' => 'Vui lòng nhập mật khẩu',
+        'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
+        'password.confirmed' => 'Xác nhận mật khẩu không khớp',
+    ]);
 
-// Tạo user mới với role_id = 2 (customer)
-$user = User::create([
-'name' => $request->name,
-'email' => $request->email,
-'password' => Hash::make($request->password),
-'role_id' => 2, // Customer role
-]);
+    //  Nếu lỗi thì trả lại form kèm lỗi và giữ lại dữ liệu đã nhập
+    if ($validator->fails()) {
+        return back()->withErrors($validator)
+                     ->withInput();
+    }
 
-// Đăng nhập tự động sau khi đăng ký
-Auth::login($user);
+    //  Tạo user mới (role_id = 2: khách hàng)
+    $user = User::create([
+        'name' => $request->input('name'),
+        'email' => $request->input('email'),
+        'password' => Hash::make($request->input('password')),
+        'role_id' => 2, // khách hàng
+    ]);
 
-return redirect()->route('client.index')
-->with('success', 'Đăng ký thành công! Chào mừng bạn đến với cửa hàng Bida!');
+    //  Đăng nhập tự động
+    Auth::login($user);
+
+    return redirect()->route('client.index')
+        ->with('success', 'Đăng ký thành công! Chào mừng bạn đến với cửa hàng Bida!');
 }
 
 public function profile()
 {
-$user = Auth::user();
-return view('client.profile', compact('user'));
+    $user = Auth::user();
+    return view('client.profile', compact('user'));
 }
 
 public function updateProfile(Request $request)
@@ -199,7 +211,7 @@ public function updateProfile(Request $request)
 
 // Danh sách sản phẩm theo danh mục 
     public function category($slug)
-    public function category(Request $request, $slug)
+  
 {
 $category = Category::with('children', 'parent')->where('slug', $slug)->firstOrFail();
         // Nếu là danh mục cha, lấy sản phẩm của cả danh mục con

@@ -109,8 +109,10 @@ return 'Đây là user dashboard';
 });
 
 // Client routes
-    Route::get('/', function () {
+Route::get('/', function () {
         return view('client.index');
+    }); // <-- Close the function here
+
     Route::prefix('')->name('client.')->group(function () {
         Route::get('/', [ClientController::class, 'index'])->name('index');
-});
+    });
