@@ -113,12 +113,12 @@
                                 <strong>{{ number_format($order->total_amount) }}đ</strong>
                             </td>
                             <td>
-                                <span class="badge {{ $order->status_badge_class }}">
+                            <span class="badge bg-{{ $order->status_badge_class }}">
                                     {{ $order->status_text }}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge {{ $order->payment_status === 'paid' ? 'bg-success' : 'bg-warning' }}">
+                            <span class="badge bg-{{ $order->status_badge_class }} fs-6">
                                     {{ $order->payment_status_text }}
                                 </span>
                             </td>

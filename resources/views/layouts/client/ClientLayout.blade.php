@@ -28,54 +28,50 @@
             @include('layouts.client.blocks.navMobile')
             <!--End Mobile Menu-->
   <!-- Flash Messages -->
-  @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
-                    <strong>Thành công!</strong> {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-            
-            @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
-                    <strong>Lỗi!</strong> {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-            
-            @if (session('warning'))
-                <div class="alert alert-warning alert-dismissible fade show m-3" role="alert">
-                    <strong>Cảnh báo!</strong> {{ session('warning') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-            
-            @if (session('info'))
-                <div class="alert alert-info alert-dismissible fade show m-3" role="alert">
-                    <strong>Thông tin!</strong> {{ session('info') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-            <!-- Body Container -->
-            @yield('content')
-            <!-- End Body Container -->
+<!-- Flash Messages -->
+@foreach (['success' => 'Thành công!', 'error' => 'Lỗi!', 'warning' => 'Cảnh báo!', 'info' => 'Thông tin!'] as $type => $message)
+    @if (session($type))
+        <div class="alert alert-{{ $type == 'error' ? 'danger' : $type }} alert-dismissible fade show m-3" role="alert">
+            <strong>{{ $message }}</strong> {{ session($type) }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+@endforeach
 
-            <!--Footer-->
-            @include('layouts.client.blocks.footer')
-            <!--End Footer-->
+<!-- Validation Errors -->
+@if ($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
+        <strong>Lỗi!</strong>
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
 
-            <!--Scoll Top-->
-            <div id="site-scroll"><i class="icon anm anm-arw-up"></i></div>
-            <!--End Scoll Top-->
+<!-- Body Container -->
+@yield('content')
+<!-- End Body Container -->
 
-            <!--MiniCart Drawer-->
-            @include('layouts.client.blocks.miniCart')
-            <!--End MiniCart Drawer-->
+<!--Footer-->
+@include('layouts.client.blocks.footer')
+<!--End Footer-->
 
-            <!-- Including Jquery/Javascript -->
-            <!-- Plugins JS -->
-            <script src="{{ asset('assets/js/plugins.js') }}"></script>
-            <!-- Main JS -->
-            <script src="{{ asset('assets/js/main.js') }}"></script>
+<!--Scoll Top-->
+<div id="site-scroll"><i class="icon anm anm-arw-up"></i></div>
+<!--End Scoll Top-->
+
+<!--MiniCart Drawer-->
+@include('layouts.client.blocks.miniCart')
+<!--End MiniCart Drawer-->
+
+<!-- Including Jquery/Javascript -->
+<!-- Plugins JS -->
+<script src="{{ asset('assets/js/plugins.js') }}"></script>
+<!-- Main JS -->
+<script src="{{ asset('assets/js/main.js') }}"></script>
 
         </div>
         <!--End Page Wrapper-->
