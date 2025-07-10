@@ -1,55 +1,33 @@
 <!DOCTYPE html>
 <html class="no-js" lang="en">
-    
+
 <!-- Mirrored from www.annimexweb.com/items/hema/index5-tools-parts.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 22 Jun 2025 15:17:43 GMT -->
 <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <meta name="description" content="description">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!-- Title Of Site -->
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="description" content="description">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Title Of Site -->
         <title>Home 05 Tools &amp; Parts - Hema Multipurpose eCommerce Bootstrap 5 Html Template</title>
-        <!-- Favicon -->
-        <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}" />
-        <!-- Plugins CSS -->
-        <link rel="stylesheet" href="{{ asset('assets/css/plugins.css') }}">
-        <!-- Main Style CSS -->
-        <link rel="stylesheet" href="{{ asset('assets/css/style-min.css') }}">
-        <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
-    </head>
+        <title>HBV Billiards</title>
+<!-- Favicon -->
+<link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}" />
+<!-- Plugins CSS -->
+<link rel="stylesheet" href="{{ asset('assets/css/plugins.css') }}">
+<!-- Main Style CSS -->
+<link rel="stylesheet" href="{{ asset('assets/css/style-min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
+</head>
 
-    <body class="template-index index-demo5">
-        <!--Page Wrapper-->
-        <div class="page-wrapper">   
-            <!--Header-->
-            @include('layouts.client.blocks.header')
-            <!--End Header-->
-            <!--Mobile Menu-->
-            @include('layouts.client.blocks.navMobile')
-            <!--End Mobile Menu-->
-  <!-- Flash Messages -->
-<!-- Flash Messages -->
-@foreach (['success' => 'Thành công!', 'error' => 'Lỗi!', 'warning' => 'Cảnh báo!', 'info' => 'Thông tin!'] as $type => $message)
-    @if (session($type))
-        <div class="alert alert-{{ $type == 'error' ? 'danger' : $type }} alert-dismissible fade show m-3" role="alert">
-            <strong>{{ $message }}</strong> {{ session($type) }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-@endforeach
-
-<!-- Validation Errors -->
-@if ($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
-        <strong>Lỗi!</strong>
-        <ul class="mb-0">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
+<body class="template-index index-demo5">
+<!--Page Wrapper-->
+<div class="page-wrapper">   
+<!--Header-->
+@include('layouts.client.blocks.header')
+<!--End Header-->
+<!--Mobile Menu-->
+@include('layouts.client.blocks.navMobile')
+<!--End Mobile Menu-->
 
 <!-- Body Container -->
 @yield('content')
@@ -73,9 +51,8 @@
 <!-- Main JS -->
 <script src="{{ asset('assets/js/main.js') }}"></script>
 
-        </div>
-        <!--End Page Wrapper-->
-    </body>
+</div>
+<!--End Page Wrapper-->
+</body>
 
 <!-- Mirrored from www.annimexweb.com/items/hema/index5-tools-parts.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 22 Jun 2025 15:18:29 GMT -->
-</html>

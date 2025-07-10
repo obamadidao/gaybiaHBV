@@ -31,6 +31,16 @@ Category::where('is_active', 1)
 true
 );
 
+
+        $cateRoot = Category::withAllProductsCount(
+            Category::where('is_active', 1)
+                ->where('parent_id', null)
+                ->get(),
+            true
+        );
+        
+        return view('client.index', compact('banners', 'cateRoot'));
+    }
 // Lấy sản phẩm mới nhất
 $newProducts = Product::with(['category', 'reviews', 'approvedReviews', 'primaryImage'])
 ->where('is_active', 1)
@@ -64,6 +74,57 @@ $product->stats = [
 ];
 return $product;
 });
+   /**
+     * Relationship với tất cả sản phẩm của danh mục và các danh mục con
+     */
+    public function allProducts()
+    {
+        $categoryIds = $this->getAllChildrenIds();
+        return $this->hasMany(Product::class, 'category_id')->whereIn('category_id', $categoryIds);
+    }
+
+    /**
+     * Lấy số lượng tất cả sản phẩm hoạt động (bao gồm danh mục con)
+     */
+    public function getAllProductsCountAttribute()
+    {
+        $categoryIds = $this->getAllChildrenIds();
+        return \App\Models\Product::whereIn('category_id', $categoryIds)
+                     ->where('is_active', true)
+                     ->count();
+    }
+
+    /**
+     * Lấy số lượng tất cả sản phẩm (bao gồm danh mục con) - không phân biệt trạng thái
+     */
+    public function getTotalProductsCountAttribute()
+    {
+        $categoryIds = $this->getAllChildrenIds();
+        return \App\Models\Product::whereIn('category_id', $categoryIds)->count();
+    }
+
+    /**
+     * Static method: Lấy danh mục kèm tổng số sản phẩm của nó và các danh mục con
+     */
+    public static function withAllProductsCount($categories = null, $activeOnly = true)
+    {
+        if ($categories === null) {
+            $categories = static::all();
+        }
+        
+        return $categories->map(function ($category) use ($activeOnly) {
+            $categoryIds = $category->getAllChildrenIds();
+            
+            $productsQuery = \App\Models\Product::whereIn('category_id', $categoryIds);
+            if ($activeOnly) {
+                $productsQuery->where('is_active', true);
+            }
+            
+            $category->all_products_count = $productsQuery->count();
+            return $category;
+        });
+    }
+}
 // Lấy sản phẩm nổi bật
 $featuredProducts = Product::with(['category', 'reviews', 'approvedReviews', 'primaryImage'])
 ->where('is_active', 1)
