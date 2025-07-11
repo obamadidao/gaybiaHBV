@@ -12,6 +12,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Client\ClientController;
+use App\Http\Controllers\Client\CartController;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -100,19 +101,58 @@ Route::post('banners/update-position', [BannerController::class, 'updatePosition
 
 // Các route cho user thường
 Route::middleware(['auth', CheckRole::class.':user'])
-->prefix('user')
+->prefix('')
 ->name('user.')
 ->group(function () {
-Route::get('/', function () {
-return 'Đây là user dashboard';
-})->name('dashboard');
+Route::get('/', [ClientController::class, 'index'])->name('client.index');
 });
 
 // Client routes
-Route::get('/', function () {
-        return view('client.index');
-    }); // <-- Close the function here
+Route::prefix('')->name('client.')->group(function () {
+Route::get('/', [ClientController::class, 'index'])->name('index');
 
-    Route::prefix('')->name('client.')->group(function () {
-        Route::get('/', [ClientController::class, 'index'])->name('index');
-    });
+// Auth routes cho khách hàng (guest only) - đặt TRƯỚC các route có tham số
+Route::middleware('guest')->group(function () {
+Route::get('/login-user', [ClientController::class, 'loginUser'])->name('login-user');
+Route::post('/login-user', [ClientController::class, 'handleLogin'])->name('handle-login');
+Route::get('/register-user', [ClientController::class, 'registerUser'])->name('register-user');
+Route::post('/register-user', [ClientController::class, 'handleRegister'])->name('handle-register');
+});
+
+// Auth routes cho khách hàng đã đăng nhập
+Route::middleware('auth')->group(function () {
+Route::post('/logout-user', [ClientController::class, 'logout'])->name('logout-user');
+Route::get('/profile-user', [ClientController::class, 'profile'])->name('profile-user');
+Route::put('/profile-user', [ClientController::class, 'updateProfile'])->name('update-profile-user');
+});
+
+Route::get('/contact', [ClientController::class, 'contact'])->name('contact');
+
+// Cart routes
+Route::prefix('cart')->name('cart.')->group(function () {
+Route::get('/', [CartController::class, 'index'])->name('index');
+Route::post('/add', [CartController::class, 'addToCart'])->name('add');
+Route::get('/count', [CartController::class, 'count'])->name('count');
+Route::get('/summary', [CartController::class, 'summary'])->name('summary');
+Route::post('/coupon/apply', [CartController::class, 'applyCoupon'])->name('coupon.apply');
+Route::delete('/coupon/remove', [CartController::class, 'removeCoupon'])->name('coupon.remove');
+Route::put('/{cartItem}/quantity', [CartController::class, 'updateQuantity'])->name('update-quantity');
+Route::delete('/{cartItem}', [CartController::class, 'remove'])->name('remove');
+Route::delete('/', [CartController::class, 'clear'])->name('clear');
+});
+
+        // Order routes - yêu cầu đăng nhập
+        Route::middleware('auth')->prefix('order')->name('order.')->group(function () {
+            Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+            Route::post('/store', [OrderController::class, 'store'])->name('store');
+            Route::get('/success/{order}', [OrderController::class, 'success'])->name('success');
+            Route::get('/detail/{order}', [OrderController::class, 'show'])->name('show');
+            Route::get('/list', [OrderController::class, 'index'])->name('index');
+            Route::post('/{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+        });
+
+// Các route có tham số đặt CUỐI CÙNG để tránh conflict
+Route::get('/product/{slug}', [ClientController::class, 'product'])->name('product');
+Route::get('/{slug}', [ClientController::class, 'category'])->name('category');
+});
+
