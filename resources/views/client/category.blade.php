@@ -110,7 +110,7 @@
                                 <!-- End Product label -->
                                 <!--Product Button-->
                                 <div class="button-set style2">
-                                    <a href="#" class="btn btn-primary">Mua ngay</a>
+                                    <a href="#" class="btn btn-success">Mua ngay</a>
                                     <a href="{{ route('client.product', ['slug'=>$product->slug]) }}" class="btn btn-primary">Mua ngay</a>
                                 </div>
                                 <!--End Product Button-->

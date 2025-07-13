@@ -209,7 +209,7 @@ Giảm: {{ number_format($cartSummary['discount_amount'], 0, ',', '.') }}đ
 <hr />
                     <input type="submit" name="add" style="width: 100%;" class="btn btn-lg my-4 checkout-btn" value="Thanh toán" />
                     <div class="d-grid gap-2">
-                        <a href="{{ route('client.order.checkout') }}" class="btn btn-primary btn-lg my-4 checkout-btn">
+                            <a href="{{ route('client.order.checkout') }}" class="btn btn-success btn-lg mb-4 checkout-btn">
                             <i class="fas fa-credit-card me-2"></i>Tiến hành thanh toán
                         </a>
                     </div>

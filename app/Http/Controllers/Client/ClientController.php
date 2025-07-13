@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Coupon;
+use App\Models\CustomerProfile;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -188,7 +189,8 @@ class ClientController extends Controller
     public function profile()
     {
         $user = Auth::user();
-        return view('client.profile', compact('user'));
+          $customerProfile = $user->customerProfile ?? new CustomerProfile();
+        return view('client.profile', compact('user', 'customerProfile'));
     }
 
     public function updateProfile(Request $request) {}
