@@ -279,17 +279,56 @@ class ClientController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+   $newProducts = Product::with(['category', 'reviews', 'approvedReviews', 'primaryImage'])
+            ->where('is_active', 1)
+            ->orderBy('created_at', 'desc')
+            ->limit(8)
+            ->get()
+            ->map(function($product) {
+                $product->stats = [
+                    'total' => $product->reviews->count(),
+                    'approved' => $product->approvedReviews->count(), 
+                    'pending' => $product->reviews->where('is_approved', false)->count(),
+                    'average_rating' => $product->average_rating,
+                    'rating_breakdown' => []
+                ];
+                return $product;
+            });
+        // Lấy sản phẩm đang giảm giá
+        $saleProducts = Product::with(['category', 'reviews', 'approvedReviews', 'primaryImage'])
+            ->where('is_active', 1)
+            ->whereColumn('compare_price', '>', 'base_price')
+            ->orderBy('created_at', 'desc')
+            ->limit(8)
+            ->get()
+            ->map(function($product) {
+                $product->stats = [
+                    'total' => $product->reviews->count(),
+                    'approved' => $product->approvedReviews->count(), 
+                    'pending' => $product->reviews->where('is_approved', false)->count(),
+                    'average_rating' => $product->average_rating,
+                    'rating_breakdown' => []
+                ];
+                return $product;
+            });
+        // Lấy sản phẩm nổi bật
+        $featuredProducts = Product::with(['category', 'reviews', 'approvedReviews', 'primaryImage'])
+            ->where('is_active', 1)
+            ->where('is_featured', 1)
+            ->orderBy('created_at', 'desc')
+            ->limit(8)
+            ->get()
+            ->map(function($product) {
+                $product->stats = [
+                    'total' => $product->reviews->count(),
+                    'approved' => $product->approvedReviews->count(), 
+                    'pending' => $product->reviews->where('is_approved', false)->count(),
+                    'average_rating' => $product->average_rating,
+                    'rating_breakdown' => []
+                ];
+                return $product;
+            });
+        return view('client.index', compact('banners', 'cateRoot', 'newProducts', 'saleProducts', 'featuredProducts'));
     }
 
     /**
@@ -307,4 +346,4 @@ class ClientController extends Controller
     {
         //
     }
-}
+
