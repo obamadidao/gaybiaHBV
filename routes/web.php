@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Client\ClientController;
 use App\Http\Controllers\Client\CartController;
+use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -141,15 +142,21 @@ Route::delete('/{cartItem}', [CartController::class, 'remove'])->name('remove');
 Route::delete('/', [CartController::class, 'clear'])->name('clear');
 });
 
-        // Order routes - yêu cầu đăng nhập
-        Route::middleware('auth')->prefix('order')->name('order.')->group(function () {
+// Order routes - yêu cầu đăng nhập
+Route::middleware('auth')->prefix('order')->name('order.')->group(function () {
             Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
             Route::post('/store', [OrderController::class, 'store'])->name('store');
             Route::get('/success/{order}', [OrderController::class, 'success'])->name('success');
             Route::get('/detail/{order}', [OrderController::class, 'show'])->name('show');
             Route::get('/list', [OrderController::class, 'index'])->name('index');
             Route::post('/{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
-        });
+            Route::get('/checkout', [ClientOrderController::class, 'checkout'])->name('checkout');
+            Route::post('/store', [ClientOrderController::class, 'store'])->name('store');
+            Route::get('/success/{order}', [ClientOrderController::class, 'success'])->name('success');
+            Route::get('/detail/{order}', [ClientOrderController::class, 'show'])->name('show');
+            Route::get('/list', [ClientOrderController::class, 'index'])->name('index');
+            Route::post('/{order}/cancel', [ClientOrderController::class, 'cancel'])->name('cancel');
+});
 
 // Các route có tham số đặt CUỐI CÙNG để tránh conflict
 Route::get('/product/{slug}', [ClientController::class, 'product'])->name('product');
