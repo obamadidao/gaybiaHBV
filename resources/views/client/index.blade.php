@@ -1273,6 +1273,8 @@
                                             <!-- End product details -->
                                         </div>
                                     </div>
+                                                <h3 class="fs-5 mb-2">Hỗ trợ tận tâm</h3>
+                            <span class="text-muted">Dịch vụ khách hàng 24/7 - Chúng tôi luôn sẵn sàng hỗ trợ!</span>
                                     <div class="item col-item">
                                         <div class="product-box">
                                             <!-- Start Product Image -->

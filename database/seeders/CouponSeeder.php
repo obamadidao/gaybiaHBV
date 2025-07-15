@@ -8,11 +8,11 @@ use Illuminate\Support\Carbon;
 
 class CouponSeeder extends Seeder
 {
-public function run()
-{
-Coupon::truncate();
-Coupon::insert([
-[
+    public function run()
+    {
+        Coupon::truncate();
+        Coupon::insert([
+            [
 'code' => 'SALE10',
 'type' => 'percent',
 'value' => 10,

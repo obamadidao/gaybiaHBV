@@ -170,7 +170,13 @@ class ClientController extends Controller
             'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
             'password.confirmed' => 'Xác nhận mật khẩu không khớp',
         ]);
-
+    // Lấy mã giảm giá kích hoạt, trong khoảng thời gian hiệu lục
+        $activeDiscounts = Coupon::where('status', 1)
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->get();
+        
+        return view('client.index', compact('banners', 'cateRoot', 'newProducts', 'saleProducts', 'featuredProducts', 'activeDiscounts'));
         // Tạo user mới với role_id = 2 (customer)
         $user = User::create([
             'name' => $request->name,
