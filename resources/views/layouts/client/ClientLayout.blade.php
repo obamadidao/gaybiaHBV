@@ -97,7 +97,7 @@
                                 product_zoom();
                         });
                 </script>
-
+  @stack('script')
                 <!-- Main JS -->
                 <script src="{{ asset('assets/js/main.js') }}"></script>
 

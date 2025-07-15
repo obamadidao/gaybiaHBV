@@ -24,7 +24,7 @@
                 <div class="dashboard-sidebar bg-block">
                     <div class="profile-top text-center mb-4 px-3">
                         <div class="profile-image mb-3">
-                            <img class="rounded-circle blur-up lazyload" data-src="assets/images/users/user-img3.jpg" src="assets/images/users/user-img3.jpg" alt="user" width="130" />
+                           <img class="rounded-circle blur-up lazyload" data-src="{{ $customerProfile->avatar ? Storage::url($customerProfile->avatar) : 'assets/images/users/user-img3.jpg' }}" src="{{ $customerProfile->avatar ? Storage::url($customerProfile->avatar) : 'assets/images/users/user-img3.jpg' }}" alt="user" width="130" />
                         </div>
                         <div class="profile-detail">
                             <h3 class="mb-1">{{ $customerProfile->first_name }} {{ $customerProfile->last_name }}</h3>
@@ -160,7 +160,7 @@
                         <div class="profile-card mt-0 h-100">                                   
                             <div class="top-sec d-flex-justify-center justify-content-between mb-4">
                                 <h2 class="mb-0">Thông tin tài khoản</h2>
-                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal"><i class="icon anm anm-plus-r me-1"></i> Edit</button>                                         
+                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal"><i class="icon anm anm-plus-r me-1"></i> Chỉnh sửa</button>    
                             </div>
                             <div class="profile-book-section mb-4">
                                 <div class="details d-flex align-items-center mb-2">
@@ -226,89 +226,94 @@
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h2 class="modal-title" id="editProfileModalLabel">Edit Profile details</h2>
+                                            <h2 class="modal-title" id="editProfileModalLabel">Chỉnh sửa thông tin</h2>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <form class="edit-profile-from" method="post" action="#"> 
+                                             <form class="edit-profile-from" method="post" action="{{ route('client.update-profile-user') }}" enctype="multipart/form-data">
+                                                @csrf
+                                                @method('PUT')
                                                 <div class="form-row">
                                                     <div class="form-group col-lg-12 col-md-12 col-sm-12 col-12 mb-4">
                                                         <div class="profileImg img-thumbnail shadow bg-white rounded-circle d-flex-justify-center position-relative mx-auto">
-                                                            <img src="assets/images/users/user-img3.jpg" class="rounded-circle" alt="profile" width="200" height="200" />
+                                    <img src="{{ $customerProfile->avatar ? Storage::url($customerProfile->avatar) : 'assets/images/users/user-img3.jpg' }}" class="rounded-circle" alt="profile" width="200" height="200" id="previewImage"/>
                                                             <div class="thumb-edit">
-                                                                <label for="profileUpload" class="d-flex-center justify-content-center position-absolute top-0 start-100 translate-middle p-2 rounded-circle shadow btn btn-secondary mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="icon anm anm-pencil-ar an-1x"></i></label>
-                                                                <input type="file" id="profileUpload" class="image-upload d-none" />
+                                                                          <label for="profileUpload" class="d-flex-center justify-content-center position-absolute top-0 start-100 translate-middle p-2 rounded-circle shadow btn btn-secondary mt-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Chỉnh sửa"><i class="icon anm anm-pencil-ar an-1x"></i></label>
+                                                                <input type="file" id="profileUpload" name="avatar" class="image-upload d-none" onchange="previewFile(this)"/>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="form-group col-lg-6 col-md-6 col-sm-12 col-12">
-                                                        <label for="editProfile-Companyname" class="d-none">Company name</label>
-                                                        <input name="editProfile-Companyname" placeholder="Company name" value="" id="editProfile-Companyname" type="text" />
+                                                           <label for="first_name">Họ</label>
+                                                        <input name="first_name" value="{{ $customerProfile->first_name }}" id="first_name" type="text" class="form-control" />
                                                     </div>
                                                     <div class="form-group col-lg-6 col-md-6 col-sm-12 col-12">
-                                                        <label for="editProfile-Emailaddress" class="d-none">Email address</label>
-                                                        <input name="editProfile-Emailaddress" placeholder="Email address" value="" id="editProfile-Emailaddress" type="email" />
+                                                           <label for="last_name">Tên</label>
+                                                        <input name="last_name" value="{{ $customerProfile->last_name }}" id="last_name" type="text" class="form-control" />
                                                     </div>
                                                     <div class="form-group col-lg-6 col-md-6 col-sm-12 col-12">
-                                                        <label for="editProfile-Phonenumber" class="d-none">Phone number</label>
-                                                        <input name="editProfile-Phonenumber" placeholder="Phone number" value="" id="editProfile-Phonenumber" type="text" />
+                                                        <label for="phone">Số điện thoại</label>
+                                                        <input name="phone" value="{{ $customerProfile->phone }}" id="phone" type="text" class="form-control" />
                                                     </div>
                                                     <div class="form-group col-lg-6 col-md-6 col-sm-12 col-12">
-                                                        <label for="editProfile-zone" class="d-none">City / State <span class="required">*</span></label>
-                                                        <select name="editProfile_zone_id" id="editProfile-zone">
-                                                            <option value="">Select Region / State</option>
-                                                            <option value="AL">Alabama</option>
-                                                            <option value="AK">Alaska</option>
-                                                            <option value="AZ">Arizona</option>
-                                                            <option value="AR">Arkansas</option>
-                                                            <option value="CA">California</option>
-                                                            <option value="CO">Colorado</option>
-                                                            <option value="CT">Connecticut</option>
-                                                            <option value="DE">Delaware</option>
+                                                            <label for="country">Quốc gia</label>
+                                                        <input name="country" value="{{ $customerProfile->country }}" id="country" type="text" class="form-control" />
+                                                    </div>
+                                                    <div class="form-group col-lg-6 col-md-6 col-sm-12 col-12">
+                                                     <label for="city">Tỉnh/Thành phố</label>
+                                                        <select name="city" class="form-control" required>
+                                                            <option value="">Chọn tỉnh/thành phố</option>
+                                                            <option value="Tuyên Quang" {{ $customerProfile->city == 'Tuyên Quang' ? 'selected' : '' }}>Tuyên Quang</option>
+                                                            <option value="Lào Cai" {{ $customerProfile->city == 'Lào Cai' ? 'selected' : '' }}>Lào Cai</option>
+                                                            <option value="Thái Nguyên" {{ $customerProfile->city == 'Thái Nguyên' ? 'selected' : '' }}>Thái Nguyên</option>
+                                                            <option value="Phú Thọ" {{ $customerProfile->city == 'Phú Thọ' ? 'selected' : '' }}>Phú Thọ</option>
+                                                            <option value="Bắc Ninh" {{ $customerProfile->city == 'Bắc Ninh' ? 'selected' : '' }}>Bắc Ninh</option>
+                                                            <option value="Hưng Yên" {{ $customerProfile->city == 'Hưng Yên' ? 'selected' : '' }}>Hưng Yên</option>
+                                                            <option value="Thành phố Hải Phòng" {{ $customerProfile->city == 'Thành phố Hải Phòng' ? 'selected' : '' }}>Thành phố Hải Phòng</option>
+                                                            <option value="Ninh Bình" {{ $customerProfile->city == 'Ninh Bình' ? 'selected' : '' }}>Ninh Bình</option>
+                                                            <option value="Quảng Trị" {{ $customerProfile->city == 'Quảng Trị' ? 'selected' : '' }}>Quảng Trị</option>
+                                                            <option value="Thành phố Đà Nẵng" {{ $customerProfile->city == 'Thành phố Đà Nẵng' ? 'selected' : '' }}>Thành phố Đà Nẵng</option>
+                                                            <option value="Quảng Ngãi" {{ $customerProfile->city == 'Quảng Ngãi' ? 'selected' : '' }}>Quảng Ngãi</option>
+                                                            <option value="Gia Lai" {{ $customerProfile->city == 'Gia Lai' ? 'selected' : '' }}>Gia Lai</option>
+                                                            <option value="Khánh Hoà" {{ $customerProfile->city == 'Khánh Hoà' ? 'selected' : '' }}>Khánh Hoà</option>
+                                                            <option value="Lâm Đồng" {{ $customerProfile->city == 'Lâm Đồng' ? 'selected' : '' }}>Lâm Đồng</option>
+                                                            <option value="Đắk Lắk" {{ $customerProfile->city == 'Đắk Lắk' ? 'selected' : '' }}>Đắk Lắk</option>
+                                                            <option value="Thành phố Hồ Chí Minh" {{ $customerProfile->city == 'Thành phố Hồ Chí Minh' ? 'selected' : '' }}>Thành phố Hồ Chí Minh</option>
+                                                            <option value="Đồng Nai" {{ $customerProfile->city == 'Đồng Nai' ? 'selected' : '' }}>Đồng Nai</option>
+                                                            <option value="Tây Ninh" {{ $customerProfile->city == 'Tây Ninh' ? 'selected' : '' }}>Tây Ninh</option>
+                                                            <option value="Thành phố Cần Thơ" {{ $customerProfile->city == 'Thành phố Cần Thơ' ? 'selected' : '' }}>Thành phố Cần Thơ</option>
+                                                            <option value="Vĩnh Long" {{ $customerProfile->city == 'Vĩnh Long' ? 'selected' : '' }}>Vĩnh Long</option>
+                                                            <option value="Đồng Tháp" {{ $customerProfile->city == 'Đồng Tháp' ? 'selected' : '' }}>Đồng Tháp</option>
+                                                            <option value="Cà Mau" {{ $customerProfile->city == 'Cà Mau' ? 'selected' : '' }}>Cà Mau</option>
+                                                            <option value="An Giang" {{ $customerProfile->city == 'An Giang' ? 'selected' : '' }}>An Giang</option>
+                                                            <option value="Thành phố Hà Nội" {{ $customerProfile->city == 'Thành phố Hà Nội' ? 'selected' : '' }}>Thành phố Hà Nội</option>
+                                                            <option value="Thành phố Huế" {{ $customerProfile->city == 'Thành phố Huế' ? 'selected' : '' }}>Thành phố Huế</option>
+                                                            <option value="Lai Châu" {{ $customerProfile->city == 'Lai Châu' ? 'selected' : '' }}>Lai Châu</option>
+                                                            <option value="Điện Biên" {{ $customerProfile->city == 'Điện Biên' ? 'selected' : '' }}>Điện Biên</option>
+                                                            <option value="Sơn La" {{ $customerProfile->city == 'Sơn La' ? 'selected' : '' }}>Sơn La</option>
+                                                            <option value="Lạng Sơn" {{ $customerProfile->city == 'Lạng Sơn' ? 'selected' : '' }}>Lạng Sơn</option>
+                                                            <option value="Quảng Ninh" {{ $customerProfile->city == 'Quảng Ninh' ? 'selected' : '' }}>Quảng Ninh</option>
+                                                            <option value="Thanh Hoá" {{ $customerProfile->city == 'Thanh Hoá' ? 'selected' : '' }}>Thanh Hoá</option>
+                                                            <option value="Nghệ An" {{ $customerProfile->city == 'Nghệ An' ? 'selected' : '' }}>Nghệ An</option>
+                                                            <option value="Hà Tĩnh" {{ $customerProfile->city == 'Hà Tĩnh' ? 'selected' : '' }}>Hà Tĩnh</option>
+                                                            <option value="Cao Bằng" {{ $customerProfile->city == 'Cao Bằng' ? 'selected' : '' }}>Cao Bằng</option>
                                                         </select>
                                                     </div>
                                                     <div class="form-group col-lg-6 col-md-6 col-sm-12 col-12">
-                                                        <label for="editProfile-country" class="d-none">Country / Region <span class="required">*</span></label>
-                                                        <select name="editProfile_country_id" id="editProfile-country">
-                                                            <option value="">Select Country / Region</option>
-                                                            <option value="AI" label="Anguilla">Anguilla</option>
-                                                            <option value="AG" label="Antigua and Barbuda">Antigua and Barbuda</option>
-                                                            <option value="AR" label="Argentina">Argentina</option>
-                                                            <option value="AW" label="Aruba">Aruba</option>
-                                                            <option value="BS" label="Bahamas">Bahamas</option>
-                                                            <option value="BB" label="Barbados">Barbados</option>
-                                                            <option value="BZ" label="Belize">Belize</option>
-                                                            <option value="BM" label="Bermuda">Bermuda</option>
-                                                            <option value="BO" label="Bolivia">Bolivia</option>
-                                                            <option value="BR" label="Brazil">Brazil</option>
-                                                        </select>
+                                                       <label for="ward">Phường/Xã</label>
+                                                        <input name="ward" value="{{ $customerProfile->ward }}" id="ward" type="text" class="form-control" />
                                                     </div>
-                                                    <div class="form-group col-lg-6 col-md-6 col-sm-12 col-12">
-                                                        <label for="editProfile-Streetaddress" class="d-none">Street address</label>
-                                                        <input name="editProfile-Streetaddress" placeholder="Street address" value="" id="editProfile-Streetaddress" type="text" />
+                                                                   <div class="form-group col-12">
+                                                        <label for="address">Địa chỉ</label>
+                                                        <input name="address" value="{{ $customerProfile->address }}" id="address" type="text" class="form-control" />
                                                     </div>
-                                                    <div class="form-group col-lg-6 col-md-6 col-sm-12 col-12">
-                                                        <label for="editProfile-Zipcode" class="d-none">Zip code</label>
-                                                        <input name="editProfile-Zipcode" placeholder="Zip code" value="" id="editProfile-Zipcode" type="text" />
-                                                    </div>
-                                                    <div class="form-group col-lg-6 col-md-6 col-sm-12 col-12">
-                                                        <label for="editProfile-Category" class="d-none">Category</label>
-                                                        <input name="editProfile-Category" placeholder="Phone number" value="" id="editProfile-Category" type="text" />
-                                                    </div>
-                                                    <div class="form-group col-lg-6 col-md-6 col-sm-12 col-12 mb-md-0">
-                                                        <label for="editProfile-YearEstablished" class="d-none">Year Established</label>
-                                                        <input name="editProfile-YearEstablished" placeholder="YearEstablished" value="" id="editProfile-YearEstablished" type="text" />
-                                                    </div>
-                                                    <div class="form-group col-lg-6 col-md-6 col-sm-12 col-12 mb-0">
-                                                        <label for="editProfile-TotalEmployees" class="d-none">Zip code</label>
-                                                        <input name="editProfile-TotalEmployees" placeholder="Zip code" value="" id="editProfile-TotalEmployees" type="text" />
-                                                    </div>
+                                                </div>
+                                                  <div class="modal-footer justify-content-center">
+                                                    <button type="submit" class="btn btn-primary m-0"><span>Lưu thông tin</span></button>
                                                 </div>
                                             </form>
                                         </div>
-                                        <div class="modal-footer justify-content-center">
-                                            <button type="submit" class="btn btn-primary m-0"><span>Save Profile</span></button>
-                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -397,3 +402,18 @@
     </div>
     <!--End Main Content-->
 @endsection
+
+@push('script')
+    <script>
+        function previewFile(input) {
+            var file = input.files[0];
+            if(file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImage').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+@endpush

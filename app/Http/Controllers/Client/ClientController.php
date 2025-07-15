@@ -10,8 +10,10 @@ use App\Models\CustomerProfile;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str; 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ClientController extends Controller
 {
@@ -199,7 +201,58 @@ class ClientController extends Controller
         return view('client.profile', compact('user', 'customerProfile'));
     }
 
-    public function updateProfile(Request $request) {}
+    public function updateProfile(Request $request) {
+           $user = Auth::user();
+        $customerProfile = $user->customerProfile ?? new CustomerProfile();
+
+        // Validate dữ liệu
+        $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255', 
+            'phone' => 'required|string|max:20',
+            'country' => 'nullable|string|max:255',
+            'city' => 'required|string|max:255',
+            'ward' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+        ], [
+            'first_name.required' => 'Vui lòng nhập họ',
+            'last_name.required' => 'Vui lòng nhập tên',
+            'phone.required' => 'Vui lòng nhập số điện thoại',
+            'city.required' => 'Vui lòng chọn tỉnh/thành phố',
+            'ward.required' => 'Vui lòng nhập phường/xã',
+            'address.required' => 'Vui lòng nhập địa chỉ'
+        ]);
+
+        // Cập nhật hoặc tạo mới CustomerProfile
+        $customerProfile = CustomerProfile::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'phone' => $request->phone,
+                'country' => $request->country,
+                'city' => $request->city,
+                'ward' => $request->ward,
+                'address' => $request->address,
+            ]
+        );
+        // Xử lý upload avatar nếu có
+        if ($request->hasFile('avatar')) {
+            // Xóa hình ảnh cũ
+            if ($customerProfile->avatar && Storage::disk('public')->exists($customerProfile->avatar)) {
+                Storage::disk('public')->delete($customerProfile->avatar);
+            }
+
+            $avatar = $request->file('avatar');
+            $avatarName = time() . '_' . Str::slug($request->first_name) . '.' . $avatar->getClientOriginalExtension();
+            $avatarPath = $avatar->storeAs('avatars', $avatarName, 'public');
+            $customerProfile->avatar = $avatarPath;
+            $customerProfile->save();
+        }
+
+        return redirect()->route('client.profile-user')
+            ->with('success', 'Cập nhật thông tin thành công!');
+    }
 
 
     // Danh sách sản phẩm theo danh mục 
