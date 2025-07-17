@@ -9,9 +9,9 @@
 <p class="text-muted">Đặt lúc: {{ $order->created_at->format('d/m/Y H:i') }}</p>
 </div>
 <div>
-            <button type="button" class="btn btn-primary me-2" onclick="showEditModal()">
-                <i class="fas fa-edit me-1"></i>Chỉnh sửa
-            </button>
+<button type="button" class="btn btn-primary me-2" onclick="showEditModal()">
+<i class="fas fa-edit me-1"></i>Chỉnh sửa
+</button>
 <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-secondary">
 <i class="fas fa-arrow-left me-2"></i>Quay lại
 </a>
@@ -186,15 +186,12 @@ class="me-3" style="width: 50px; height: 50px; object-fit: cover;">
 <div class="d-flex align-items-start mb-2">
 <i class="fas fa-map-marker-alt me-2 text-primary mt-1"></i>
 <div>
-                                <p class="mb-1">{{ $order->shipping_address['address'] ?? 'Không có địa chỉ' }}</p>
                                 <p class="mb-1">{{ $order->shipping_address['address'] }}</p>
-<p class="mb-1">
-                                    {{ $order->shipping_address['ward'] ?? 'Không có phường/xã' }}, 
-                                    {{ $order->shipping_address['district'] ?? 'Không có quận/huyện' }}, 
-                                    {{ $order->shipping_address['city'] ?? 'Không có thành phố' }}
-                                    {{ $order->shipping_address['ward'] }}, 
+                                <p class="mb-1">
+                                <p class="mb-1">{{ $order->shipping_address['address'] }}
+{{ $order->shipping_address['ward'] }}, 
                                     {{ $order->shipping_address['district'] }}, 
-                                    {{ $order->shipping_address['city'] }}
+{{ $order->shipping_address['city'] }}
 </p>
 </div>
 </div>
@@ -431,62 +428,101 @@ alt="Ảnh minh chứng" class="img-thumbnail" style="max-width: 200px;">
 
 <!-- Modal Chỉnh sửa thông tin -->
 <div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Chỉnh sửa thông tin đơn hàng</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form action="{{ route('admin.orders.update', $order) }}" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-body">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Tên người nhận <span class="text-danger">*</span></label>
-                            <input type="text" name="shipping_address[name]" class="form-control" 
-                                   value="{{ $order->shipping_address['name'] }}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-                            <input type="text" name="shipping_address[phone]" class="form-control" 
-                                   value="{{ $order->shipping_address['phone'] }}" required>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
-                        <input type="text" name="shipping_address[address]" class="form-control" 
-                               value="{{ $order->shipping_address['address'] }}" required>
-                    </div>
-                    <div class="row mb-3">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title">Chỉnh sửa thông tin đơn hàng</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<form action="{{ route('admin.orders.update', $order) }}" method="POST">
+@csrf
+@method('PUT')
+<div class="modal-body">
+<div class="row mb-3">
+<div class="col-md-6">
+<label class="form-label">Tên người nhận <span class="text-danger">*</span></label>
+<input type="text" name="shipping_address[name]" class="form-control" 
+value="{{ $order->shipping_address['name'] }}" required>
+</div>
+<div class="col-md-6">
+<label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+<input type="text" name="shipping_address[phone]" class="form-control" 
+value="{{ $order->shipping_address['phone'] }}" required>
+</div>
+</div>
+<div class="mb-3">
+<label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+<input type="text" name="shipping_address[address]" class="form-control" 
+value="{{ $order->shipping_address['address'] }}" required>
+</div>
+<div class="row mb-3">
                         <div class="col-md-4">
-                            <label class="form-label">Phường/Xã <span class="text-danger">*</span></label>
-                            <input type="text" name="shipping_address[ward]" class="form-control" 
-                                   value="{{ $order->shipping_address['ward'] }}" required>
-                        </div>
+                        <div class="col-md-6">
+<label class="form-label">Phường/Xã <span class="text-danger">*</span></label>
+<input type="text" name="shipping_address[ward]" class="form-control" 
+value="{{ $order->shipping_address['ward'] }}" required>
+</div>
                         <div class="col-md-4">
                             <label class="form-label">Quận/Huyện <span class="text-danger">*</span></label>
                             <input type="text" name="shipping_address[district]" class="form-control" 
                                    value="{{ $order->shipping_address['district'] }}" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+                        <div class="col-md-6">
+<label class="form-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
                             <input type="text" name="shipping_address[city]" class="form-control" 
                                    value="{{ $order->shipping_address['city'] }}" required>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Ghi chú admin</label>
-                        <textarea name="admin_notes" class="form-control" rows="3">{{ $order->admin_notes }}</textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-                </div>
-            </form>
-        </div>
-    </div>
+                            <select name="shipping_address[city]" class="form-control" required>
+                                <option value="">Chọn tỉnh/thành phố</option>
+                                <option value="Tuyên Quang" {{ $order->shipping_address['city'] == 'Tuyên Quang' ? 'selected' : '' }}>Tuyên Quang</option>
+                                <option value="Lào Cai" {{ $order->shipping_address['city'] == 'Lào Cai' ? 'selected' : '' }}>Lào Cai</option>
+                                <option value="Thái Nguyên" {{ $order->shipping_address['city'] == 'Thái Nguyên' ? 'selected' : '' }}>Thái Nguyên</option>
+                                <option value="Phú Thọ" {{ $order->shipping_address['city'] == 'Phú Thọ' ? 'selected' : '' }}>Phú Thọ</option>
+                                <option value="Bắc Ninh" {{ $order->shipping_address['city'] == 'Bắc Ninh' ? 'selected' : '' }}>Bắc Ninh</option>
+                                <option value="Hưng Yên" {{ $order->shipping_address['city'] == 'Hưng Yên' ? 'selected' : '' }}>Hưng Yên</option>
+                                <option value="Thành phố Hải Phòng" {{ $order->shipping_address['city'] == 'Thành phố Hải Phòng' ? 'selected' : '' }}>Thành phố Hải Phòng</option>
+                                <option value="Ninh Bình" {{ $order->shipping_address['city'] == 'Ninh Bình' ? 'selected' : '' }}>Ninh Bình</option>
+                                <option value="Quảng Trị" {{ $order->shipping_address['city'] == 'Quảng Trị' ? 'selected' : '' }}>Quảng Trị</option>
+                                <option value="Thành phố Đà Nẵng" {{ $order->shipping_address['city'] == 'Thành phố Đà Nẵng' ? 'selected' : '' }}>Thành phố Đà Nẵng</option>
+                                <option value="Quảng Ngãi" {{ $order->shipping_address['city'] == 'Quảng Ngãi' ? 'selected' : '' }}>Quảng Ngãi</option>
+                                <option value="Gia Lai" {{ $order->shipping_address['city'] == 'Gia Lai' ? 'selected' : '' }}>Gia Lai</option>
+                                <option value="Khánh Hoà" {{ $order->shipping_address['city'] == 'Khánh Hoà' ? 'selected' : '' }}>Khánh Hoà</option>
+                                <option value="Lâm Đồng" {{ $order->shipping_address['city'] == 'Lâm Đồng' ? 'selected' : '' }}>Lâm Đồng</option>
+                                <option value="Đắk Lắk" {{ $order->shipping_address['city'] == 'Đắk Lắk' ? 'selected' : '' }}>Đắk Lắk</option>
+                                <option value="Thành phố Hồ Chí Minh" {{ $order->shipping_address['city'] == 'Thành phố Hồ Chí Minh' ? 'selected' : '' }}>Thành phố Hồ Chí Minh</option>
+                                <option value="Đồng Nai" {{ $order->shipping_address['city'] == 'Đồng Nai' ? 'selected' : '' }}>Đồng Nai</option>
+                                <option value="Tây Ninh" {{ $order->shipping_address['city'] == 'Tây Ninh' ? 'selected' : '' }}>Tây Ninh</option>
+                                <option value="Thành phố Cần Thơ" {{ $order->shipping_address['city'] == 'Thành phố Cần Thơ' ? 'selected' : '' }}>Thành phố Cần Thơ</option>
+                                <option value="Vĩnh Long" {{ $order->shipping_address['city'] == 'Vĩnh Long' ? 'selected' : '' }}>Vĩnh Long</option>
+                                <option value="Đồng Tháp" {{ $order->shipping_address['city'] == 'Đồng Tháp' ? 'selected' : '' }}>Đồng Tháp</option>
+                                <option value="Cà Mau" {{ $order->shipping_address['city'] == 'Cà Mau' ? 'selected' : '' }}>Cà Mau</option>
+                                <option value="An Giang" {{ $order->shipping_address['city'] == 'An Giang' ? 'selected' : '' }}>An Giang</option>
+                                <option value="Thành phố Hà Nội" {{ $order->shipping_address['city'] == 'Thành phố Hà Nội' ? 'selected' : '' }}>Thành phố Hà Nội</option>
+                                <option value="Thành phố Huế" {{ $order->shipping_address['city'] == 'Thành phố Huế' ? 'selected' : '' }}>Thành phố Huế</option>
+                                <option value="Lai Châu" {{ $order->shipping_address['city'] == 'Lai Châu' ? 'selected' : '' }}>Lai Châu</option>
+                                <option value="Điện Biên" {{ $order->shipping_address['city'] == 'Điện Biên' ? 'selected' : '' }}>Điện Biên</option>
+                                <option value="Sơn La" {{ $order->shipping_address['city'] == 'Sơn La' ? 'selected' : '' }}>Sơn La</option>
+                                <option value="Lạng Sơn" {{ $order->shipping_address['city'] == 'Lạng Sơn' ? 'selected' : '' }}>Lạng Sơn</option>
+                                <option value="Quảng Ninh" {{ $order->shipping_address['city'] == 'Quảng Ninh' ? 'selected' : '' }}>Quảng Ninh</option>
+                                <option value="Thanh Hoá" {{ $order->shipping_address['city'] == 'Thanh Hoá' ? 'selected' : '' }}>Thanh Hoá</option>
+                                <option value="Nghệ An" {{ $order->shipping_address['city'] == 'Nghệ An' ? 'selected' : '' }}>Nghệ An</option>
+                                <option value="Hà Tĩnh" {{ $order->shipping_address['city'] == 'Hà Tĩnh' ? 'selected' : '' }}>Hà Tĩnh</option>
+                                <option value="Cao Bằng" {{ $order->shipping_address['city'] == 'Cao Bằng' ? 'selected' : '' }}>Cao Bằng</option>
+                            </select>
+</div>
+</div>
+<div class="mb-3">
+<label class="form-label">Ghi chú admin</label>
+<textarea name="admin_notes" class="form-control" rows="3">{{ $order->admin_notes }}</textarea>
+</div>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+<button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+</div>
+</form>
+</div>
+</div>
 </div>
 
 @endsection
@@ -510,7 +546,7 @@ function showRefundModal() {
 }
 
 function showEditModal() {
-    new bootstrap.Modal(document.getElementById('editModal')).show();
+   new bootstrap.Modal(document.getElementById('editModal')).show();
 }
 </script>
 @endpush

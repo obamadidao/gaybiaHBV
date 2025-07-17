@@ -1,27 +1,22 @@
 @extends('layouts.client.ClientLayout')
 
 @section('content')
-<!--Page Title-->
-<div class="page-title">
 <!--Page Header-->
 <div class="page-header text-center">
 <div class="container">
-        <div class="column">
-            <h1>Thanh toán</h1>
-        <div class="row">
-            <div class="col-12 col-sm-12 col-md-12 col-lg-12 d-flex justify-content-between align-items-center">
-                <div class="page-title"><h1>Thanh toán</h1></div>
-                <!--Breadcrumbs-->
-                <div class="breadcrumbs">
-                    <a href="{{ route('client.index') }}" title="Back to the home page">Trang chủ</a>
-                    <span class="main-title"><i class="icon anm anm-angle-right-l"></i>Thanh toán</span>
-                </div>
-                <!--End Breadcrumbs-->
-            </div>
+<div class="row">
+<div class="col-12 col-sm-12 col-md-12 col-lg-12 d-flex justify-content-between align-items-center">
+<div class="page-title"><h1>Thanh toán</h1></div>
+<!--Breadcrumbs-->
+<div class="breadcrumbs">
+<a href="{{ route('client.index') }}" title="Back to the home page">Trang chủ</a>
+<span class="main-title"><i class="icon anm anm-angle-right-l"></i>Thanh toán</span>
+</div>
+<!--End Breadcrumbs-->
 </div>
 </div>
 </div>
-<!--End Page Title-->
+</div>
 <!--End Page Header-->
 
 <!--Main Content-->
@@ -74,33 +69,71 @@ placeholder="Số nhà, tên đường" required>
 </div>
 
 <div class="row">
-<div class="col-md-4">
+                            <div class="col-md-4">
+                            <div class="col-md-6">
 <div class="form-group">
 <label for="shipping_city">Tỉnh/Thành phố <span class="required">*</span></label>
 <select name="shipping_city" id="shipping_city" class="form-control" required>
 <option value="">Chọn tỉnh/thành phố</option>
-<option value="Hà Nội" {{ old('shipping_city', $customerProfile->city) == 'Hà Nội' ? 'selected' : '' }}>Hà Nội</option>
-<option value="TP. Hồ Chí Minh" {{ old('shipping_city', $customerProfile->city) == 'TP. Hồ Chí Minh' ? 'selected' : '' }}>TP. Hồ Chí Minh</option>
-<option value="Đà Nẵng" {{ old('shipping_city', $customerProfile->city) == 'Đà Nẵng' ? 'selected' : '' }}>Đà Nẵng</option>
-<option value="Cần Thơ" {{ old('shipping_city', $customerProfile->city) == 'Cần Thơ' ? 'selected' : '' }}>Cần Thơ</option>
-<option value="Hải Phòng" {{ old('shipping_city', $customerProfile->city) == 'Hải Phòng' ? 'selected' : '' }}>Hải Phòng</option>
+                                        <option value="Hà Nội" {{ old('shipping_city', $customerProfile->city) == 'Hà Nội' ? 'selected' : '' }}>Hà Nội</option>
+                                        <option value="TP. Hồ Chí Minh" {{ old('shipping_city', $customerProfile->city) == 'TP. Hồ Chí Minh' ? 'selected' : '' }}>TP. Hồ Chí Minh</option>
+                                        <option value="Đà Nẵng" {{ old('shipping_city', $customerProfile->city) == 'Đà Nẵng' ? 'selected' : '' }}>Đà Nẵng</option>
+                                        <option value="Cần Thơ" {{ old('shipping_city', $customerProfile->city) == 'Cần Thơ' ? 'selected' : '' }}>Cần Thơ</option>
+                                        <option value="Hải Phòng" {{ old('shipping_city', $customerProfile->city) == 'Hải Phòng' ? 'selected' : '' }}>Hải Phòng</option>
+                                        <option value="Tuyên Quang" {{ old('shipping_city', $customerProfile->city) == 'Tuyên Quang' ? 'selected' : '' }}>Tuyên Quang</option>
+                                        <option value="Lào Cai" {{ old('shipping_city', $customerProfile->city) == 'Lào Cai' ? 'selected' : '' }}>Lào Cai</option>
+                                        <option value="Thái Nguyên" {{ old('shipping_city', $customerProfile->city) == 'Thái Nguyên' ? 'selected' : '' }}>Thái Nguyên</option>
+                                        <option value="Phú Thọ" {{ old('shipping_city', $customerProfile->city) == 'Phú Thọ' ? 'selected' : '' }}>Phú Thọ</option>
+                                        <option value="Bắc Ninh" {{ old('shipping_city', $customerProfile->city) == 'Bắc Ninh' ? 'selected' : '' }}>Bắc Ninh</option>
+                                        <option value="Hưng Yên" {{ old('shipping_city', $customerProfile->city) == 'Hưng Yên' ? 'selected' : '' }}>Hưng Yên</option>
+                                        <option value="Thành phố Hải Phòng" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Hải Phòng' ? 'selected' : '' }}>Thành phố Hải Phòng</option>
+                                        <option value="Ninh Bình" {{ old('shipping_city', $customerProfile->city) == 'Ninh Bình' ? 'selected' : '' }}>Ninh Bình</option>
+                                        <option value="Quảng Trị" {{ old('shipping_city', $customerProfile->city) == 'Quảng Trị' ? 'selected' : '' }}>Quảng Trị</option>
+                                        <option value="Thành phố Đà Nẵng" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Đà Nẵng' ? 'selected' : '' }}>Thành phố Đà Nẵng</option>
+                                        <option value="Quảng Ngãi" {{ old('shipping_city', $customerProfile->city) == 'Quảng Ngãi' ? 'selected' : '' }}>Quảng Ngãi</option>
+                                        <option value="Gia Lai" {{ old('shipping_city', $customerProfile->city) == 'Gia Lai' ? 'selected' : '' }}>Gia Lai</option>
+                                        <option value="Khánh Hoà" {{ old('shipping_city', $customerProfile->city) == 'Khánh Hoà' ? 'selected' : '' }}>Khánh Hoà</option>
+                                        <option value="Lâm Đồng" {{ old('shipping_city', $customerProfile->city) == 'Lâm Đồng' ? 'selected' : '' }}>Lâm Đồng</option>
+                                        <option value="Đắk Lắk" {{ old('shipping_city', $customerProfile->city) == 'Đắk Lắk' ? 'selected' : '' }}>Đắk Lắk</option>
+                                        <option value="Thành phố Hồ Chí Minh" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Hồ Chí Minh' ? 'selected' : '' }}>Thành phố Hồ Chí Minh</option>
+                                        <option value="Đồng Nai" {{ old('shipping_city', $customerProfile->city) == 'Đồng Nai' ? 'selected' : '' }}>Đồng Nai</option>
+                                        <option value="Tây Ninh" {{ old('shipping_city', $customerProfile->city) == 'Tây Ninh' ? 'selected' : '' }}>Tây Ninh</option>
+                                        <option value="Thành phố Cần Thơ" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Cần Thơ' ? 'selected' : '' }}>Thành phố Cần Thơ</option>
+                                        <option value="Vĩnh Long" {{ old('shipping_city', $customerProfile->city) == 'Vĩnh Long' ? 'selected' : '' }}>Vĩnh Long</option>
+                                        <option value="Đồng Tháp" {{ old('shipping_city', $customerProfile->city) == 'Đồng Tháp' ? 'selected' : '' }}>Đồng Tháp</option>
+                                        <option value="Cà Mau" {{ old('shipping_city', $customerProfile->city) == 'Cà Mau' ? 'selected' : '' }}>Cà Mau</option>
+                                        <option value="An Giang" {{ old('shipping_city', $customerProfile->city) == 'An Giang' ? 'selected' : '' }}>An Giang</option>
+                                        <option value="Thành phố Hà Nội" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Hà Nội' ? 'selected' : '' }}>Thành phố Hà Nội</option>
+                                        <option value="Thành phố Huế" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Huế' ? 'selected' : '' }}>Thành phố Huế</option>
+                                        <option value="Lai Châu" {{ old('shipping_city', $customerProfile->city) == 'Lai Châu' ? 'selected' : '' }}>Lai Châu</option>
+                                        <option value="Điện Biên" {{ old('shipping_city', $customerProfile->city) == 'Điện Biên' ? 'selected' : '' }}>Điện Biên</option>
+                                        <option value="Sơn La" {{ old('shipping_city', $customerProfile->city) == 'Sơn La' ? 'selected' : '' }}>Sơn La</option>
+                                        <option value="Lạng Sơn" {{ old('shipping_city', $customerProfile->city) == 'Lạng Sơn' ? 'selected' : '' }}>Lạng Sơn</option>
+                                        <option value="Quảng Ninh" {{ old('shipping_city', $customerProfile->city) == 'Quảng Ninh' ? 'selected' : '' }}>Quảng Ninh</option>
+                                        <option value="Thanh Hoá" {{ old('shipping_city', $customerProfile->city) == 'Thanh Hoá' ? 'selected' : '' }}>Thanh Hoá</option>
+                                        <option value="Nghệ An" {{ old('shipping_city', $customerProfile->city) == 'Nghệ An' ? 'selected' : '' }}>Nghệ An</option>
+                                        <option value="Hà Tĩnh" {{ old('shipping_city', $customerProfile->city) == 'Hà Tĩnh' ? 'selected' : '' }}>Hà Tĩnh</option>
+                                        <option value="Cao Bằng" {{ old('shipping_city', $customerProfile->city) == 'Cao Bằng' ? 'selected' : '' }}>Cao Bằng</option>
 </select>
 <div class="invalid-feedback"></div>
 </div>
 </div>
-<div class="col-md-4">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="shipping_district">Quận/Huyện <span class="required">*</span></label>
+                                    <input type="text" name="shipping_district" id="shipping_district" 
+                                           class="form-control" value="{{ old('shipping_district', $customerProfile->district) }}" required>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                            <div class="col-md-6">
 <div class="form-group">
-<label for="shipping_district">Quận/Huyện <span class="required">*</span></label>
-<input type="text" name="shipping_district" id="shipping_district" 
-class="form-control" value="{{ old('shipping_district', $customerProfile->district) }}" required>
-<div class="invalid-feedback"></div>
-</div>
-</div>
-<div class="col-md-4">
-<div class="form-group">
-<label for="shipping_ward">Phường/Xã</label>
+                                    <label for="shipping_ward">Phường/Xã</label>
+                                    <label for="shipping_ward">Phường/Xã <span class="required">*</span></label>
 <input type="text" name="shipping_ward" id="shipping_ward" 
-class="form-control" value="{{ old('shipping_ward', $customerProfile->ward) }}">
+                                           class="form-control" value="{{ old('shipping_ward', $customerProfile->ward) }}">
+                                           class="form-control" value="{{ old('shipping_ward', $customerProfile->ward) }}" required>
 <div class="invalid-feedback"></div>
 </div>
 </div>
