@@ -253,6 +253,71 @@ class ClientController extends Controller
         return redirect()->route('client.profile-user')
             ->with('success', 'Cập nhật thông tin thành công!');
     }
+     public function updateProfilePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        // Trường hợp chỉ đổi email
+        if (!$request->filled('password')) {
+            $request->validate([
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'current_password' => 'required',
+            ], [
+                'email.required' => 'Vui lòng nhập email',
+                'email.email' => 'Email không đúng định dạng', 
+                'email.unique' => 'Email đã được sử dụng',
+                'current_password.required' => 'Vui lòng nhập mật khẩu hiện tại',
+            ]);
+
+            // Kiểm tra mật khẩu hiện tại
+            if (!Hash::check($request->current_password, $user->password)) {
+                return back()->withErrors([
+                    'current_password' => 'Mật khẩu hiện tại không đúng'
+                ]);
+            }
+
+            // Cập nhật email
+            if ($request->email !== $user->email) {
+                $user->email = $request->email;
+                $user->save();
+            }
+
+            return redirect()->route('client.profile-user')
+                ->with('success', 'Cập nhật email thành công!');
+        }
+
+        // Trường hợp đổi password
+        $request->validate([
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'current_password' => 'required',
+            'password' => 'required|min:8|max:20|confirmed',
+        ], [
+            'email.required' => 'Vui lòng nhập email',
+            'email.email' => 'Email không đúng định dạng',
+            'email.unique' => 'Email đã được sử dụng', 
+            'current_password.required' => 'Vui lòng nhập mật khẩu hiện tại',
+            'password.required' => 'Vui lòng nhập mật khẩu mới',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự',
+            'password.max' => 'Mật khẩu không được vượt quá 20 ký tự',
+            'password.regex' => 'Mật khẩu phải chứa chữ cái và số, không chứa khoảng trắng và ký tự đặc biệt',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp'
+        ]);
+
+        // Kiểm tra mật khẩu hiện tại
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors([
+                'current_password' => 'Mật khẩu hiện tại không đúng'
+            ]);
+        }
+
+        // Cập nhật email và password
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return redirect()->route('client.profile-user')
+            ->with('success', 'Cập nhật thông tin đăng nhập thành công!');
+    }
 
 
     // Danh sách sản phẩm theo danh mục 

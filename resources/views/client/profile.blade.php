@@ -36,8 +36,10 @@
                             <li class="nav-item"><a href="#" data-bs-toggle="tab" data-bs-target="#info" class="nav-link active">Thông tin tài khoản</a></li>
                             <li class="nav-item"><a href="#" data-bs-toggle="tab" data-bs-target="#orders" class="nav-link">Đơn hàng</a></li>
                             <li class="nav-item"><a href="#" data-bs-toggle="tab" data-bs-target="#profile" class="nav-link">Thông tin cá nhân</a></li>
-                            <li class="nav-item"><a href="{{ route('client.logout-user') }}" class="nav-link">Đăng xuất</a> </li>
-                        </ul>
+                          <li class="nav-item"><a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-link">Đăng xuất</a></li>
+                            <form id="logout-form" action="{{ route('client.logout-user') }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
                     </div>
                 </div>
                 <!-- End Dashboard sidebar -->
@@ -355,40 +357,51 @@
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h2 class="modal-title" id="editLoginModalLabel">Edit Login details</h2>
+                                             <h2 class="modal-title" id="editLoginModalLabel">Chỉnh sửa thông tin đăng nhập</h2>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <form class="edit-Loginprofile-from" method="post" action="#"> 
+                                            <form class="edit-Loginprofile-from" method="post" action="{{ route('client.update-profile-password') }}">
+                                                @csrf
+                                                @method('PUT')
                                                 <div class="form-row row-cols-lg-1 row-cols-md-1 row-cols-sm-1 row-cols-1">
                                                     <div class="form-group">
-                                                        <label for="editLogin-Emailaddress" class="d-none">Email address <span class="required">*</span></label>
-                                                        <input name="editLogin-Emailaddress" placeholder="Email address" value="" id="editLogin-Emailaddress" type="email" />
+                                                         <label for="email">Email <span class="required">*</span></label>
+                                                        <input name="email" placeholder="Email" value="{{ $user->email }}" id="email" type="email" class="@error('email') is-invalid @enderror" required />
+                                                        @error('email')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
                                                     </div>
                                                     <div class="form-group">
-                                                        <label for="editLogin-Phonenumber" class="d-none">Phone number <span class="required">*</span></label>
-                                                        <input name="editLogin-Phonenumber" placeholder="Phone number" value="" id="editLogin-Phonenumber" type="text" />
+                                                        <label for="current_password">Mật khẩu hiện tại <span class="required">*</span></label>
+                                                        <input name="current_password" placeholder="Mật khẩu hiện tại" id="current_password" type="password" class="@error('current_password') is-invalid @enderror" required />
+                                                        @error('current_password')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
                                                     </div>
                                                     <div class="form-group">
-                                                        <label for="editLogin-Password" class="d-none">Current Password <span class="required">*</span></label>
-                                                        <input name="editLogin-Password" placeholder="Current Password" value="" id="editLogin-Password" type="password" />
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="editLogin-NewPassword" class="d-none">New Password <span class="required">*</span></label>
-                                                        <input name="editLogin-NewPassword" placeholder="New Password" value="" id="editLogin-NewPassword" type="password" />
-                                                        <small class="form-text text-muted">Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces, special characters.</small>
+                                                        <label for="password">Mật khẩu mới</label>
+                                                        <input name="password" placeholder="Mật khẩu mới" id="password" type="password" class="@error('password') is-invalid @enderror" minlength="8" maxlength="20" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+\-=\[\]{};:\'&quot;,.<>?\/\\|]{8,20}$" />
+                                                        <small class="form-text text-muted">Mật khẩu phải có từ 8-20 ký tự, chứa chữ cái và số, không chứa khoảng trắng và ký tự đặc biệt.</small>
+                                                        @error('password')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
                                                     </div>
                                                     <div class="form-group mb-0">
-                                                        <label for="editLogin-Verify" class="d-none">Verify <span class="required">*</span></label>
-                                                        <input name="editLogin-Verify" placeholder="Verify" value="" id="editLogin-Verify" type="text" />
-                                                        <small class="form-text text-muted">To confirm, type the new password again.</small>
+                                                          <label for="password_confirmation">Xác nhận mật khẩu mới</label>
+                                                        <input name="password_confirmation" placeholder="Xác nhận mật khẩu mới" id="password_confirmation" type="password" class="@error('password_confirmation') is-invalid @enderror" />
+                                                        <small class="form-text text-muted">Để xác nhận, hãy nhập lại mật khẩu mới.</small>
+                                                        @error('password_confirmation')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
                                                     </div>
                                                 </div>
-                                            </form>
+                                          
                                         </div>
                                         <div class="modal-footer justify-content-center">
-                                            <button type="submit" class="btn btn-primary m-0"><span>Save changes</span></button>
+                                            <button type="submit" class="btn btn-primary m-0"><span>Lưu thông tin</span></button>
                                         </div>
+                                          </form>
                                     </div>
                                 </div>
                             </div>

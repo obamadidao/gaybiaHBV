@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\InventoryController;
+
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Client\ClientController;
 use App\Http\Controllers\Client\CartController;
@@ -125,6 +126,7 @@ Route::middleware('auth')->group(function () {
 Route::post('/logout-user', [ClientController::class, 'logout'])->name('logout-user');
 Route::get('/profile-user', [ClientController::class, 'profile'])->name('profile-user');
 Route::put('/profile-user', [ClientController::class, 'updateProfile'])->name('update-profile-user');
+ Route::put('/profile-user/password', [ClientController::class, 'updateProfilePassword'])->name('update-profile-password');
 });
 
 Route::get('/contact', [ClientController::class, 'contact'])->name('contact');
