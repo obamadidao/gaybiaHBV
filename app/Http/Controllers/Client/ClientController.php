@@ -8,9 +8,13 @@ use App\Models\Category;
 use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\CustomerProfile;
+use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ClientController extends Controller
 {
@@ -188,12 +192,133 @@ return redirect()->route('client.index')
 public function profile()
 {
 $user = Auth::user();
-return view('client.profile', compact('user'));
+$customerProfile = $user->customerProfile ?? new CustomerProfile();
+        return view('client.profile', compact('user', 'customerProfile'));
+
+        // Lấy danh sách đơn hàng của khách hàng
+        $orders = Order::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+
+        return view('client.profile', compact('user', 'customerProfile', 'orders'));
 }
 
 public function updateProfile(Request $request)
 {
+$user = Auth::user();
+$customerProfile = $user->customerProfile ?? new CustomerProfile();
 
+// Validate dữ liệu
+$request->validate([
+'first_name' => 'required|string|max:255',
+'last_name' => 'required|string|max:255', 
+'phone' => 'required|string|max:20',
+'country' => 'nullable|string|max:255',
+'city' => 'required|string|max:255',
+'ward' => 'required|string|max:255',
+'address' => 'required|string|max:255',
+], [
+'first_name.required' => 'Vui lòng nhập họ',
+'last_name.required' => 'Vui lòng nhập tên',
+'phone.required' => 'Vui lòng nhập số điện thoại',
+'city.required' => 'Vui lòng chọn tỉnh/thành phố',
+'ward.required' => 'Vui lòng nhập phường/xã',
+'address.required' => 'Vui lòng nhập địa chỉ'
+]);
+
+// Cập nhật hoặc tạo mới CustomerProfile
+$customerProfile = CustomerProfile::updateOrCreate(
+['user_id' => $user->id],
+[
+'first_name' => $request->first_name,
+'last_name' => $request->last_name,
+'phone' => $request->phone,
+'country' => $request->country,
+'city' => $request->city,
+'ward' => $request->ward,
+'address' => $request->address,
+]
+);
+// Xử lý upload avatar nếu có
+if ($request->hasFile('avatar')) {
+// Xóa hình ảnh cũ
+if ($customerProfile->avatar && Storage::disk('public')->exists($customerProfile->avatar)) {
+Storage::disk('public')->delete($customerProfile->avatar);
+}
+
+$avatar = $request->file('avatar');
+$avatarName = time() . '_' . Str::slug($request->first_name) . '.' . $avatar->getClientOriginalExtension();
+$avatarPath = $avatar->storeAs('avatars', $avatarName, 'public');
+$customerProfile->avatar = $avatarPath;
+$customerProfile->save();
+}
+
+return redirect()->route('client.profile-user')
+->with('success', 'Cập nhật thông tin thành công!');
+}
+
+public function updateProfilePassword(Request $request)
+{
+$user = Auth::user();
+
+// Trường hợp chỉ đổi email
+if (!$request->filled('password')) {
+$request->validate([
+'email' => 'required|email|unique:users,email,' . $user->id,
+'current_password' => 'required',
+], [
+'email.required' => 'Vui lòng nhập email',
+'email.email' => 'Email không đúng định dạng', 
+'email.unique' => 'Email đã được sử dụng',
+'current_password.required' => 'Vui lòng nhập mật khẩu hiện tại',
+]);
+
+// Kiểm tra mật khẩu hiện tại
+if (!Hash::check($request->current_password, $user->password)) {
+return back()->withErrors([
+'current_password' => 'Mật khẩu hiện tại không đúng'
+]);
+}
+
+// Cập nhật email
+if ($request->email !== $user->email) {
+$user->email = $request->email;
+$user->save();
+}
+
+return redirect()->route('client.profile-user')
+->with('success', 'Cập nhật email thành công!');
+}
+
+// Trường hợp đổi password
+$request->validate([
+'email' => 'required|email|unique:users,email,' . $user->id,
+'current_password' => 'required',
+'password' => 'required|min:8|max:20|confirmed',
+], [
+'email.required' => 'Vui lòng nhập email',
+'email.email' => 'Email không đúng định dạng',
+'email.unique' => 'Email đã được sử dụng', 
+'current_password.required' => 'Vui lòng nhập mật khẩu hiện tại',
+'password.required' => 'Vui lòng nhập mật khẩu mới',
+'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự',
+'password.max' => 'Mật khẩu không được vượt quá 20 ký tự',
+'password.regex' => 'Mật khẩu phải chứa chữ cái và số, không chứa khoảng trắng và ký tự đặc biệt',
+'password.confirmed' => 'Xác nhận mật khẩu không khớp'
+]);
+
+// Kiểm tra mật khẩu hiện tại
+if (!Hash::check($request->current_password, $user->password)) {
+return back()->withErrors([
+'current_password' => 'Mật khẩu hiện tại không đúng'
+]);
+}
+
+// Cập nhật email và password
+$user->email = $request->email;
+$user->password = Hash::make($request->password);
+$user->save();
+
+return redirect()->route('client.profile-user')
+->with('success', 'Cập nhật thông tin đăng nhập thành công!');
 }
 
 
@@ -249,85 +374,77 @@ return view('client.category', compact('category', 'products', 'sortBy'));
 // Chi tiết sản phẩm
 public function product(Request $request, $slug)
 {
-        $product = Product::with(['category', 'primaryImage', 'reviews', 'approvedReviews'])
-            ->where('slug', $slug)
-            ->where('is_active', 1)
-            ->firstOrFail();
-        $product->stats = [
-        // Load product với tất cả relationships cần thiết
-        $product = Product::with([
-            'category', 
-            'images', 
-            'reviews' => function($query) {
-                $query->orderBy('created_at', 'desc');
-            },
-            'approvedReviews' => function($query) {
-                $query->orderBy('created_at', 'desc');
-            },
-            'variants' => function($query) {
-                $query->where('is_active', 1)->orderBy('variant_type')->orderBy('variant_value');
-            }
-        ])
-        ->where('slug', $slug)
-        ->where('is_active', 1)
-        ->firstOrFail();
+// Load product với tất cả relationships cần thiết
+$product = Product::with([
+'category', 
+'images', 
+'reviews' => function($query) {
+$query->orderBy('created_at', 'desc');
+},
+'approvedReviews' => function($query) {
+$query->orderBy('created_at', 'desc');
+},
+'variants' => function($query) {
+$query->where('is_active', 1)->orderBy('variant_type')->orderBy('variant_value');
+}
+])
+->where('slug', $slug)
+->where('is_active', 1)
+->firstOrFail();
 
-        // Tính toán review statistics
-        $reviewStats = [
+// Tính toán review statistics
+$reviewStats = [
 'total' => $product->reviews->count(),
-            'approved' => $product->approvedReviews->count(), 
-            'approved' => $product->approvedReviews->count(),
+'approved' => $product->approvedReviews->count(),
 'pending' => $product->reviews->where('is_approved', false)->count(),
-            'average_rating' => $product->average_rating,
-            'average_rating' => 0,
+'average_rating' => 0,
 'rating_breakdown' => []
 ];
-        return view('client.product', compact('product'));
 
-        // Tính rating breakdown
-        if ($reviewStats['approved'] > 0) {
-            $approvedReviews = $product->approvedReviews;
-            $totalRating = $approvedReviews->sum('rating');
-            $reviewStats['average_rating'] = round($totalRating / $reviewStats['approved'], 1);
+// Tính rating breakdown
+if ($reviewStats['approved'] > 0) {
+$approvedReviews = $product->approvedReviews;
+$totalRating = $approvedReviews->sum('rating');
+$reviewStats['average_rating'] = round($totalRating / $reviewStats['approved'], 1);
 
-            // Breakdown theo từng rating
-            for ($i = 1; $i <= 5; $i++) {
-                $count = $approvedReviews->where('rating', $i)->count();
-                $reviewStats['rating_breakdown'][$i] = [
-                    'count' => $count,
-                    'percentage' => $reviewStats['approved'] > 0 ? round(($count / $reviewStats['approved']) * 100, 1) : 0
-                ];
-            }
-        } else {
-            for ($i = 1; $i <= 5; $i++) {
-                $reviewStats['rating_breakdown'][$i] = [
-                    'count' => 0,
-                    'percentage' => 0
-                ];
-            }
-        }
+// Breakdown theo từng rating
+for ($i = 1; $i <= 5; $i++) {
+$count = $approvedReviews->where('rating', $i)->count();
+$reviewStats['rating_breakdown'][$i] = [
+'count' => $count,
+'percentage' => $reviewStats['approved'] > 0 ? round(($count / $reviewStats['approved']) * 100, 1) : 0
+];
+}
+} else {
+for ($i = 1; $i <= 5; $i++) {
+$reviewStats['rating_breakdown'][$i] = [
+'count' => 0,
+'percentage' => 0
+];
+}
+}
 
-        // Group variants by type
-        $variantsByType = $product->variants->groupBy('variant_type');
+// Group variants by type
+$variantsByType = $product->variants->groupBy('variant_type');
 
-        // Lấy sản phẩm liên quan (cùng danh mục)
-        $relatedProducts = Product::with(['category', 'images', 'reviews'])
-            ->where('category_id', $product->category_id)
-            ->where('id', '!=', $product->id)
-            ->where('is_active', 1)
-            ->inRandomOrder()
-            ->limit(8)
-            ->get()
-            ->map(function($relatedProduct) {
-                $relatedProduct->stats = [
-                    'total' => $relatedProduct->reviews->count(),
-                    'approved' => $relatedProduct->reviews->where('is_approved', true)->count(),
-                    'average_rating' => $relatedProduct->reviews->where('is_approved', true)->avg('rating') ?? 0
-                ];
-                return $relatedProduct;
-            });
+// Lấy sản phẩm liên quan (cùng danh mục)
+$relatedProducts = Product::with(['category', 'images', 'reviews'])
+->where('category_id', $product->category_id)
+->where('id', '!=', $product->id)
+->where('is_active', 1)
+->inRandomOrder()
+->limit(8)
+->get()
+->map(function($relatedProduct) {
+$relatedProduct->stats = [
+'total' => $relatedProduct->reviews->count(),
+'approved' => $relatedProduct->reviews->where('is_approved', true)->count(),
+'average_rating' => $relatedProduct->reviews->where('is_approved', true)->avg('rating') ?? 0
+];
+return $relatedProduct;
+});
 
-        return view('client.product', compact('product', 'reviewStats', 'variantsByType', 'relatedProducts'));
+return view('client.product', compact('product', 'reviewStats', 'variantsByType', 'relatedProducts'));
 }
 
 /**
