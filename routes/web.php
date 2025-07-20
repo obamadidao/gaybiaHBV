@@ -10,7 +10,6 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\InventoryController;
-
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Client\ClientController;
 use App\Http\Controllers\Client\CartController;
@@ -126,7 +125,8 @@ Route::middleware('auth')->group(function () {
 Route::post('/logout-user', [ClientController::class, 'logout'])->name('logout-user');
 Route::get('/profile-user', [ClientController::class, 'profile'])->name('profile-user');
 Route::put('/profile-user', [ClientController::class, 'updateProfile'])->name('update-profile-user');
- Route::put('/profile-user/password', [ClientController::class, 'updateProfilePassword'])->name('update-profile-password');
+Route::put('/profile-user/password', [ClientController::class, 'updateProfilePassword'])->name('update-profile-password');
+            Route::get('/api/order/{orderId}/detail', [ClientController::class, 'getOrderDetail'])->name('order-detail-api');
 });
 
 Route::get('/contact', [ClientController::class, 'contact'])->name('contact');
@@ -146,18 +146,12 @@ Route::delete('/', [CartController::class, 'clear'])->name('clear');
 
 // Order routes - yêu cầu đăng nhập
 Route::middleware('auth')->prefix('order')->name('order.')->group(function () {
-            Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
-            Route::post('/store', [OrderController::class, 'store'])->name('store');
-            Route::get('/success/{order}', [OrderController::class, 'success'])->name('success');
-            Route::get('/detail/{order}', [OrderController::class, 'show'])->name('show');
-            Route::get('/list', [OrderController::class, 'index'])->name('index');
-            Route::post('/{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
-            Route::get('/checkout', [ClientOrderController::class, 'checkout'])->name('checkout');
-            Route::post('/store', [ClientOrderController::class, 'store'])->name('store');
-            Route::get('/success/{order}', [ClientOrderController::class, 'success'])->name('success');
-            Route::get('/detail/{order}', [ClientOrderController::class, 'show'])->name('show');
-            Route::get('/list', [ClientOrderController::class, 'index'])->name('index');
-            Route::post('/{order}/cancel', [ClientOrderController::class, 'cancel'])->name('cancel');
+Route::get('/checkout', [ClientOrderController::class, 'checkout'])->name('checkout');
+Route::post('/store', [ClientOrderController::class, 'store'])->name('store');
+Route::get('/success/{order}', [ClientOrderController::class, 'success'])->name('success');
+Route::get('/detail/{order}', [ClientOrderController::class, 'show'])->name('show');
+Route::get('/list', [ClientOrderController::class, 'index'])->name('index');
+Route::post('/{order}/cancel', [ClientOrderController::class, 'cancel'])->name('cancel');
 });
 
 // Các route có tham số đặt CUỐI CÙNG để tránh conflict

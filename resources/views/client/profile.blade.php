@@ -60,7 +60,8 @@
 <div class="bg-block d-flex-center flex-nowrap">
 <img class="blur-up lazyload" data-src="assets/images/icons/sale.png" src="assets/images/icons/sale.png" alt="icon" width="64" height="64" />
 <div class="content">
-<h3 class="fs-5 mb-1 text-primary">238</h3>
+                                            <h3 class="fs-5 mb-1 text-primary">238</h3>
+                                            <h3 class="fs-5 mb-1 text-primary">{{ $orderStats['total_orders'] }}</h3>
 <p>Tổng số đơn hàng</p>
 </div>
 </div>
@@ -69,7 +70,8 @@
 <div class="bg-block d-flex-center flex-nowrap">
 <img class="blur-up lazyload" data-src="assets/images/icons/homework.png" src="assets/images/icons/homework.png" alt="icon" width="64" height="64" />
 <div class="content">
-<h3 class="fs-5 mb-1 text-primary">124</h3>
+                                            <h3 class="fs-5 mb-1 text-primary">124</h3>
+                                            <h3 class="fs-5 mb-1 text-primary">{{ $orderStats['processing_orders'] }}</h3>
 <p>Đơn đang xử lý</p>
 </div>
 </div>
@@ -78,7 +80,8 @@
 <div class="bg-block d-flex-center flex-nowrap">
 <img class="blur-up lazyload" data-src="assets/images/icons/order.png" src="assets/images/icons/order.png" alt="icon" width="64" height="64" />
 <div class="content">
-<h3 class="fs-5 mb-1 text-primary">102</h3>
+                                            <h3 class="fs-5 mb-1 text-primary">102</h3>
+                                            <h3 class="fs-5 mb-1 text-primary">{{ $orderStats['completed_orders'] }}</h3>
 <p>Đơn hàng hoàn thành</p>
 </div>
 </div>
@@ -89,8 +92,10 @@
 <div class="bg-block d-flex-center flex-nowrap">
 <img class="blur-up lazyload" data-src="assets/images/icons/sale.png" src="assets/images/icons/sale.png" alt="icon" width="64" height="64" />
 <div class="content">
-<h3 class="fs-5 mb-1 text-primary">238</h3>
-<p>Tổng chi tiêu</p>
+                                            <h3 class="fs-5 mb-1 text-primary">238</h3>
+                                            <p>Tổng chi tiêu</p>
+                                            <h3 class="fs-5 mb-1 text-primary">{{ number_format($orderStats['total_spent'], 0, ',', '.') }}</h3>
+                                            <p>Tổng chi tiêu (VNĐ)</p>
 </div>
 </div>
 </div>
@@ -103,82 +108,47 @@
 <div class="tab-pane fade h-100" id="orders">
 <div class="orders-card mt-0 h-100">    
 <div class="top-sec d-flex-justify-center justify-content-between mb-4">
-                                <h2 class="mb-0">My Orders</h2>
-                                <h2 class="mb-0">Đơn hàng của tôi
-                                    ({{ $orders->count() }})
-                                </h2>
+<h2 class="mb-0">Đơn hàng của tôi
+({{ $orders->count() }})
+</h2>
 </div>
 
-                            <div class="table-bottom-brd table-responsive">
-                            <div class="table-bottom-brd table-responsive" style="max-height: 400px; overflow-y: auto;">
+<div class="table-bottom-brd table-responsive" style="max-height: 400px; overflow-y: auto;">
 <table class="table align-middle text-center order-table">
 <thead>
 <tr class="table-head text-nowrap">
-                                            <th scope="col">image</th>
-                                            <th scope="col">Order Id</th>
-                                            <th scope="col">Product Details</th>
-                                            <th scope="col">Price</th>
-                                            <th scope="col">Status</th>
-                                            <th scope="col">View</th>
-                                            <th scope="col">Mã đơn hàng</th>
-                                            <th scope="col">Ngày đặt</th>
-                                            <th scope="col">Tổng tiền</th>
-                                            <th scope="col">Thanh toán</th>
-                                            <th scope="col">Trạng thái</th>
-                                            <th scope="col">Chi tiết</th>
+<th scope="col">Mã đơn hàng</th>
+<th scope="col">Ngày đặt</th>
+<th scope="col">Tổng tiền</th>
+<th scope="col">Thanh toán</th>
+<th scope="col">Trạng thái</th>
+<th scope="col">Chi tiết</th>
 </tr>
 </thead>
 <tbody>
-                                        <tr>
-                                            <td><img class="blur-up lazyload" data-src="assets/images/products/product1-120x170.jpg" src="assets/images/products/product1-120x170.jpg" width="50" alt="product" title="product" /></td>
-                                            <td><span class="id">#12301</span></td>
-                                            <td><span class="name">Oxford Cuban Shirt</span></td>
-                                            <td><span class="price fw-500">$99.00</span></td>
-                                            <td><span class="badge rounded-pill bg-success custom-badge">Shipped</span></td>
-                                            <td><a href="product-layout1.html" class="view"><i class="icon anm anm-eye btn-link fs-6"></i></a></td>
-                                        </tr>
-                                        <tr>
-                                            <td><img class="blur-up lazyload" data-src="assets/images/products/product2-120x170.jpg" src="assets/images/products/product2-120x170.jpg" width="50" alt="product" title="product" /></td>
-                                            <td><span class="id">#12302</span></td>
-                                            <td><span class="name">Cuff Beanie Cap</span></td>
-                                            <td><span class="price fw-500">$128.00</span></td>
-                                            <td><span class="badge rounded-pill bg-danger custom-badge">Pending</span></td>
-                                            <td><a href="product-layout2.html" class="view"><i class="icon anm anm-eye btn-link fs-6"></i></a></td>
-                                        </tr>
-                                        <tr>
-                                            <td><img class="blur-up lazyload" data-src="assets/images/products/product3-120x170.jpg" src="assets/images/products/product3-120x170.jpg" width="50" alt="product" title="product" /></td>
-                                            <td><span class="id">#12303</span></td>
-                                            <td><span class="name">Flannel Collar Shirt</span></td>
-                                            <td><span class="price fw-500">$114.00</span></td>
-                                            <td><span class="badge rounded-pill bg-dark custom-badge">Processing</span></td>
-                                            <td><a href="product-layout3.html" class="view"><i class="icon anm anm-eye btn-link fs-6"></i></a></td>
-                                        </tr>
-                                        <tr>
-                                            <td><img class="blur-up lazyload" data-src="assets/images/products/product4-120x170.jpg" src="assets/images/products/product4-120x170.jpg" width="50" alt="product" title="product" /></td>
-                                            <td><span class="id">#12304</span></td>
-                                            <td><span class="name">Cotton Hooded Hoodie</span></td>
-                                            <td><span class="price fw-500">$198.00</span></td>
-                                            <td><span class="badge rounded-pill bg-secondary custom-badge">Canceled</span></td>
-                                            <td><a href="product-layout4.html" class="view"><i class="icon anm anm-eye btn-link fs-6"></i></a></td>
-                                        </tr>
-                                        @foreach ($orders as $order)
-                                            <tr>
-                                                <td><span class="id">#{{ substr($order->order_number, -7) }}</span></td>
-                                                <td><span class="name">{{ $order->created_at->format('d/m/Y') }}</span></td>
-                                                <td><span class="price fw-500">{{ number_format($order->total_amount, 0, ',', '.') }} VNĐ</span></td>
-                                                <td>
+@foreach ($orders as $order)
+<tr>
+<td><span class="id">#{{ substr($order->order_number, -7) }}</span></td>
+<td><span class="name">{{ $order->created_at->format('d/m/Y') }}</span></td>
+<td><span class="price fw-500">{{ number_format($order->total_amount, 0, ',', '.') }} VNĐ</span></td>
+<td>
                                                     <span class="badge bg-{{ $order->status_badge_class }}">
                                                         {{ $order->status_text }}
-                                                    </span>
-                                                </td>
-                                                <td>
+                                                    <span class="badge {{ $order->payment_status === 'paid' ? 'bg-success' : 'bg-warning' }}">
+                                                        {{ $order->payment_status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán' }}
+</span>
+</td>
+<td>
                                                     <span class="badge {{ $order->payment_status === 'paid' ? 'bg-success' : 'bg-warning' }}">
                                                         {{ $order->payment_status_text }}
-                                                    </span>
-                                                </td>
+                                                    <span class="badge bg-{{ $order->status === 'pending' ? 'warning' : ($order->status === 'processing' ? 'info' : ($order->status === 'shipped' ? 'primary' : ($order->status === 'delivered' ? 'success' : 'danger'))) }}">
+                                                        {{ $order->status === 'pending' ? 'Chờ xử lý' : ($order->status === 'processing' ? 'Đang xử lý' : ($order->status === 'shipped' ? 'Đã gửi hàng' : ($order->status === 'delivered' ? 'Đã giao' : 'Đã hủy'))) }}
+</span>
+</td>
                                                 <td><a href="" class="view"><i class="icon anm anm-eye btn-link fs-6"></i></a></td>
-                                            </tr>
-                                        @endforeach
+                                                <td><a href="#" onclick="viewOrderDetail({{ $order->id }})" class="view" title="Xem chi tiết"><i class="icon anm anm-eye btn-link fs-6"></i></a></td>
+</tr>
+@endforeach
 </tbody>
 </table>
 </div>                                               
@@ -442,6 +412,27 @@
 </div>
 </div>
 <!--End Main Content-->
+
+    <!-- Order Detail Modal -->
+    <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="orderDetailModalLabel">Chi tiết đơn hàng</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="orderDetailContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                        <div class="mt-2">Đang tải thông tin đơn hàng...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Order Detail Modal -->
 @endsection
 
 @push('script')
@@ -456,5 +447,220 @@
                reader.readAsDataURL(file);
            }
        }
+
+        // Xem chi tiết đơn hàng
+        function viewOrderDetail(orderId) {
+            const modal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
+            const modalContent = document.getElementById('orderDetailContent');
+            
+            // Reset modal content về loading state
+            modalContent.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                    <div class="mt-2">Đang tải thông tin đơn hàng...</div>
+                </div>
+            `;
+            
+            // Mở modal
+            modal.show();
+            
+            // Load dữ liệu qua AJAX
+            fetch(`/api/order/${orderId}/detail`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderOrderDetail(data.order);
+                    } else {
+                        modalContent.innerHTML = `
+                            <div class="alert alert-danger text-center">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                ${data.message || 'Không thể tải thông tin đơn hàng'}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    modalContent.innerHTML = `
+                        <div class="alert alert-danger text-center">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Có lỗi xảy ra khi tải thông tin đơn hàng
+                        </div>
+                    `;
+                });
+        }
+
+        function renderOrderDetail(order) {
+            const modalContent = document.getElementById('orderDetailContent');
+            
+            // Update modal title
+            document.getElementById('orderDetailModalLabel').textContent = `Chi tiết đơn hàng #${order.order_number}`;
+            
+            // Render order items
+            let orderItemsHtml = '';
+            order.order_items.forEach(item => {
+                orderItemsHtml += `
+                    <tr>
+                        <td class="text-start">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    ${item.product_image ? 
+                                        `<img src="/storage/${item.product_image}" alt="${item.product_name}" width="50" height="50" class="rounded">` :
+                                        `<img src="/assets/images/empty-img.gif" alt="No Image" width="50" height="50" class="rounded">`
+                                    }
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">${item.product_name}</h6>
+                                    ${item.variant_name ? `<small class="text-muted">${item.variant_name}</small>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center">${formatCurrency(item.unit_price)}</td>
+                        <td class="text-center">${item.quantity}</td>
+                        <td class="text-end">${formatCurrency(item.total_price)}</td>
+                    </tr>
+                `;
+            });
+
+            modalContent.innerHTML = `
+                <div class="row">
+                    <!-- Order Information -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0">Thông tin đơn hàng</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-5"><strong>Mã đơn hàng:</strong></div>
+                                    <div class="col-7">#${order.order_number}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-5"><strong>Ngày đặt:</strong></div>
+                                    <div class="col-7">${order.created_at}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-5"><strong>Trạng thái:</strong></div>
+                                    <div class="col-7">
+                                        <span class="badge bg-${order.status_badge_class}">${order.status_text}</span>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-5"><strong>Thanh toán:</strong></div>
+                                    <div class="col-7">${order.payment_method_text}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-5"><strong>TT thanh toán:</strong></div>
+                                    <div class="col-7">
+                                        <span class="badge ${order.payment_status === 'paid' ? 'bg-success' : 'bg-warning'}">${order.payment_status_text}</span>
+                                    </div>
+                                </div>
+                                ${order.coupon_code ? `
+                                <div class="row mb-2">
+                                    <div class="col-5"><strong>Mã giảm giá:</strong></div>
+                                    <div class="col-7">${order.coupon_code}</div>
+                                </div>
+                                ` : ''}
+                                ${order.notes ? `
+                                <div class="row mb-2">
+                                    <div class="col-5"><strong>Ghi chú:</strong></div>
+                                    <div class="col-7">${order.notes}</div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Information -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0">Thông tin giao hàng</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-4"><strong>Người nhận:</strong></div>
+                                    <div class="col-8">${order.shipping_address.name || 'N/A'}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-4"><strong>Số điện thoại:</strong></div>
+                                    <div class="col-8">${order.shipping_address.phone || 'N/A'}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-4"><strong>Địa chỉ:</strong></div>
+                                    <div class="col-8">${order.shipping_address.address || 'N/A'}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-4"><strong>Phường/Xã:</strong></div>
+                                    <div class="col-8">${order.shipping_address.ward || 'N/A'}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-4"><strong>Tỉnh/TP:</strong></div>
+                                    <div class="col-8">${order.shipping_address.city || 'N/A'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Sản phẩm đã đặt</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-start">Sản phẩm</th>
+                                                <th class="text-center">Đơn giá</th>
+                                                <th class="text-center">Số lượng</th>
+                                                <th class="text-end">Thành tiền</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${orderItemsHtml}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Order Summary -->
+                                <div class="row justify-content-end">
+                                    <div class="col-md-6">
+                                        <table class="table">
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Tạm tính:</strong></td>
+                                                    <td class="text-end">${formatCurrency(order.subtotal)}</td>
+                                                </tr>
+                                                ${order.discount_amount > 0 ? `
+                                                <tr>
+                                                    <td><strong>Giảm giá:</strong></td>
+                                                    <td class="text-end text-success">-${formatCurrency(order.discount_amount)}</td>
+                                                </tr>
+                                                ` : ''}
+                                                <tr class="table-active">
+                                                    <td><strong>Tổng cộng:</strong></td>
+                                                    <td class="text-end"><strong class="text-danger">${formatCurrency(order.total_amount)}</strong></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
+        }
    </script>
 @endpush
