@@ -145,12 +145,11 @@ Route::delete('/', [CartController::class, 'clear'])->name('clear');
 });
 
 // Order routes - yêu cầu đăng nhập
-Route::middleware('auth')->prefix('order')->name('order.')->group(function () {
+        Route::middleware('auth')->prefix('order')->name('order.')->group(function () {
+        Route::prefix('order')->name('order.')->group(function () {
 Route::get('/checkout', [ClientOrderController::class, 'checkout'])->name('checkout');
 Route::post('/store', [ClientOrderController::class, 'store'])->name('store');
 Route::get('/success/{order}', [ClientOrderController::class, 'success'])->name('success');
-            Route::get('/detail/{order}', [ClientOrderController::class, 'show'])->name('show');
-            Route::get('/list', [ClientOrderController::class, 'index'])->name('index');
 Route::post('/{order}/cancel', [ClientOrderController::class, 'cancel'])->name('cancel');
 });
 
