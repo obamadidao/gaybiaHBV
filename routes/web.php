@@ -126,7 +126,7 @@ Route::post('/logout-user', [ClientController::class, 'logout'])->name('logout-u
 Route::get('/profile-user', [ClientController::class, 'profile'])->name('profile-user');
 Route::put('/profile-user', [ClientController::class, 'updateProfile'])->name('update-profile-user');
 Route::put('/profile-user/password', [ClientController::class, 'updateProfilePassword'])->name('update-profile-password');
-            Route::get('/api/order/{orderId}/detail', [ClientController::class, 'getOrderDetail'])->name('order-detail-api');
+Route::get('/api/order/{orderId}/detail', [ClientController::class, 'getOrderDetail'])->name('order-detail-api');
 });
 
 Route::get('/contact', [ClientController::class, 'contact'])->name('contact');
@@ -149,8 +149,8 @@ Route::middleware('auth')->prefix('order')->name('order.')->group(function () {
 Route::get('/checkout', [ClientOrderController::class, 'checkout'])->name('checkout');
 Route::post('/store', [ClientOrderController::class, 'store'])->name('store');
 Route::get('/success/{order}', [ClientOrderController::class, 'success'])->name('success');
-Route::get('/detail/{order}', [ClientOrderController::class, 'show'])->name('show');
-Route::get('/list', [ClientOrderController::class, 'index'])->name('index');
+            Route::get('/detail/{order}', [ClientOrderController::class, 'show'])->name('show');
+            Route::get('/list', [ClientOrderController::class, 'index'])->name('index');
 Route::post('/{order}/cancel', [ClientOrderController::class, 'cancel'])->name('cancel');
 });
 

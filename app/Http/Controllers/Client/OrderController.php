@@ -55,7 +55,6 @@ $request->validate([
 'shipping_email' => 'required|email|max:100',
 'shipping_address' => 'required|string|max:255',
 'shipping_city' => 'required|string|max:100',
-            'shipping_district' => 'required|string|max:100',
 'shipping_ward' => 'nullable|string|max:100',
 'payment_method' => 'required|in:cod,bank_transfer,online',
 'notes' => 'nullable|string|max:500',
@@ -66,7 +65,6 @@ $request->validate([
 'shipping_email.required' => 'Vui lòng nhập email',
 'shipping_address.required' => 'Vui lòng nhập địa chỉ giao hàng',
 'shipping_city.required' => 'Vui lòng chọn tỉnh/thành phố',
-            'shipping_district.required' => 'Vui lòng chọn quận/huyện',
 'payment_method.required' => 'Vui lòng chọn phương thức thanh toán',
 'terms_accepted.accepted' => 'Vui lòng đồng ý với điều khoản và điều kiện'
 ]);
@@ -93,12 +91,10 @@ $shippingAddress = [
 'email' => $request->shipping_email,
 'address' => $request->shipping_address,
 'city' => $request->shipping_city,
-                'district' => $request->shipping_district,
 'ward' => $request->shipping_ward,
 'full_address' => implode(', ', array_filter([
 $request->shipping_address,
 $request->shipping_ward,
-                    $request->shipping_district,
 $request->shipping_city
 ]))
 ];
@@ -195,39 +191,39 @@ $order = Order::with(['orderItems.product', 'user'])
 return view('client.order-success', compact('order'));
 }
 
-/**
-    * Hiển thị chi tiết đơn hàng
-    */
-public function show($orderId)
-{
-$order = Order::with(['orderItems.product.images', 'user'])
-->where('id', $orderId)
-->where('user_id', Auth::id())
-->firstOrFail();
+    /**
+     * Hiển thị chi tiết đơn hàng
+     */
+    public function show($orderId)
+    {
+        $order = Order::with(['orderItems.product.images', 'user'])
+            ->where('id', $orderId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
 
-return view('client.order-detail', compact('order'));
-}
+        return view('client.order-detail', compact('order'));
+    }
 
-/**
-    * Danh sách đơn hàng của khách hàng
-    */
-public function index(Request $request)
-{
-$query = Order::with(['orderItems.product.images'])
-->where('user_id', Auth::id());
+    /**
+     * Danh sách đơn hàng của khách hàng
+     */
+    public function index(Request $request)
+    {
+        $query = Order::with(['orderItems.product.images'])
+            ->where('user_id', Auth::id());
 
-// Filter by status if provided
-if ($request->has('status') && !empty($request->status)) {
-$query->where('status', $request->status);
-}
+        // Filter by status if provided
+        if ($request->has('status') && !empty($request->status)) {
+            $query->where('status', $request->status);
+        }
 
-$orders = $query->orderBy('created_at', 'desc')->paginate(10);
+        $orders = $query->orderBy('created_at', 'desc')->paginate(10);
 
-// Preserve query parameters in pagination links
-$orders->appends($request->query());
+        // Preserve query parameters in pagination links
+        $orders->appends($request->query());
 
-return view('client.orders', compact('orders'));
-}
+        return view('client.orders', compact('orders'));
+    }
 
 /**
     * Hủy đơn hàng
@@ -381,7 +377,6 @@ $profile->phone = $request->shipping_phone;
 if (!$profile->address || $profile->address !== $request->shipping_address) {
 $profile->address = $request->shipping_address;
 $profile->city = $request->shipping_city;
-            $profile->district = $request->shipping_district;
 $profile->ward = $request->shipping_ward;
 }
 
