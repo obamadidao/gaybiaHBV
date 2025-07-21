@@ -34,7 +34,8 @@
 <div class="collection-slider-4items gp15 arwOut5 hov-arrow dots-hide">
 @foreach($cateRoot as $category)
 <div class="category-item zoomscal-hov">
-<a href="#" class="category-link clr-none">
+                                    <a href="#" class="category-link clr-none">
+                                    <a href="{{ route('client.category', $category->slug) }}" class="category-link clr-none">
 <div class="zoom-scal zoom-scal-nopb"><img style="min-height: 300px;" class="blur-up lazyload" data-src="{{ Storage::url($category->image) }}" src="{{ Storage::url($category->image) }}" alt="collection" title="" width="300" height="300" /></div>
 <div class="details mt-3 text-center">
 <h4 class="category-title mb-0">{{ $category->name }}</h4>
@@ -92,8 +93,7 @@
 <!--End Countdown Timer-->
 <!--Product Button-->
 <div class="button-set style2">
-                                                        <a href="#" class="btn btn-primary">Mua ngay</a>
-                                                        <a href="{{ route('client.product', $product->slug) }}" class="btn btn-primary">Mua ngay</a>
+<a href="{{ route('client.product', $product->slug) }}" class="btn btn-primary">Mua ngay</a>
 </div>
 <!--End Product Button-->
 </div>
@@ -158,8 +158,7 @@
 <!--End Countdown Timer-->
 <!--Product Button-->
 <div class="button-set style2">
-                                                        <a href="#" class="btn btn-primary">Mua ngay</a>
-                                                        <a href="{{ route('client.product', $product->slug) }}" class="btn btn-primary">Mua ngay</a>
+<a href="{{ route('client.product', $product->slug) }}" class="btn btn-primary">Mua ngay</a>
 </div>
 <!--End Product Button-->
 </div>
@@ -224,8 +223,7 @@
 <!--End Countdown Timer-->
 <!--Product Button-->
 <div class="button-set style2">
-                                                        <a href="#" class="btn btn-primary">Mua ngay</a>
-                                                        <a href="{{ route('client.product', $product->slug) }}" class="btn btn-primary">Mua ngay</a>
+<a href="{{ route('client.product', $product->slug) }}" class="btn btn-primary">Mua ngay</a>
 </div>
 <!--End Product Button-->
 </div>
