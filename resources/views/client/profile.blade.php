@@ -1,5 +1,11 @@
 @extends('layouts.client.ClientLayout')
 
+@section('title', 'Tài khoản')
+
+@push('head')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
+
 @section('content')
 <!--Page Header-->
 <div class="page-header text-center">
@@ -60,8 +66,7 @@
 <div class="bg-block d-flex-center flex-nowrap">
 <img class="blur-up lazyload" data-src="assets/images/icons/sale.png" src="assets/images/icons/sale.png" alt="icon" width="64" height="64" />
 <div class="content">
-                                            <h3 class="fs-5 mb-1 text-primary">238</h3>
-                                            <h3 class="fs-5 mb-1 text-primary">{{ $orderStats['total_orders'] }}</h3>
+<h3 class="fs-5 mb-1 text-primary">{{ $orderStats['total_orders'] }}</h3>
 <p>Tổng số đơn hàng</p>
 </div>
 </div>
@@ -70,8 +75,7 @@
 <div class="bg-block d-flex-center flex-nowrap">
 <img class="blur-up lazyload" data-src="assets/images/icons/homework.png" src="assets/images/icons/homework.png" alt="icon" width="64" height="64" />
 <div class="content">
-                                            <h3 class="fs-5 mb-1 text-primary">124</h3>
-                                            <h3 class="fs-5 mb-1 text-primary">{{ $orderStats['processing_orders'] }}</h3>
+<h3 class="fs-5 mb-1 text-primary">{{ $orderStats['processing_orders'] }}</h3>
 <p>Đơn đang xử lý</p>
 </div>
 </div>
@@ -80,8 +84,7 @@
 <div class="bg-block d-flex-center flex-nowrap">
 <img class="blur-up lazyload" data-src="assets/images/icons/order.png" src="assets/images/icons/order.png" alt="icon" width="64" height="64" />
 <div class="content">
-                                            <h3 class="fs-5 mb-1 text-primary">102</h3>
-                                            <h3 class="fs-5 mb-1 text-primary">{{ $orderStats['completed_orders'] }}</h3>
+<h3 class="fs-5 mb-1 text-primary">{{ $orderStats['completed_orders'] }}</h3>
 <p>Đơn hàng hoàn thành</p>
 </div>
 </div>
@@ -92,10 +95,8 @@
 <div class="bg-block d-flex-center flex-nowrap">
 <img class="blur-up lazyload" data-src="assets/images/icons/sale.png" src="assets/images/icons/sale.png" alt="icon" width="64" height="64" />
 <div class="content">
-                                            <h3 class="fs-5 mb-1 text-primary">238</h3>
-                                            <p>Tổng chi tiêu</p>
-                                            <h3 class="fs-5 mb-1 text-primary">{{ number_format($orderStats['total_spent'], 0, ',', '.') }}</h3>
-                                            <p>Tổng chi tiêu (VNĐ)</p>
+<h3 class="fs-5 mb-1 text-primary">{{ number_format($orderStats['total_spent'], 0, ',', '.') }}</h3>
+<p>Tổng chi tiêu (VNĐ)</p>
 </div>
 </div>
 </div>
@@ -132,21 +133,16 @@
 <td><span class="name">{{ $order->created_at->format('d/m/Y') }}</span></td>
 <td><span class="price fw-500">{{ number_format($order->total_amount, 0, ',', '.') }} VNĐ</span></td>
 <td>
-                                                    <span class="badge bg-{{ $order->status_badge_class }}">
-                                                        {{ $order->status_text }}
-                                                    <span class="badge {{ $order->payment_status === 'paid' ? 'bg-success' : 'bg-warning' }}">
-                                                        {{ $order->payment_status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán' }}
+<span class="badge {{ $order->payment_status === 'paid' ? 'bg-success' : 'bg-warning' }}">
+{{ $order->payment_status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán' }}
 </span>
 </td>
 <td>
-                                                    <span class="badge {{ $order->payment_status === 'paid' ? 'bg-success' : 'bg-warning' }}">
-                                                        {{ $order->payment_status_text }}
-                                                    <span class="badge bg-{{ $order->status === 'pending' ? 'warning' : ($order->status === 'processing' ? 'info' : ($order->status === 'shipped' ? 'primary' : ($order->status === 'delivered' ? 'success' : 'danger'))) }}">
-                                                        {{ $order->status === 'pending' ? 'Chờ xử lý' : ($order->status === 'processing' ? 'Đang xử lý' : ($order->status === 'shipped' ? 'Đã gửi hàng' : ($order->status === 'delivered' ? 'Đã giao' : 'Đã hủy'))) }}
+<span class="badge bg-{{ $order->status === 'pending' ? 'warning' : ($order->status === 'processing' ? 'info' : ($order->status === 'shipped' ? 'primary' : ($order->status === 'delivered' ? 'success' : 'danger'))) }}">
+{{ $order->status === 'pending' ? 'Chờ xử lý' : ($order->status === 'processing' ? 'Đang xử lý' : ($order->status === 'shipped' ? 'Đã gửi hàng' : ($order->status === 'delivered' ? 'Đã giao' : 'Đã hủy'))) }}
 </span>
 </td>
-                                                <td><a href="" class="view"><i class="icon anm anm-eye btn-link fs-6"></i></a></td>
-                                                <td><a href="#" onclick="viewOrderDetail({{ $order->id }})" class="view" title="Xem chi tiết"><i class="icon anm anm-eye btn-link fs-6"></i></a></td>
+<td><a href="#" onclick="viewOrderDetail({{ $order->id }})" class="view" title="Xem chi tiết"><i class="icon anm anm-eye btn-link fs-6"></i></a></td>
 </tr>
 @endforeach
 </tbody>
@@ -413,26 +409,71 @@
 </div>
 <!--End Main Content-->
 
-    <!-- Order Detail Modal -->
-    <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+<!-- Order Detail Modal -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
+<div class="modal-dialog modal-xl">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="orderDetailModalLabel">Chi tiết đơn hàng</h4>
+<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body" id="orderDetailContent">
+<div class="text-center py-5">
+<div class="spinner-border text-primary" role="status">
+<span class="visually-hidden">Đang tải...</span>
+</div>
+<div class="mt-2">Đang tải thông tin đơn hàng...</div>
+</div>
+</div>
+                <div class="modal-footer" id="orderDetailFooter" style="display: none;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger" id="cancelOrderBtn" onclick="showCancelOrderModal()" style="display: none;">
+                        <i class="fas fa-times me-1"></i>Hủy đơn hàng
+                    </button>
+                </div>
+</div>
+</div>
+</div>
+<!-- End Order Detail Modal -->
+
+    <!-- Cancel Order Modal -->
+    <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="orderDetailModalLabel">Chi tiết đơn hàng</h4>
+                    <h5 class="modal-title" id="cancelOrderModalLabel">Hủy đơn hàng</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="orderDetailContent">
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Đang tải...</span>
+                <form id="cancelOrderForm">
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Bạn có chắc chắn muốn hủy đơn hàng này? Hành động này không thể hoàn tác.
                         </div>
-                        <div class="mt-2">Đang tải thông tin đơn hàng...</div>
+                        <div class="mb-3">
+                            <label for="cancellationReason" class="form-label">Lý do hủy đơn hàng <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="cancellationReason" name="cancellation_reason" rows="4" 
+                                placeholder="Vui lòng cho biết lý do hủy đơn hàng..." required maxlength="500"></textarea>
+                            <div class="form-text">Tối đa 500 ký tự</div>
+                            <div class="invalid-feedback" id="cancellationReasonError"></div>
+                        </div>
+                        <input type="hidden" id="orderIdToCancel" name="order_id" value="">
                     </div>
-                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không hủy</button>
+                        <button type="submit" class="btn btn-danger" id="confirmCancelBtn">
+                            <span class="btn-text">Xác nhận hủy</span>
+                            <span class="btn-loading d-none">
+                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                Đang xử lý...
+                            </span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <!-- End Order Detail Modal -->
+    <!-- End Cancel Order Modal -->
 @endsection
 
 @push('script')
@@ -448,219 +489,357 @@
            }
        }
 
-        // Xem chi tiết đơn hàng
-        function viewOrderDetail(orderId) {
-            const modal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
-            const modalContent = document.getElementById('orderDetailContent');
+       // Xem chi tiết đơn hàng
+       function viewOrderDetail(orderId) {
+           const modal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
+           const modalContent = document.getElementById('orderDetailContent');
+           
+           // Reset modal content về loading state
+           modalContent.innerHTML = `
+               <div class="text-center py-5">
+                   <div class="spinner-border text-primary" role="status">
+                       <span class="visually-hidden">Đang tải...</span>
+                   </div>
+                   <div class="mt-2">Đang tải thông tin đơn hàng...</div>
+               </div>
+           `;
+           
+           // Mở modal
+           modal.show();
+           
+           // Load dữ liệu qua AJAX
+           fetch(`/api/order/${orderId}/detail`)
+               .then(response => response.json())
+               .then(data => {
+                   if (data.success) {
+                       renderOrderDetail(data.order);
+                   } else {
+                       modalContent.innerHTML = `
+                           <div class="alert alert-danger text-center">
+                               <i class="fas fa-exclamation-triangle"></i>
+                               ${data.message || 'Không thể tải thông tin đơn hàng'}
+                           </div>
+                       `;
+                   }
+               })
+               .catch(error => {
+                   console.error('Error:', error);
+                   modalContent.innerHTML = `
+                       <div class="alert alert-danger text-center">
+                           <i class="fas fa-exclamation-triangle"></i>
+                           Có lỗi xảy ra khi tải thông tin đơn hàng
+                       </div>
+                   `;
+               });
+       }
+
+       function renderOrderDetail(order) {
+           const modalContent = document.getElementById('orderDetailContent');
+            const modalFooter = document.getElementById('orderDetailFooter');
+            const cancelOrderBtn = document.getElementById('cancelOrderBtn');
+           
+           // Update modal title
+           document.getElementById('orderDetailModalLabel').textContent = `Chi tiết đơn hàng #${order.order_number}`;
+           
+            // Show/hide cancel button based on order status
+            if (order.can_be_cancelled) {
+                cancelOrderBtn.style.display = 'inline-block';
+                cancelOrderBtn.setAttribute('data-order-id', order.id);
+            } else {
+                cancelOrderBtn.style.display = 'none';
+            }
+            modalFooter.style.display = 'flex';
             
-            // Reset modal content về loading state
-            modalContent.innerHTML = `
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Đang tải...</span>
-                    </div>
-                    <div class="mt-2">Đang tải thông tin đơn hàng...</div>
-                </div>
-            `;
+           // Render order items
+           let orderItemsHtml = '';
+           order.order_items.forEach(item => {
+               orderItemsHtml += `
+                   <tr>
+                       <td class="text-start">
+                           <div class="d-flex align-items-center">
+                               <div class="me-3">
+                                   ${item.product_image ? 
+                                       `<img src="/storage/${item.product_image}" alt="${item.product_name}" width="50" height="50" class="rounded">` :
+                                       `<img src="/assets/images/empty-img.gif" alt="No Image" width="50" height="50" class="rounded">`
+                                   }
+                               </div>
+                               <div>
+                                   <h6 class="mb-1">${item.product_name}</h6>
+                                   ${item.variant_name ? `<small class="text-muted">${item.variant_name}</small>` : ''}
+                               </div>
+                           </div>
+                       </td>
+                       <td class="text-center">${formatCurrency(item.unit_price)}</td>
+                       <td class="text-center">${item.quantity}</td>
+                       <td class="text-end">${formatCurrency(item.total_price)}</td>
+                   </tr>
+               `;
+           });
+
+           modalContent.innerHTML = `
+               <div class="row">
+                   <!-- Order Information -->
+                   <div class="col-md-6 mb-4">
+                       <div class="card h-100">
+                           <div class="card-header">
+                               <h5 class="mb-0">Thông tin đơn hàng</h5>
+                           </div>
+                           <div class="card-body">
+                               <div class="row mb-2">
+                                   <div class="col-5"><strong>Mã đơn hàng:</strong></div>
+                                   <div class="col-7">#${order.order_number}</div>
+                               </div>
+                               <div class="row mb-2">
+                                   <div class="col-5"><strong>Ngày đặt:</strong></div>
+                                   <div class="col-7">${order.created_at}</div>
+                               </div>
+                               <div class="row mb-2">
+                                   <div class="col-5"><strong>Trạng thái:</strong></div>
+                                   <div class="col-7">
+                                       <span class="badge bg-${order.status_badge_class}">${order.status_text}</span>
+                                   </div>
+                               </div>
+                               <div class="row mb-2">
+                                   <div class="col-5"><strong>Thanh toán:</strong></div>
+                                   <div class="col-7">${order.payment_method_text}</div>
+                               </div>
+                               <div class="row mb-2">
+                                   <div class="col-5"><strong>TT thanh toán:</strong></div>
+                                   <div class="col-7">
+                                       <span class="badge ${order.payment_status === 'paid' ? 'bg-success' : 'bg-warning'}">${order.payment_status_text}</span>
+                                   </div>
+                               </div>
+                               ${order.coupon_code ? `
+                               <div class="row mb-2">
+                                   <div class="col-5"><strong>Mã giảm giá:</strong></div>
+                                   <div class="col-7">${order.coupon_code}</div>
+                               </div>
+                               ` : ''}
+                               ${order.notes ? `
+                               <div class="row mb-2">
+                                   <div class="col-5"><strong>Ghi chú:</strong></div>
+                                   <div class="col-7">${order.notes}</div>
+                               </div>
+                               ` : ''}
+                                ${order.status === 'cancelled' && order.cancellation_reason ? `
+                                <div class="row mb-2">
+                                    <div class="col-5"><strong>Lý do hủy:</strong></div>
+                                    <div class="col-7 text-danger">${order.cancellation_reason}</div>
+                                </div>
+                                ` : ''}
+                                ${order.status === 'cancelled' && order.cancelled_at ? `
+                                <div class="row mb-2">
+                                    <div class="col-5"><strong>Thời gian hủy:</strong></div>
+                                    <div class="col-7">${order.cancelled_at}</div>
+                                </div>
+                                ` : ''}
+                           </div>
+                       </div>
+                   </div>
+
+                   <!-- Shipping Information -->
+                   <div class="col-md-6 mb-4">
+                       <div class="card h-100">
+                           <div class="card-header">
+                               <h5 class="mb-0">Thông tin giao hàng</h5>
+                           </div>
+                           <div class="card-body">
+                               <div class="row mb-2">
+                                   <div class="col-4"><strong>Người nhận:</strong></div>
+                                   <div class="col-8">${order.shipping_address.name || 'N/A'}</div>
+                               </div>
+                               <div class="row mb-2">
+                                   <div class="col-4"><strong>Số điện thoại:</strong></div>
+                                   <div class="col-8">${order.shipping_address.phone || 'N/A'}</div>
+                               </div>
+                               <div class="row mb-2">
+                                   <div class="col-4"><strong>Địa chỉ:</strong></div>
+                                   <div class="col-8">${order.shipping_address.address || 'N/A'}</div>
+                               </div>
+                               <div class="row mb-2">
+                                   <div class="col-4"><strong>Phường/Xã:</strong></div>
+                                   <div class="col-8">${order.shipping_address.ward || 'N/A'}</div>
+                               </div>
+                               <div class="row mb-2">
+                                   <div class="col-4"><strong>Tỉnh/TP:</strong></div>
+                                   <div class="col-8">${order.shipping_address.city || 'N/A'}</div>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+
+               <!-- Order Items -->
+               <div class="row">
+                   <div class="col-12">
+                       <div class="card">
+                           <div class="card-header">
+                               <h5 class="mb-0">Sản phẩm đã đặt</h5>
+                           </div>
+                           <div class="card-body">
+                               <div class="table-responsive">
+                                   <table class="table table-striped">
+                                       <thead>
+                                           <tr>
+                                               <th class="text-start">Sản phẩm</th>
+                                               <th class="text-center">Đơn giá</th>
+                                               <th class="text-center">Số lượng</th>
+                                               <th class="text-end">Thành tiền</th>
+                                           </tr>
+                                       </thead>
+                                       <tbody>
+                                           ${orderItemsHtml}
+                                       </tbody>
+                                   </table>
+                               </div>
+                               
+                               <!-- Order Summary -->
+                               <div class="row justify-content-end">
+                                   <div class="col-md-6">
+                                       <table class="table">
+                                           <tbody>
+                                               <tr>
+                                                   <td><strong>Tạm tính:</strong></td>
+                                                   <td class="text-end">${formatCurrency(order.subtotal)}</td>
+                                               </tr>
+                                               ${order.discount_amount > 0 ? `
+                                               <tr>
+                                                   <td><strong>Giảm giá:</strong></td>
+                                                   <td class="text-end text-success">-${formatCurrency(order.discount_amount)}</td>
+                                               </tr>
+                                               ` : ''}
+                                               <tr class="table-active">
+                                                   <td><strong>Tổng cộng:</strong></td>
+                                                   <td class="text-end"><strong class="text-danger">${formatCurrency(order.total_amount)}</strong></td>
+                                               </tr>
+                                           </tbody>
+                                       </table>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           `;
+       }
+
+       function formatCurrency(amount) {
+           return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
+       }
+
+        // Hiển thị modal hủy đơn hàng
+        function showCancelOrderModal() {
+            const orderId = document.getElementById('cancelOrderBtn').getAttribute('data-order-id');
+            const cancelOrderModal = new bootstrap.Modal(document.getElementById('cancelOrderModal'));
             
-            // Mở modal
-            modal.show();
+            // Reset form
+            document.getElementById('cancelOrderForm').reset();
+            document.getElementById('orderIdToCancel').value = orderId;
+            document.getElementById('cancellationReason').classList.remove('is-invalid');
+            document.getElementById('cancellationReasonError').textContent = '';
             
-            // Load dữ liệu qua AJAX
-            fetch(`/api/order/${orderId}/detail`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        renderOrderDetail(data.order);
-                    } else {
-                        modalContent.innerHTML = `
-                            <div class="alert alert-danger text-center">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                ${data.message || 'Không thể tải thông tin đơn hàng'}
-                            </div>
-                        `;
-                    }
+            // Hide order detail modal
+            const orderDetailModal = bootstrap.Modal.getInstance(document.getElementById('orderDetailModal'));
+            orderDetailModal.hide();
+            
+            // Show cancel modal
+            cancelOrderModal.show();
+        }
+
+        // Xử lý hủy đơn hàng
+        document.getElementById('cancelOrderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const orderId = formData.get('order_id');
+            const reason = formData.get('cancellation_reason').trim();
+            
+            // Validate
+            if (!reason) {
+                showFieldError('cancellationReason', 'Vui lòng nhập lý do hủy đơn hàng');
+                return;
+            }
+            
+            if (reason.length > 500) {
+                showFieldError('cancellationReason', 'Lý do hủy không được vượt quá 500 ký tự');
+                return;
+            }
+            
+            // Show loading
+            const confirmBtn = document.getElementById('confirmCancelBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.querySelector('.btn-text').classList.add('d-none');
+            confirmBtn.querySelector('.btn-loading').classList.remove('d-none');
+            
+            // Send request
+            fetch(`/order/${orderId}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    cancellation_reason: reason
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    modalContent.innerHTML = `
-                        <div class="alert alert-danger text-center">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            Có lỗi xảy ra khi tải thông tin đơn hàng
-                        </div>
-                    `;
-                });
-        }
-
-        function renderOrderDetail(order) {
-            const modalContent = document.getElementById('orderDetailContent');
-            
-            // Update modal title
-            document.getElementById('orderDetailModalLabel').textContent = `Chi tiết đơn hàng #${order.order_number}`;
-            
-            // Render order items
-            let orderItemsHtml = '';
-            order.order_items.forEach(item => {
-                orderItemsHtml += `
-                    <tr>
-                        <td class="text-start">
-                            <div class="d-flex align-items-center">
-                                <div class="me-3">
-                                    ${item.product_image ? 
-                                        `<img src="/storage/${item.product_image}" alt="${item.product_name}" width="50" height="50" class="rounded">` :
-                                        `<img src="/assets/images/empty-img.gif" alt="No Image" width="50" height="50" class="rounded">`
-                                    }
-                                </div>
-                                <div>
-                                    <h6 class="mb-1">${item.product_name}</h6>
-                                    ${item.variant_name ? `<small class="text-muted">${item.variant_name}</small>` : ''}
-                                </div>
-                            </div>
-                        </td>
-                        <td class="text-center">${formatCurrency(item.unit_price)}</td>
-                        <td class="text-center">${item.quantity}</td>
-                        <td class="text-end">${formatCurrency(item.total_price)}</td>
-                    </tr>
-                `;
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Hide cancel modal
+                    const cancelModal = bootstrap.Modal.getInstance(document.getElementById('cancelOrderModal'));
+                    cancelModal.hide();
+                    
+                    // Show success message
+                    showSuccessMessage(data.message || 'Hủy đơn hàng thành công!');
+                    
+                    // Reload page to refresh order list
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                    
+                } else {
+                    showFieldError('cancellationReason', data.message || 'Có lỗi xảy ra khi hủy đơn hàng');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showFieldError('cancellationReason', 'Có lỗi xảy ra khi hủy đơn hàng');
+            })
+            .finally(() => {
+                // Hide loading
+                confirmBtn.disabled = false;
+                confirmBtn.querySelector('.btn-text').classList.remove('d-none');
+                confirmBtn.querySelector('.btn-loading').classList.add('d-none');
             });
+        });
 
-            modalContent.innerHTML = `
-                <div class="row">
-                    <!-- Order Information -->
-                    <div class="col-md-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h5 class="mb-0">Thông tin đơn hàng</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row mb-2">
-                                    <div class="col-5"><strong>Mã đơn hàng:</strong></div>
-                                    <div class="col-7">#${order.order_number}</div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-5"><strong>Ngày đặt:</strong></div>
-                                    <div class="col-7">${order.created_at}</div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-5"><strong>Trạng thái:</strong></div>
-                                    <div class="col-7">
-                                        <span class="badge bg-${order.status_badge_class}">${order.status_text}</span>
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-5"><strong>Thanh toán:</strong></div>
-                                    <div class="col-7">${order.payment_method_text}</div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-5"><strong>TT thanh toán:</strong></div>
-                                    <div class="col-7">
-                                        <span class="badge ${order.payment_status === 'paid' ? 'bg-success' : 'bg-warning'}">${order.payment_status_text}</span>
-                                    </div>
-                                </div>
-                                ${order.coupon_code ? `
-                                <div class="row mb-2">
-                                    <div class="col-5"><strong>Mã giảm giá:</strong></div>
-                                    <div class="col-7">${order.coupon_code}</div>
-                                </div>
-                                ` : ''}
-                                ${order.notes ? `
-                                <div class="row mb-2">
-                                    <div class="col-5"><strong>Ghi chú:</strong></div>
-                                    <div class="col-7">${order.notes}</div>
-                                </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Shipping Information -->
-                    <div class="col-md-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h5 class="mb-0">Thông tin giao hàng</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row mb-2">
-                                    <div class="col-4"><strong>Người nhận:</strong></div>
-                                    <div class="col-8">${order.shipping_address.name || 'N/A'}</div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-4"><strong>Số điện thoại:</strong></div>
-                                    <div class="col-8">${order.shipping_address.phone || 'N/A'}</div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-4"><strong>Địa chỉ:</strong></div>
-                                    <div class="col-8">${order.shipping_address.address || 'N/A'}</div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-4"><strong>Phường/Xã:</strong></div>
-                                    <div class="col-8">${order.shipping_address.ward || 'N/A'}</div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-4"><strong>Tỉnh/TP:</strong></div>
-                                    <div class="col-8">${order.shipping_address.city || 'N/A'}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Order Items -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Sản phẩm đã đặt</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-start">Sản phẩm</th>
-                                                <th class="text-center">Đơn giá</th>
-                                                <th class="text-center">Số lượng</th>
-                                                <th class="text-end">Thành tiền</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${orderItemsHtml}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                
-                                <!-- Order Summary -->
-                                <div class="row justify-content-end">
-                                    <div class="col-md-6">
-                                        <table class="table">
-                                            <tbody>
-                                                <tr>
-                                                    <td><strong>Tạm tính:</strong></td>
-                                                    <td class="text-end">${formatCurrency(order.subtotal)}</td>
-                                                </tr>
-                                                ${order.discount_amount > 0 ? `
-                                                <tr>
-                                                    <td><strong>Giảm giá:</strong></td>
-                                                    <td class="text-end text-success">-${formatCurrency(order.discount_amount)}</td>
-                                                </tr>
-                                                ` : ''}
-                                                <tr class="table-active">
-                                                    <td><strong>Tổng cộng:</strong></td>
-                                                    <td class="text-end"><strong class="text-danger">${formatCurrency(order.total_amount)}</strong></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorDiv = document.getElementById(fieldId + 'Error');
+            
+            field.classList.add('is-invalid');
+            errorDiv.textContent = message;
         }
 
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
+        function showSuccessMessage(message) {
+            // Create and show success alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
         }
    </script>
 @endpush

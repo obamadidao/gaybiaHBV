@@ -197,16 +197,15 @@ $customerProfile = $user->customerProfile ?? new CustomerProfile();
 // Lấy danh sách đơn hàng của khách hàng
 $orders = Order::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
 
-        return view('client.profile', compact('user', 'customerProfile', 'orders'));
-        // Tính toán thống kê đơn hàng
-        $orderStats = [
-            'total_orders' => $orders->count(),
-            'processing_orders' => $orders->whereIn('status', ['pending', 'processing'])->count(),
-            'completed_orders' => $orders->where('status', 'delivered')->count(),
-            'total_spent' => $orders->where('status', '!=', 'cancelled')->sum('total_amount')
-        ];
+// Tính toán thống kê đơn hàng
+$orderStats = [
+'total_orders' => $orders->count(),
+'processing_orders' => $orders->whereIn('status', ['pending', 'processing'])->count(),
+'completed_orders' => $orders->where('status', 'delivered')->count(),
+'total_spent' => $orders->where('status', '!=', 'cancelled')->sum('total_amount')
+];
 
-        return view('client.profile', compact('user', 'customerProfile', 'orders', 'orderStats'));
+return view('client.profile', compact('user', 'customerProfile', 'orders', 'orderStats'));
 }
 
 public function updateProfile(Request $request)
@@ -288,9 +287,7 @@ return back()->withErrors([
 
 // Cập nhật email
 if ($request->email !== $user->email) {
-                $user->email = $request->email;
-                $user->save();
-                User::where('id', $user->id)->update(['email' => $request->email]);
+User::where('id', $user->id)->update(['email' => $request->email]);
 }
 
 return redirect()->route('client.profile-user')
@@ -322,122 +319,122 @@ return back()->withErrors([
 }
 
 // Cập nhật email và password
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->save();
-        User::where('id', $user->id)->update([
-            'email' => $request->email,
-            'password' => Hash::make($request->password)
-        ]);
+User::where('id', $user->id)->update([
+'email' => $request->email,
+'password' => Hash::make($request->password)
+]);
 
 return redirect()->route('client.profile-user')
 ->with('success', 'Cập nhật thông tin đăng nhập thành công!');
 }
 
-    /**
-     * Lấy chi tiết đơn hàng qua AJAX
-     */
-    public function getOrderDetail($orderId)
-    {
-        $order = Order::with(['orderItems.product.images', 'user.customerProfile'])
-            ->where('id', $orderId)
-            ->where('user_id', Auth::id())
-            ->first();
+/**
+    * Lấy chi tiết đơn hàng qua AJAX
+    */
+public function getOrderDetail($orderId)
+{
+$order = Order::with(['orderItems.product.images', 'user.customerProfile'])
+->where('id', $orderId)
+->where('user_id', Auth::id())
+->first();
 
-        if (!$order) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không tìm thấy đơn hàng'
-            ], 404);
-        }
+if (!$order) {
+return response()->json([
+'success' => false,
+'message' => 'Không tìm thấy đơn hàng'
+], 404);
+}
 
-        // Parse shipping address if it's JSON
-        $shippingAddress = $order->shipping_address;
-        if (is_string($shippingAddress)) {
-            try {
-                $shippingAddress = json_decode($shippingAddress, true);
-            } catch (\Exception $e) {
-                $shippingAddress = ['name' => $order->shipping_address];
-            }
-        }
+// Parse shipping address if it's JSON
+$shippingAddress = $order->shipping_address;
+if (is_string($shippingAddress)) {
+try {
+$shippingAddress = json_decode($shippingAddress, true);
+} catch (\Exception $e) {
+$shippingAddress = ['name' => $order->shipping_address];
+}
+}
 
-        // Format order data
-        $orderData = [
-            'id' => $order->id,
-            'order_number' => $order->order_number,
-            'status' => $order->status,
-            'status_text' => $this->getStatusText($order->status),
-            'status_badge_class' => $this->getStatusBadgeClass($order->status),
-            'payment_method' => $order->payment_method,
-            'payment_method_text' => $this->getPaymentMethodText($order->payment_method),
-            'payment_status' => $order->payment_status,
-            'payment_status_text' => $order->payment_status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán',
-            'total_amount' => $order->total_amount,
-            'subtotal' => $order->subtotal,
-            'discount_amount' => $order->discount_amount,
-            'coupon_code' => $order->coupon_code,
-            'shipping_address' => $shippingAddress,
-            'notes' => $order->notes,
-            'created_at' => $order->created_at->format('d/m/Y H:i'),
-            'order_items' => $order->orderItems->map(function($item) {
-                return [
-                    'product_name' => $item->product_name,
-                    'variant_name' => $item->variant_name,
-                    'quantity' => $item->quantity,
-                    'unit_price' => $item->unit_price,
-                    'total_price' => $item->total_price,
-                    'product_image' => $item->product && $item->product->images->isNotEmpty() 
-                        ? $item->product->images->first()->image_url 
-                        : null
-                ];
-            })
-        ];
+// Format order data
+$orderData = [
+'id' => $order->id,
+'order_number' => $order->order_number,
+'status' => $order->status,
+'status_text' => $this->getStatusText($order->status),
+'status_badge_class' => $this->getStatusBadgeClass($order->status),
+'payment_method' => $order->payment_method,
+'payment_method_text' => $this->getPaymentMethodText($order->payment_method),
+'payment_status' => $order->payment_status,
+'payment_status_text' => $order->payment_status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán',
+'total_amount' => $order->total_amount,
+'subtotal' => $order->subtotal,
+'discount_amount' => $order->discount_amount,
+'coupon_code' => $order->coupon_code,
+'shipping_address' => $shippingAddress,
+'notes' => $order->notes,
+'created_at' => $order->created_at->format('d/m/Y H:i'),
+            'can_be_cancelled' => $order->canBeCancelled(),
+            'cancellation_reason' => $order->cancellation_reason,
+            'cancelled_at' => $order->cancelled_at ? $order->cancelled_at->format('d/m/Y H:i') : null,
+'order_items' => $order->orderItems->map(function($item) {
+return [
+'product_name' => $item->product_name,
+'variant_name' => $item->variant_name,
+'quantity' => $item->quantity,
+'unit_price' => $item->unit_price,
+'total_price' => $item->total_price,
+'product_image' => $item->product && $item->product->images->isNotEmpty() 
+? $item->product->images->first()->image_url 
+: null
+];
+})
+];
 
-        return response()->json([
-            'success' => true,
-            'order' => $orderData
-        ]);
-    }
+return response()->json([
+'success' => true,
+'order' => $orderData
+]);
+}
 
-    /**
-     * Helper methods for status and payment
-     */
-    private function getStatusText($status)
-    {
-        $statusTexts = [
-            'pending' => 'Chờ xử lý',
-            'processing' => 'Đang xử lý', 
-            'shipped' => 'Đã gửi hàng',
-            'delivered' => 'Đã giao',
-            'cancelled' => 'Đã hủy'
-        ];
+/**
+    * Helper methods for status and payment
+    */
+private function getStatusText($status)
+{
+$statusTexts = [
+'pending' => 'Chờ xử lý',
+'processing' => 'Đang xử lý', 
+'shipped' => 'Đã gửi hàng',
+'delivered' => 'Đã giao',
+'cancelled' => 'Đã hủy'
+];
 
-        return $statusTexts[$status] ?? $status;
-    }
+return $statusTexts[$status] ?? $status;
+}
 
-    private function getStatusBadgeClass($status)
-    {
-        $statusBadgeClasses = [
-            'pending' => 'warning',
-            'processing' => 'info',
-            'shipped' => 'primary', 
-            'delivered' => 'success',
-            'cancelled' => 'danger'
-        ];
+private function getStatusBadgeClass($status)
+{
+$statusBadgeClasses = [
+'pending' => 'warning',
+'processing' => 'info',
+'shipped' => 'primary', 
+'delivered' => 'success',
+'cancelled' => 'danger'
+];
 
-        return $statusBadgeClasses[$status] ?? 'secondary';
-    }
+return $statusBadgeClasses[$status] ?? 'secondary';
+}
 
-    private function getPaymentMethodText($paymentMethod)
-    {
-        $paymentMethodTexts = [
-            'cod' => 'Thanh toán khi nhận hàng (COD)',
-            'bank_transfer' => 'Chuyển khoản ngân hàng',
-            'online' => 'Thanh toán online'
-        ];
+private function getPaymentMethodText($paymentMethod)
+{
+$paymentMethodTexts = [
+'cod' => 'Thanh toán khi nhận hàng (COD)',
+'bank_transfer' => 'Chuyển khoản ngân hàng',
+'online' => 'Thanh toán online'
+];
 
-        return $paymentMethodTexts[$paymentMethod] ?? $paymentMethod;
-    }
+return $paymentMethodTexts[$paymentMethod] ?? $paymentMethod;
+}
 
 
 // Danh sách sản phẩm theo danh mục 

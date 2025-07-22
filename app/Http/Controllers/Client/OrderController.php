@@ -191,40 +191,6 @@ $order = Order::with(['orderItems.product', 'user'])
 return view('client.order-success', compact('order'));
 }
 
-    /**
-     * Hiển thị chi tiết đơn hàng
-     */
-    public function show($orderId)
-    {
-        $order = Order::with(['orderItems.product.images', 'user'])
-            ->where('id', $orderId)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
-
-        return view('client.order-detail', compact('order'));
-    }
-
-    /**
-     * Danh sách đơn hàng của khách hàng
-     */
-    public function index(Request $request)
-    {
-        $query = Order::with(['orderItems.product.images'])
-            ->where('user_id', Auth::id());
-
-        // Filter by status if provided
-        if ($request->has('status') && !empty($request->status)) {
-            $query->where('status', $request->status);
-        }
-
-        $orders = $query->orderBy('created_at', 'desc')->paginate(10);
-
-        // Preserve query parameters in pagination links
-        $orders->appends($request->query());
-
-        return view('client.orders', compact('orders'));
-    }
-
 /**
     * Hủy đơn hàng
     */
@@ -251,12 +217,17 @@ return response()->json([
 }
 
 // Cập nhật trạng thái đơn hàng
-$order->update([
-'status' => 'cancelled',
-'cancellation_reason' => $request->cancellation_reason,
-'cancelled_by' => Auth::id(),
-'cancelled_at' => now()
-]);
+            $order->update([
+                'status' => 'cancelled',
+                'cancellation_reason' => $request->cancellation_reason,
+                'cancelled_by' => Auth::id(),
+                'cancelled_at' => now()
+            ]);
+            $order->status = 'cancelled';
+            $order->cancellation_reason = $request->cancellation_reason;
+            $order->cancelled_by = Auth::id();
+            $order->cancelled_at = now();
+            $order->save();
 
 // Hoàn lại stock
 foreach ($order->orderItems as $orderItem) {
