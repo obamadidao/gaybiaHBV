@@ -373,9 +373,9 @@ $orderData = [
 'shipping_address' => $shippingAddress,
 'notes' => $order->notes,
 'created_at' => $order->created_at->format('d/m/Y H:i'),
-            'can_be_cancelled' => $order->canBeCancelled(),
-            'cancellation_reason' => $order->cancellation_reason,
-            'cancelled_at' => $order->cancelled_at ? $order->cancelled_at->format('d/m/Y H:i') : null,
+'can_be_cancelled' => $order->canBeCancelled(),
+'cancellation_reason' => $order->cancellation_reason,
+'cancelled_at' => $order->cancelled_at ? $order->cancelled_at->format('d/m/Y H:i') : null,
 'order_items' => $order->orderItems->map(function($item) {
 return [
 'product_name' => $item->product_name,
@@ -383,8 +383,10 @@ return [
 'quantity' => $item->quantity,
 'unit_price' => $item->unit_price,
 'total_price' => $item->total_price,
-'product_image' => $item->product && $item->product->images->isNotEmpty() 
-? $item->product->images->first()->image_url 
+                    'product_image' => $item->product && $item->product->images->isNotEmpty() 
+                        ? $item->product->images->first()->image_url 
+                    'product_image' => $item->product && $item->product->primaryImage
+                        ? $item->product->primaryImage->url 
 : null
 ];
 })
