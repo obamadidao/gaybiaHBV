@@ -8,12 +8,15 @@ use App\Models\Category;
 use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\CartItem;
 use App\Models\CustomerProfile;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ClientController extends Controller
@@ -124,16 +127,29 @@ $user = Auth::user();
 if ($user->role_id == 2) {
 $request->session()->regenerate();
 
-return redirect()->intended(route('client.index'))
-->with('success', 'Đăng nhập thành công! Chào mừng ' . $user->name);
-} else {
-// Đăng xuất nếu không phải customer
-Auth::logout();
-$request->session()->invalidate();
-$request->session()->regenerateToken();
+    // Đồng bộ giỏ hàng từ localStorage (nếu có dữ liệu được gửi từ frontend)
+    $successMessage = 'Đăng nhập thành công! Chào mừng ' . $user->name;
+    $mergedCount = 0;
 
-return back()->with('error', 'Tài khoản này không có quyền truy cập vào trang khách hàng.');
-}
+    if ($request->has('cart_data')) {
+        $cartDataInput = $request->input('cart_data');
+        $cartData = is_string($cartDataInput) ? json_decode($cartDataInput, true) : $cartDataInput;
+
+        $mergedCount = $this->mergeLocalStorageCartToUser($user->id, $cartData);
+        if ($mergedCount > 0) {
+            $successMessage .= " Đã đồng bộ {$mergedCount} sản phẩm từ giỏ hàng trước đó.";
+        }
+    }
+
+    return redirect()->intended(route('client.index'))
+        ->with('success', $successMessage);
+} else {
+    // Đăng xuất nếu không phải customer
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return back()->with('error', 'Tài khoản này không có quyền truy cập vào trang khách hàng.');
 }
 
 return back()->withErrors([
@@ -384,10 +400,11 @@ return [
 'unit_price' => $item->unit_price,
 'total_price' => $item->total_price,
                     'product_image' => $item->product && $item->product->images->isNotEmpty() 
-                        ? $item->product->images->first()->image_url 
-                    'product_image' => $item->product && $item->product->primaryImage
+                        ? $item->product->images->first()->image_url
+                        : null,
+                    'product_primary_image' => $item->product && $item->product->primaryImage
                         ? $item->product->primaryImage->url 
-: null
+                        : null
 ];
 })
 ];
@@ -611,4 +628,189 @@ public function destroy(string $id)
 {
 //
 }
+/**
+     * Đồng bộ giỏ hàng từ localStorage sang user account
+     *
+     * @param int $userId
+     * @param array $cartData
+     * @return int Số lượng sản phẩm đã được đồng bộ
+     */
+    private function mergeLocalStorageCartToUser($userId, $cartData)
+    {
+        try {
+            DB::beginTransaction();
+
+            if (empty($cartData) || !is_array($cartData)) {
+                DB::commit();
+                return 0;
+            }
+
+
+
+            $mergedCount = 0;
+
+            // Lấy giỏ hàng hiện tại của user
+            $userCartItems = CartItem::where('user_id', $userId)->get();
+
+            foreach ($cartData as $cartItemData) {
+                // Validate dữ liệu
+                if (!isset($cartItemData['product_id']) || !isset($cartItemData['quantity'])) {
+                    continue;
+                }
+
+                $productId = $cartItemData['product_id'];
+                $quantity = (int) $cartItemData['quantity'];
+                $unitPrice = $cartItemData['unit_price'] ?? 0;
+                $selectedVariants = $cartItemData['selected_variants'] ?? [];
+
+                // Kiểm tra xem sản phẩm có cùng variant đã có trong giỏ hàng user chưa
+                $existingUserItem = null;
+                foreach ($userCartItems as $userItem) {
+                    if ($userItem->product_id == $productId) {
+                        // So sánh variants
+                        $userVariants = $userItem->selected_variants ?: [];
+                        
+                        if ($selectedVariants == $userVariants) {
+                            $existingUserItem = $userItem;
+                            break;
+                        }
+                    }
+                }
+
+                if ($existingUserItem) {
+                    // Nếu đã có, cộng số lượng
+                    $newQuantity = $existingUserItem->quantity + $quantity;
+                    $existingUserItem->update([
+                        'quantity' => $newQuantity,
+                        'total_price' => $existingUserItem->unit_price * $newQuantity
+                    ]);
+                } else {
+                    // Nếu chưa có, tạo cart item mới cho user
+                    CartItem::create([
+                        'user_id' => $userId,
+                        'session_id' => null,
+                        'product_id' => $productId,
+                        'selected_variants' => $selectedVariants,
+                        'quantity' => $quantity,
+                        'unit_price' => $unitPrice,
+                        'total_price' => $unitPrice * $quantity
+                    ]);
+                }
+                
+                $mergedCount++;
+            }
+
+            DB::commit();
+            
+            if ($mergedCount > 0) {
+                Log::info("Đồng bộ giỏ hàng từ localStorage thành công: {$mergedCount} sản phẩm cho user {$userId}");
+            }
+            
+            return $mergedCount;
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Log error nhưng không throw exception để không ảnh hưởng đến quá trình đăng nhập
+            Log::error('Lỗi khi đồng bộ giỏ hàng từ localStorage: ' . $e->getMessage(), [
+                'user_id' => $userId,
+                'cart_data_count' => count($cartData ?? [])
+            ]);
+            return 0;
+        }
+    }
+
+    /**
+     * Debug method để kiểm tra session cart
+     */
+    public function debugSessionCart(Request $request)
+    {
+        $sessionId = $request->session()->getId();
+        $userId = Auth::id();
+        $checkSessionId = $request->get('old_session_id', $sessionId);
+        
+        // Kiểm tra session cart
+        $sessionCartItems = CartItem::where('session_id', $checkSessionId)
+            ->whereNull('user_id')
+            ->get();
+            
+        // Kiểm tra user cart nếu đã đăng nhập
+        $userCartItems = [];
+        if ($userId) {
+            $userCartItems = CartItem::where('user_id', $userId)->get();
+        }
+        
+        // Kiểm tra tất cả session cart items (để debug)
+        $allSessionCartItems = CartItem::whereNull('user_id')
+            ->whereNotNull('session_id')
+            ->get();
+        
+        return response()->json([
+            'current_session_id' => $sessionId,
+            'checking_session_id' => $checkSessionId,
+            'user_id' => $userId,
+            'session_cart_count' => $sessionCartItems->count(),
+            'session_cart_items' => $sessionCartItems->toArray(),
+            'user_cart_count' => count($userCartItems),
+            'user_cart_items' => $userCartItems,
+            'all_session_carts' => $allSessionCartItems->toArray()
+        ]);
+    }
+
+    /**
+     * Test method để thêm sản phẩm vào session cart
+     */
+    public function testAddToSessionCart(Request $request)
+    {
+        $sessionId = $request->session()->getId();
+        
+        // Thêm một sản phẩm test vào session cart
+        $cartItem = CartItem::create([
+            'user_id' => null,
+            'session_id' => $sessionId,
+            'product_id' => 1, // Giả sử có product với ID 1
+            'selected_variants' => [],
+            'quantity' => 1,
+            'unit_price' => 100000,
+            'total_price' => 100000
+        ]);
+        
+        return response()->json([
+            'message' => 'Đã thêm sản phẩm test vào session cart',
+            'session_id' => $sessionId,
+            'cart_item_id' => $cartItem->id,
+            'debug_url' => route('client.cart.debug')
+        ]);
+    }
+
+    /**
+     * API để lấy session cart hiện tại (để lưu vào localStorage)
+     */
+    public function getCurrentSessionCart(Request $request)
+    {
+        $sessionId = $request->session()->getId();
+        
+        // Lấy giỏ hàng từ session hiện tại
+        $sessionCartItems = CartItem::with('product')
+            ->where('session_id', $sessionId)
+            ->whereNull('user_id')
+            ->get();
+
+        // Chuyển đổi thành format đơn giản cho localStorage
+        $cartData = $sessionCartItems->map(function ($item) {
+            return [
+                'product_id' => $item->product_id,
+                'quantity' => $item->quantity,
+                'unit_price' => $item->unit_price,
+                'total_price' => $item->total_price,
+                'selected_variants' => $item->selected_variants,
+                'product_name' => $item->product->name ?? 'Unknown Product'
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'cart_data' => $cartData,
+            'count' => $cartData->count()
+        ]);
+    }
 }

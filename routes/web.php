@@ -142,11 +142,15 @@ Route::delete('/coupon/remove', [CartController::class, 'removeCoupon'])->name('
 Route::put('/{cartItem}/quantity', [CartController::class, 'updateQuantity'])->name('update-quantity');
 Route::delete('/{cartItem}', [CartController::class, 'remove'])->name('remove');
 Route::delete('/', [CartController::class, 'clear'])->name('clear');
+  Route::get('/current-session-cart', [ClientController::class, 'getCurrentSessionCart'])->name('current-session-cart');
+            
+            // Debug routes
+            Route::get('/debug', [ClientController::class, 'debugSessionCart'])->name('debug');
+            Route::post('/test-add-session', [ClientController::class, 'testAddToSessionCart'])->name('test-add-session');
 });
 
 // Order routes - yêu cầu đăng nhập
         Route::middleware('auth')->prefix('order')->name('order.')->group(function () {
-        Route::prefix('order')->name('order.')->group(function () {
 Route::get('/checkout', [ClientOrderController::class, 'checkout'])->name('checkout');
 Route::post('/store', [ClientOrderController::class, 'store'])->name('store');
 Route::get('/success/{order}', [ClientOrderController::class, 'success'])->name('success');
@@ -157,4 +161,3 @@ Route::post('/{order}/cancel', [ClientOrderController::class, 'cancel'])->name('
 Route::get('/product/{slug}', [ClientController::class, 'product'])->name('product');
 Route::get('/{slug}', [ClientController::class, 'category'])->name('category');
 });
-

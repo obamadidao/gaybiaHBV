@@ -100,6 +100,8 @@
 
                 <!-- Main JS -->
                 <script src="{{ asset('assets/js/main.js') }}"></script>
+                 <!-- Cart Sync JS -->
+                <script src="{{ asset('assets/js/cart-sync.js') }}"></script>
 
                 <!-- Photoswipe Gallery JS -->
                 <script src="{{ asset('assets/js/vendor/photoswipe.min.js') }}"></script>
