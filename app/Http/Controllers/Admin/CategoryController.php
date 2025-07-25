@@ -55,7 +55,8 @@ class CategoryController extends Controller
             }
         }
 
-        $categories = $query->orderBy('sort_order')->orderBy('name')->paginate(20);
+       // Lấy danh mục theo hierarchy (cha -> con)
+        $categories = $this->getCategoriesInHierarchy($query);
 
         // Lấy danh sách danh mục cha để filter
         $parentCategories = Category::whereNull('parent_id')->active()->ordered()->get();

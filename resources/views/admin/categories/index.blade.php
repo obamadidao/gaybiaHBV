@@ -132,12 +132,26 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     @if($category->level > 0)
-                                    <span style="margin-left: {{ $category->level * 20 }}px" class="text-muted me-2">
-                                        {!! str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $category->level) !!}└─
+                                    <span style="margin-left: {{ $category->level * 25 }}px" class="text-muted me-2 hierarchy-indicator">
+                                        @if($category->level == 1)
+                                            <i class="fas fa-level-down-alt text-primary me-1"></i>
+                                        @elseif($category->level == 2)
+                                            <i class="fas fa-chevron-right text-secondary me-1"></i>
+                                        @endif
+                                        <span class="hierarchy-line">│── </span>
                                     </span>
                                     @endif
                                     <div>
-                                        <h6 class="mb-1">{{ $category->name }}</h6>
+                                          <h6 class="mb-1 {{ $category->level == 0 ? 'text-primary fw-bold' : ($category->level == 1 ? 'text-dark' : 'text-muted') }}">
+                                            {{ $category->name }}
+                                            @if($category->level == 0)
+                                                <i class="fas fa-folder text-primary ms-1"></i>
+                                            @elseif($category->level == 1)
+                                                <i class="fas fa-folder-open text-info ms-1"></i>
+                                            @else
+                                                <i class="fas fa-tag text-secondary ms-1"></i>
+                                            @endif
+                                        </h6>
                                         @if($category->description)
                                         <small class="text-muted">{{ Str::limit($category->description, 60) }}</small>
                                         @endif
@@ -304,4 +318,32 @@
         }
     }
 </script>
+<style>
+    .hierarchy-indicator {
+        font-family: 'Courier New', monospace;
+        font-weight: 500;
+    }
+    
+    .hierarchy-line {
+        color: #6c757d;
+        font-weight: normal;
+    }
+    
+    /* Làm nổi bật danh mục cha */
+    tr:has(.text-primary.fw-bold) {
+        background-color: #f8f9ff !important;
+        border-left: 3px solid #007bff;
+    }
+    
+    /* Subtle background cho danh mục con cấp 1 */
+    tr:has(.hierarchy-indicator .fa-level-down-alt) {
+        background-color: #fafafa;
+        border-left: 2px solid #17a2b8;
+    }
+    
+    /* Subtle background cho danh mục con cấp 2 */
+    tr:has(.hierarchy-indicator .fa-chevron-right) {
+        background-color: #f8f8f8;
+        border-left: 1px solid #6c757d;
+    }
 @endpush
