@@ -164,7 +164,6 @@
                                     data-variant-id="{{ $variant->id }}"
                                     data-variant-value="{{ $variant->variant_value }}"
                                     data-price-adjustment="{{ $variant->price_adjustment }}"
-                                    data-stock="{{ $variant->stock_quantity }}">
                                     data-stock="{{ $variant->stock_quantity }}"
                                     onclick="updateVariantInfo('{{ $variantType }}', '{{ $variant->variant_value }}', {{ $variant->price_adjustment }})">
                                     <span class="swatchLbl"
@@ -182,7 +181,6 @@
                                     data-variant-id="{{ $variant->id }}"
                                     data-variant-value="{{ $variant->variant_value }}"
                                     data-price-adjustment="{{ $variant->price_adjustment }}"
-                                    data-stock="{{ $variant->stock_quantity }}">
                                     data-stock="{{ $variant->stock_quantity }}"
                                     onclick="updateVariantInfo('{{ $variantType }}', '{{ $variant->variant_value }}', {{ $variant->price_adjustment }})">
                                     <span class="swatchLbl"
@@ -257,6 +255,7 @@
                             }
                         }
                     </script>
+
                 </form>
                 <!-- End Product Form -->
 
@@ -640,3 +639,20 @@
 </section>
 @endif
 <!--End Related Products-->
+<script>
+    function updateVariantInfo(variantType, variantValue, priceAdjustment) {
+        // Update selected variant text
+        document.getElementById('selected-' + variantType).textContent = variantValue;
+
+        // Update price adjustment text
+        let priceAdjustmentElement = document.getElementById('price-adjustment-' + variantType);
+        if (priceAdjustment > 0) {
+            priceAdjustmentElement.textContent = '(+' + new Intl.NumberFormat('vi-VN').format(priceAdjustment) + 'đ)';
+        } else if (priceAdjustment < 0) {
+            priceAdjustmentElement.textContent = '(-' + new Intl.NumberFormat('vi-VN').format(Math.abs(priceAdjustment)) + 'đ)';
+        } else {
+            priceAdjustmentElement.textContent = '';
+        }
+    }
+</script>
+@endsection
