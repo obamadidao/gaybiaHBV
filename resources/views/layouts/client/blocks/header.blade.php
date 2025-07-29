@@ -63,7 +63,6 @@
 <li><a href="{{ route('client.register-user') }}"><i class="icon anm anm-user-al"></i>Đăng ký</a></li>
 @else
 <li><a href="{{ route('client.profile-user') }}"><i class="icon anm anm-user-al"></i>Tài khoản</a></li>
-                                    <li><a href="{{ route('client.order.index') }}"><i class="icon anm anm-bag-l"></i>Đơn hàng</a></li>
 <li><a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="icon anm anm-sign-out-al"></i>Đăng xuất</a></li>
 <form id="logout-form" action="{{ route('client.logout-user') }}" method="POST" class="d-none">
 @csrf
@@ -76,10 +75,12 @@
 <!--End Account-->
 <!--Minicart-->
 <div class="header-cart iconset" title="Cart">
-<a href="{{ route('client.cart.index') }}" class="header-cart btn-minicart clr-none">
-<i class="hdr-icon icon anm anm-cart-l"></i>
-<span class="cart-count" data-cart-count="0" style="display: none;">0</span>
-</a>
+                    <a href="{{ route('client.cart.index') }}" class="header-cart btn-minicart clr-none"><i class="hdr-icon icon anm anm-cart-l"></i><span class="cart-count">2</span></a>
+                    {{-- <a href="#;" class="header-cart btn-minicart clr-none" data-bs-toggle="offcanvas" data-bs-target="#minicart-drawer"><i class="hdr-icon icon anm anm-cart-l"></i><span class="cart-count">2</span></a> --}}
+                    <a href="{{ route('client.cart.index') }}" class="header-cart btn-minicart clr-none">
+                        <i class="hdr-icon icon anm anm-cart-l"></i>
+                        <span class="cart-count" data-cart-count="0" style="display: none;">0</span>
+                    </a>
 </div>
 <!--End Minicart-->
 <!--Mobile Toggle-->
