@@ -63,7 +63,8 @@ width="120" height="170" />
 @if($item->selected_variants)
 <div class="variant-info">
 @foreach($item->selected_variants as $type => $value)
-<span class="variant-item">{{ $type }}: {{ $value }}</span>
+                                                <span class="variant-item">{{ $type }}: {{ $value }}</span>
+                                                <span class="variant-item">{{ $value }}</span>
 @if(!$loop->last) | @endif
 @endforeach
 </div>
@@ -95,7 +96,7 @@ class="cart-qty-input qty" data-item-id="{{ $item->id }}" readonly />
 </div>
 </div>
 </td>
-<td class="cart-price cart-flex-item text-center">
+<td class="cart-price cart-flex-item text-end">
 <span class="money item-total-{{ $item->id }}">{{ number_format($item->total_price, 0, ',', '.') }}đ</span>
 </td>
 </tr>
@@ -105,12 +106,14 @@ class="cart-qty-input qty" data-item-id="{{ $item->id }}" readonly />
 <tr>
 <td colspan="3" class="text-left">
 <a href="{{ route('client.index') }}" class="btn btn-outline-secondary cart-continue">
-<i class="icon anm anm-angle-left-r"></i> Tiếp tục mua sắm
+                                    <i class="icon anm anm-angle-left-r"></i> Tiếp tục mua sắm
+                                    Tiếp tục mua sắm
 </a>
 </td>
 <td colspan="3" class="text-right">
 <button type="button" class="btn btn-outline-danger" id="clear-cart">
-<i class="icon anm anm-times-r"></i> Xóa toàn bộ giỏ hàng
+                                    <i class="icon anm anm-times-r"></i> Xóa toàn bộ giỏ hàng
+                                    Xóa toàn bộ giỏ hàng
 </button>
 </td>
 </tr>
@@ -163,16 +166,17 @@ class="cart-qty-input qty" data-item-id="{{ $item->id }}" readonly />
 </span>
 </div>
 <hr />
-<p class="cart-tearms">
-<input type="checkbox" class="form-check-input" id="cart-tearms">
-<label class="form-check-label" for="cart-tearms">
-Tôi đồng ý với <a href="#" class="text-link">điều khoản và điều kiện</a>
-</label>
-</p>
-<input type="submit" name="add" class="btn btn-lg my-4 checkout-btn" value="Thanh toán" />
-<div class="paymnet-img text-center">
-<img src="{{ asset('assets/images/payment-img.jpg') }}" alt="Payment" width="299" height="28" />
-</div>
+                    <p class="cart-tearms">
+                        <input type="checkbox" class="form-check-input" id="cart-tearms">
+                        <label class="form-check-label" for="cart-tearms">
+                            Tôi đồng ý với <a href="#" class="text-link">điều khoản và điều kiện</a>
+                        </label>
+                    </p>
+                    <input type="submit" name="add" class="btn btn-lg my-4 checkout-btn" value="Thanh toán" />
+                    <div class="paymnet-img text-center">
+                        <img src="{{ asset('assets/images/payment-img.jpg') }}" alt="Payment" width="299" height="28" />
+                    </div>
+                    <input type="submit" name="add" style="width: 100%;" class="btn btn-lg my-4 checkout-btn" value="Thanh toán" />
 </div>
 </div>
 </div>
@@ -204,9 +208,7 @@ Tôi đồng ý với <a href="#" class="text-link">điều khoản và điều 
                    let currentQty = parseInt(input.value);
                    
                    if (this.classList.contains('plus')) {
-                       currentQty++;
                    } else if (this.classList.contains('minus') && currentQty > 1) {
-                       currentQty--;
                    }
                    
                    updateQuantity(itemId, currentQty);
@@ -250,11 +252,11 @@ Tôi đồng ý với <a href="#" class="text-link">điều khoản và điều 
                    // Update cart totals
                    updateCartTotals(data.cart_total);
                    
-                    // Update global cart count
-                    if (typeof window.updateCartCount === 'function') {
-                        window.updateCartCount(data.cart_count);
-                    }
-                    
+                   // Update global cart count
+                   if (typeof window.updateCartCount === 'function') {
+                       window.updateCartCount(data.cart_count);
+                   }
+                   
                    showNotification(data.message, 'success');
                } else {
                    showNotification(data.message, 'error');
@@ -286,11 +288,11 @@ Tôi đồng ý với <a href="#" class="text-link">điều khoản và điều 
                    // Update cart totals
                    updateCartTotals(data.cart_total);
                    
-                    // Update global cart count
-                    if (typeof window.updateCartCount === 'function') {
-                        window.updateCartCount(data.cart_count);
-                    }
-                    
+                   // Update global cart count
+                   if (typeof window.updateCartCount === 'function') {
+                       window.updateCartCount(data.cart_count);
+                   }
+                   
                    // Check if cart is empty
                    if (data.cart_count === 0) {
                        location.reload(); // Reload to show empty cart
@@ -317,10 +319,10 @@ Tôi đồng ý với <a href="#" class="text-link">điều khoản và điều 
            .then(response => response.json())
            .then(data => {
                if (data.success) {
-                    // Update global cart count to 0
-                    if (typeof window.updateCartCount === 'function') {
-                        window.updateCartCount(0);
-                    }
+                   // Update global cart count to 0
+                   if (typeof window.updateCartCount === 'function') {
+                       window.updateCartCount(0);
+                   }
                    location.reload(); // Reload to show empty cart
                } else {
                    showNotification(data.message, 'error');
