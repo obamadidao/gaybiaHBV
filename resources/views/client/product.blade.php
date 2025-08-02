@@ -764,7 +764,7 @@ alt="{{ $relatedProduct->name }}" title="{{ $relatedProduct->name }}" width="625
            `;
            
            notification.innerHTML = `
-               <strong>${type === 'success' ? 'Thành công!' : 'Lỗi!'}</strong> ${message}
+                 <strong>${type === 'success' ? 'Thêm sản phẩm vào giỏ hàng thành công!' : 'Lỗi! Vượt quá số sản phẩm tồn kho'}</strong> ${message}
                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
            `;
 
