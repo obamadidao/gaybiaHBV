@@ -135,4 +135,3 @@ Route::prefix('')->name('client.')->group(function () {
         Route::get('/product/{slug}', [ClientController::class, 'product'])->name('product');
         Route::get('/{slug}', [ClientController::class, 'category'])->name('category');
 });
-git
