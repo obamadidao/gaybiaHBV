@@ -13,7 +13,6 @@ use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Client\ClientController;
 use App\Http\Controllers\Client\CartController;
-use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -125,8 +124,6 @@ Route::middleware('auth')->group(function () {
 Route::post('/logout-user', [ClientController::class, 'logout'])->name('logout-user');
 Route::get('/profile-user', [ClientController::class, 'profile'])->name('profile-user');
 Route::put('/profile-user', [ClientController::class, 'updateProfile'])->name('update-profile-user');
-Route::put('/profile-user/password', [ClientController::class, 'updateProfilePassword'])->name('update-profile-password');
-Route::get('/api/order/{orderId}/detail', [ClientController::class, 'getOrderDetail'])->name('order-detail-api');
 });
 
 Route::get('/contact', [ClientController::class, 'contact'])->name('contact');
@@ -136,35 +133,13 @@ Route::prefix('cart')->name('cart.')->group(function () {
 Route::get('/', [CartController::class, 'index'])->name('index');
 Route::post('/add', [CartController::class, 'addToCart'])->name('add');
 Route::get('/count', [CartController::class, 'count'])->name('count');
-Route::get('/summary', [CartController::class, 'summary'])->name('summary');
-Route::post('/coupon/apply', [CartController::class, 'applyCoupon'])->name('coupon.apply');
-Route::delete('/coupon/remove', [CartController::class, 'removeCoupon'])->name('coupon.remove');
+            Route::get('/summary', [CartController::class, 'summary'])->name('summary');
+            Route::post('/coupon/apply', [CartController::class, 'applyCoupon'])->name('coupon.apply');
+            Route::delete('/coupon/remove', [CartController::class, 'removeCoupon'])->name('coupon.remove');
 Route::put('/{cartItem}/quantity', [CartController::class, 'updateQuantity'])->name('update-quantity');
 Route::delete('/{cartItem}', [CartController::class, 'remove'])->name('remove');
 Route::delete('/', [CartController::class, 'clear'])->name('clear');
-
-// API routes
-Route::get('/current-session-cart', [ClientController::class, 'getCurrentSessionCart'])->name('current-session-cart');
-
-// Debug routes
-Route::get('/debug', [ClientController::class, 'debugSessionCart'])->name('debug');
-Route::post('/test-add-session', [ClientController::class, 'testAddToSessionCart'])->name('test-add-session');
 });
-
-// Order routes - yêu cầu đăng nhập
-Route::prefix('order')->name('order.')->group(function () {
-Route::get('/checkout', [ClientOrderController::class, 'checkout'])->name('checkout');
-Route::post('/store', [ClientOrderController::class, 'store'])->name('store');
-Route::get('/success/{order}', [ClientOrderController::class, 'success'])->name('success');
-Route::post('/{order}/cancel', [ClientOrderController::class, 'cancel'])->name('cancel');
-});
-
-        // ZaloPay routes (trong group client)
-        Route::prefix('checkout')->name('checkout.')->group(function () {
-            Route::post('/zalopay-payment', [ClientOrderController::class, 'processZaloPayPayment'])->name('zalopay.payment');
-            Route::get('/zalopay-return', [ClientOrderController::class, 'zaloPayReturn'])->name('zalopay.return');
-            Route::post('/zalopay-callback', [ClientOrderController::class, 'zaloPayCallback'])->name('zalopay.callback');
-        });
 
 // Các route có tham số đặt CUỐI CÙNG để tránh conflict
 Route::get('/product/{slug}', [ClientController::class, 'product'])->name('product');
