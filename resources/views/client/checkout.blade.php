@@ -69,71 +69,54 @@ placeholder="Số nhà, tên đường" required>
 </div>
 
 <div class="row">
-                            <div class="col-md-4">
-                            <div class="col-md-6">
+<div class="col-md-6">
 <div class="form-group">
 <label for="shipping_city">Tỉnh/Thành phố <span class="required">*</span></label>
 <select name="shipping_city" id="shipping_city" class="form-control" required>
 <option value="">Chọn tỉnh/thành phố</option>
-                                        <option value="Hà Nội" {{ old('shipping_city', $customerProfile->city) == 'Hà Nội' ? 'selected' : '' }}>Hà Nội</option>
-                                        <option value="TP. Hồ Chí Minh" {{ old('shipping_city', $customerProfile->city) == 'TP. Hồ Chí Minh' ? 'selected' : '' }}>TP. Hồ Chí Minh</option>
-                                        <option value="Đà Nẵng" {{ old('shipping_city', $customerProfile->city) == 'Đà Nẵng' ? 'selected' : '' }}>Đà Nẵng</option>
-                                        <option value="Cần Thơ" {{ old('shipping_city', $customerProfile->city) == 'Cần Thơ' ? 'selected' : '' }}>Cần Thơ</option>
-                                        <option value="Hải Phòng" {{ old('shipping_city', $customerProfile->city) == 'Hải Phòng' ? 'selected' : '' }}>Hải Phòng</option>
-                                        <option value="Tuyên Quang" {{ old('shipping_city', $customerProfile->city) == 'Tuyên Quang' ? 'selected' : '' }}>Tuyên Quang</option>
-                                        <option value="Lào Cai" {{ old('shipping_city', $customerProfile->city) == 'Lào Cai' ? 'selected' : '' }}>Lào Cai</option>
-                                        <option value="Thái Nguyên" {{ old('shipping_city', $customerProfile->city) == 'Thái Nguyên' ? 'selected' : '' }}>Thái Nguyên</option>
-                                        <option value="Phú Thọ" {{ old('shipping_city', $customerProfile->city) == 'Phú Thọ' ? 'selected' : '' }}>Phú Thọ</option>
-                                        <option value="Bắc Ninh" {{ old('shipping_city', $customerProfile->city) == 'Bắc Ninh' ? 'selected' : '' }}>Bắc Ninh</option>
-                                        <option value="Hưng Yên" {{ old('shipping_city', $customerProfile->city) == 'Hưng Yên' ? 'selected' : '' }}>Hưng Yên</option>
-                                        <option value="Thành phố Hải Phòng" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Hải Phòng' ? 'selected' : '' }}>Thành phố Hải Phòng</option>
-                                        <option value="Ninh Bình" {{ old('shipping_city', $customerProfile->city) == 'Ninh Bình' ? 'selected' : '' }}>Ninh Bình</option>
-                                        <option value="Quảng Trị" {{ old('shipping_city', $customerProfile->city) == 'Quảng Trị' ? 'selected' : '' }}>Quảng Trị</option>
-                                        <option value="Thành phố Đà Nẵng" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Đà Nẵng' ? 'selected' : '' }}>Thành phố Đà Nẵng</option>
-                                        <option value="Quảng Ngãi" {{ old('shipping_city', $customerProfile->city) == 'Quảng Ngãi' ? 'selected' : '' }}>Quảng Ngãi</option>
-                                        <option value="Gia Lai" {{ old('shipping_city', $customerProfile->city) == 'Gia Lai' ? 'selected' : '' }}>Gia Lai</option>
-                                        <option value="Khánh Hoà" {{ old('shipping_city', $customerProfile->city) == 'Khánh Hoà' ? 'selected' : '' }}>Khánh Hoà</option>
-                                        <option value="Lâm Đồng" {{ old('shipping_city', $customerProfile->city) == 'Lâm Đồng' ? 'selected' : '' }}>Lâm Đồng</option>
-                                        <option value="Đắk Lắk" {{ old('shipping_city', $customerProfile->city) == 'Đắk Lắk' ? 'selected' : '' }}>Đắk Lắk</option>
-                                        <option value="Thành phố Hồ Chí Minh" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Hồ Chí Minh' ? 'selected' : '' }}>Thành phố Hồ Chí Minh</option>
-                                        <option value="Đồng Nai" {{ old('shipping_city', $customerProfile->city) == 'Đồng Nai' ? 'selected' : '' }}>Đồng Nai</option>
-                                        <option value="Tây Ninh" {{ old('shipping_city', $customerProfile->city) == 'Tây Ninh' ? 'selected' : '' }}>Tây Ninh</option>
-                                        <option value="Thành phố Cần Thơ" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Cần Thơ' ? 'selected' : '' }}>Thành phố Cần Thơ</option>
-                                        <option value="Vĩnh Long" {{ old('shipping_city', $customerProfile->city) == 'Vĩnh Long' ? 'selected' : '' }}>Vĩnh Long</option>
-                                        <option value="Đồng Tháp" {{ old('shipping_city', $customerProfile->city) == 'Đồng Tháp' ? 'selected' : '' }}>Đồng Tháp</option>
-                                        <option value="Cà Mau" {{ old('shipping_city', $customerProfile->city) == 'Cà Mau' ? 'selected' : '' }}>Cà Mau</option>
-                                        <option value="An Giang" {{ old('shipping_city', $customerProfile->city) == 'An Giang' ? 'selected' : '' }}>An Giang</option>
-                                        <option value="Thành phố Hà Nội" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Hà Nội' ? 'selected' : '' }}>Thành phố Hà Nội</option>
-                                        <option value="Thành phố Huế" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Huế' ? 'selected' : '' }}>Thành phố Huế</option>
-                                        <option value="Lai Châu" {{ old('shipping_city', $customerProfile->city) == 'Lai Châu' ? 'selected' : '' }}>Lai Châu</option>
-                                        <option value="Điện Biên" {{ old('shipping_city', $customerProfile->city) == 'Điện Biên' ? 'selected' : '' }}>Điện Biên</option>
-                                        <option value="Sơn La" {{ old('shipping_city', $customerProfile->city) == 'Sơn La' ? 'selected' : '' }}>Sơn La</option>
-                                        <option value="Lạng Sơn" {{ old('shipping_city', $customerProfile->city) == 'Lạng Sơn' ? 'selected' : '' }}>Lạng Sơn</option>
-                                        <option value="Quảng Ninh" {{ old('shipping_city', $customerProfile->city) == 'Quảng Ninh' ? 'selected' : '' }}>Quảng Ninh</option>
-                                        <option value="Thanh Hoá" {{ old('shipping_city', $customerProfile->city) == 'Thanh Hoá' ? 'selected' : '' }}>Thanh Hoá</option>
-                                        <option value="Nghệ An" {{ old('shipping_city', $customerProfile->city) == 'Nghệ An' ? 'selected' : '' }}>Nghệ An</option>
-                                        <option value="Hà Tĩnh" {{ old('shipping_city', $customerProfile->city) == 'Hà Tĩnh' ? 'selected' : '' }}>Hà Tĩnh</option>
-                                        <option value="Cao Bằng" {{ old('shipping_city', $customerProfile->city) == 'Cao Bằng' ? 'selected' : '' }}>Cao Bằng</option>
+<option value="Tuyên Quang" {{ old('shipping_city', $customerProfile->city) == 'Tuyên Quang' ? 'selected' : '' }}>Tuyên Quang</option>
+<option value="Lào Cai" {{ old('shipping_city', $customerProfile->city) == 'Lào Cai' ? 'selected' : '' }}>Lào Cai</option>
+<option value="Thái Nguyên" {{ old('shipping_city', $customerProfile->city) == 'Thái Nguyên' ? 'selected' : '' }}>Thái Nguyên</option>
+<option value="Phú Thọ" {{ old('shipping_city', $customerProfile->city) == 'Phú Thọ' ? 'selected' : '' }}>Phú Thọ</option>
+<option value="Bắc Ninh" {{ old('shipping_city', $customerProfile->city) == 'Bắc Ninh' ? 'selected' : '' }}>Bắc Ninh</option>
+<option value="Hưng Yên" {{ old('shipping_city', $customerProfile->city) == 'Hưng Yên' ? 'selected' : '' }}>Hưng Yên</option>
+<option value="Thành phố Hải Phòng" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Hải Phòng' ? 'selected' : '' }}>Thành phố Hải Phòng</option>
+<option value="Ninh Bình" {{ old('shipping_city', $customerProfile->city) == 'Ninh Bình' ? 'selected' : '' }}>Ninh Bình</option>
+<option value="Quảng Trị" {{ old('shipping_city', $customerProfile->city) == 'Quảng Trị' ? 'selected' : '' }}>Quảng Trị</option>
+<option value="Thành phố Đà Nẵng" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Đà Nẵng' ? 'selected' : '' }}>Thành phố Đà Nẵng</option>
+<option value="Quảng Ngãi" {{ old('shipping_city', $customerProfile->city) == 'Quảng Ngãi' ? 'selected' : '' }}>Quảng Ngãi</option>
+<option value="Gia Lai" {{ old('shipping_city', $customerProfile->city) == 'Gia Lai' ? 'selected' : '' }}>Gia Lai</option>
+<option value="Khánh Hoà" {{ old('shipping_city', $customerProfile->city) == 'Khánh Hoà' ? 'selected' : '' }}>Khánh Hoà</option>
+<option value="Lâm Đồng" {{ old('shipping_city', $customerProfile->city) == 'Lâm Đồng' ? 'selected' : '' }}>Lâm Đồng</option>
+<option value="Đắk Lắk" {{ old('shipping_city', $customerProfile->city) == 'Đắk Lắk' ? 'selected' : '' }}>Đắk Lắk</option>
+<option value="Thành phố Hồ Chí Minh" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Hồ Chí Minh' ? 'selected' : '' }}>Thành phố Hồ Chí Minh</option>
+<option value="Đồng Nai" {{ old('shipping_city', $customerProfile->city) == 'Đồng Nai' ? 'selected' : '' }}>Đồng Nai</option>
+<option value="Tây Ninh" {{ old('shipping_city', $customerProfile->city) == 'Tây Ninh' ? 'selected' : '' }}>Tây Ninh</option>
+<option value="Thành phố Cần Thơ" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Cần Thơ' ? 'selected' : '' }}>Thành phố Cần Thơ</option>
+<option value="Vĩnh Long" {{ old('shipping_city', $customerProfile->city) == 'Vĩnh Long' ? 'selected' : '' }}>Vĩnh Long</option>
+<option value="Đồng Tháp" {{ old('shipping_city', $customerProfile->city) == 'Đồng Tháp' ? 'selected' : '' }}>Đồng Tháp</option>
+<option value="Cà Mau" {{ old('shipping_city', $customerProfile->city) == 'Cà Mau' ? 'selected' : '' }}>Cà Mau</option>
+<option value="An Giang" {{ old('shipping_city', $customerProfile->city) == 'An Giang' ? 'selected' : '' }}>An Giang</option>
+<option value="Thành phố Hà Nội" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Hà Nội' ? 'selected' : '' }}>Thành phố Hà Nội</option>
+<option value="Thành phố Huế" {{ old('shipping_city', $customerProfile->city) == 'Thành phố Huế' ? 'selected' : '' }}>Thành phố Huế</option>
+<option value="Lai Châu" {{ old('shipping_city', $customerProfile->city) == 'Lai Châu' ? 'selected' : '' }}>Lai Châu</option>
+<option value="Điện Biên" {{ old('shipping_city', $customerProfile->city) == 'Điện Biên' ? 'selected' : '' }}>Điện Biên</option>
+<option value="Sơn La" {{ old('shipping_city', $customerProfile->city) == 'Sơn La' ? 'selected' : '' }}>Sơn La</option>
+<option value="Lạng Sơn" {{ old('shipping_city', $customerProfile->city) == 'Lạng Sơn' ? 'selected' : '' }}>Lạng Sơn</option>
+<option value="Quảng Ninh" {{ old('shipping_city', $customerProfile->city) == 'Quảng Ninh' ? 'selected' : '' }}>Quảng Ninh</option>
+<option value="Thanh Hoá" {{ old('shipping_city', $customerProfile->city) == 'Thanh Hoá' ? 'selected' : '' }}>Thanh Hoá</option>
+<option value="Nghệ An" {{ old('shipping_city', $customerProfile->city) == 'Nghệ An' ? 'selected' : '' }}>Nghệ An</option>
+<option value="Hà Tĩnh" {{ old('shipping_city', $customerProfile->city) == 'Hà Tĩnh' ? 'selected' : '' }}>Hà Tĩnh</option>
+<option value="Cao Bằng" {{ old('shipping_city', $customerProfile->city) == 'Cao Bằng' ? 'selected' : '' }}>Cao Bằng</option>
 </select>
 <div class="invalid-feedback"></div>
 </div>
 </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="shipping_district">Quận/Huyện <span class="required">*</span></label>
-                                    <input type="text" name="shipping_district" id="shipping_district" 
-                                           class="form-control" value="{{ old('shipping_district', $customerProfile->district) }}" required>
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                            <div class="col-md-6">
+<div class="col-md-6">
 <div class="form-group">
-                                    <label for="shipping_ward">Phường/Xã</label>
-                                    <label for="shipping_ward">Phường/Xã <span class="required">*</span></label>
+<label for="shipping_ward">Phường/Xã <span class="required">*</span></label>
 <input type="text" name="shipping_ward" id="shipping_ward" 
-                                           class="form-control" value="{{ old('shipping_ward', $customerProfile->ward) }}">
-                                           class="form-control" value="{{ old('shipping_ward', $customerProfile->ward) }}" required>
+class="form-control" value="{{ old('shipping_ward', $customerProfile->ward) }}" required>
 <div class="invalid-feedback"></div>
 </div>
 </div>
@@ -246,7 +229,7 @@ Thanh toán online (ZaloPay)
 </div>
 
 <!-- Place Order Button -->
-<button type="submit" form="checkout-form" class="btn btn-primary btn-lg w-100 place-order-btn">
+<button type="submit" form="checkout-form" class="btn btn-success btn-lg w-100 place-order-btn">
 <i class="fas fa-lock me-2"></i>
 <span class="button-text">Đặt hàng</span>
 <span class="button-loading d-none">
@@ -473,7 +456,20 @@ document.addEventListener('DOMContentLoaded', function() {
        // Clear previous errors
        clearErrors();
        
-       // Submit form
+        // Submit form
+        // Check payment method
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked')?.value;
+        
+        if (paymentMethod === 'online') {
+            // Handle ZaloPay payment flow
+            handleZaloPayPayment(form);
+        } else {
+            // Handle regular order creation (COD)
+            handleRegularOrder(form);
+        }
+    });
+    
+    function handleRegularOrder(form) {
        const formData = new FormData(form);
        
        fetch(form.action, {
@@ -495,24 +491,97 @@ document.addEventListener('DOMContentLoaded', function() {
                    window.location.href = data.redirect_url;
                }, 1000);
            } else {
-               // Show error message
-               showNotification(data.message, 'error');
-               
-               // Display validation errors
-               if (data.errors) {
-                   displayErrors(data.errors);
-               }
-               
-               // Reset button state
-               resetButtonState();
+                // Show error message
+                showNotification(data.message, 'error');
+                
+                // Display validation errors
+                if (data.errors) {
+                    displayErrors(data.errors);
+                }
+                
+                // Reset button state
+                resetButtonState();
+                handleOrderError(data);
            }
        })
        .catch(error => {
-           console.error('Error:', error);
+            console.error('Error:', error);
+            console.error('Order Error:', error);
            showNotification('Có lỗi xảy ra khi đặt hàng!', 'error');
            resetButtonState();
        });
-   });
+    });
+    }
+    
+    function handleZaloPayPayment(form) {
+        // First create the order
+        const formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Order created successfully, now process ZaloPay payment
+                processZaloPayPayment(data.order_id);
+            } else {
+                handleOrderError(data);
+            }
+        })
+        .catch(error => {
+            console.error('Order Creation Error:', error);
+            showNotification('Có lỗi xảy ra khi tạo đơn hàng!', 'error');
+            resetButtonState();
+        });
+    }
+    
+    function processZaloPayPayment(orderId) {
+        fetch('{{ route("client.checkout.zalopay.payment") }}', {
+            method: 'POST',
+            body: JSON.stringify({ order_id: orderId }),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect to ZaloPay payment page
+                showNotification('Đang chuyển đến trang thanh toán ZaloPay...', 'success');
+                window.location.href = data.order_url;
+            } else {
+                showNotification(data.message || 'Có lỗi xảy ra khi xử lý thanh toán ZaloPay!', 'error');
+                resetButtonState();
+            }
+        })
+        .catch(error => {
+            console.error('ZaloPay Error:', error);
+            showNotification('Có lỗi xảy ra khi kết nối ZaloPay!', 'error');
+            resetButtonState();
+        });
+    }
+    
+    function handleOrderError(data) {
+        // Show error message
+        showNotification(data.message, 'error');
+        
+        // Display validation errors
+        if (data.errors) {
+            displayErrors(data.errors);
+        }
+        
+        // Reset button state
+        resetButtonState();
+    }
    
    function resetButtonState() {
        const buttonText = submitBtn.querySelector('.button-text');

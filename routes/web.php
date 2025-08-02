@@ -154,20 +154,17 @@ Route::post('/test-add-session', [ClientController::class, 'testAddToSessionCart
 // Order routes - yêu cầu đăng nhập
 Route::prefix('order')->name('order.')->group(function () {
 Route::get('/checkout', [ClientOrderController::class, 'checkout'])->name('checkout');
-            Route::post('/checkout', [ClientOrderController::class, 'checkout'])->name('checkout.post');
 Route::post('/store', [ClientOrderController::class, 'store'])->name('store');
 Route::get('/success/{order}', [ClientOrderController::class, 'success'])->name('success');
 Route::post('/{order}/cancel', [ClientOrderController::class, 'cancel'])->name('cancel');
-Route::get('/check-payment-status/{order}', [ClientOrderController::class, 'checkPaymentStatus'])->name('check-payment-status');
-Route::get('/zalopay-waiting/{order}', [ClientOrderController::class, 'zaloPayWaiting'])->name('zalopay-waiting');
 });
 
-// ZaloPay routes (trong group client)
-Route::prefix('checkout')->name('checkout.')->group(function () {
-Route::post('/zalopay-payment', [ClientOrderController::class, 'processZaloPayPayment'])->name('zalopay.payment');
-Route::get('/zalopay-return', [ClientOrderController::class, 'zaloPayReturn'])->name('zalopay.return');
-Route::post('/zalopay-callback', [ClientOrderController::class, 'zaloPayCallback'])->name('zalopay.callback');
-});
+        // ZaloPay routes (trong group client)
+        Route::prefix('checkout')->name('checkout.')->group(function () {
+            Route::post('/zalopay-payment', [ClientOrderController::class, 'processZaloPayPayment'])->name('zalopay.payment');
+            Route::get('/zalopay-return', [ClientOrderController::class, 'zaloPayReturn'])->name('zalopay.return');
+            Route::post('/zalopay-callback', [ClientOrderController::class, 'zaloPayCallback'])->name('zalopay.callback');
+        });
 
 // Các route có tham số đặt CUỐI CÙNG để tránh conflict
 Route::get('/product/{slug}', [ClientController::class, 'product'])->name('product');
