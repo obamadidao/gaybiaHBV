@@ -58,7 +58,15 @@
 <h2>Sản phẩm</h2>
 <p>Đa dạng sản phẩm liên quan đến bida</p>
 </div>
-
+ <div class="dashboard-tab">
+                        <ul class="nav nav-tabs flex-lg-column border-bottom-0" id="top-tab" role="tablist">
+                            <li class="nav-item"><a href="#" data-bs-toggle="tab" data-bs-target="#info" class="nav-link active">Thông tin tài khoản</a></li>
+                            <li class="nav-item"><a href="#" data-bs-toggle="tab" data-bs-target="#orders" class="nav-link">Đơn hàng</a></li>
+                            <li class="nav-item"><a href="#" data-bs-toggle="tab" data-bs-target="#profile" class="nav-link">Thông tin cá nhân</a></li>
+                            <li class="nav-item"><a href="{{ route('client.logout-user') }}" class="nav-link">Đăng xuất</a> </li>
+                        </ul>
+                    </div>
+                </div>
 <div class="tabs-listing">
 <ul class="nav nav-tabs style1 justify-content-center" id="productTabs" role="tablist">
 <li class="nav-item" role="presentation">

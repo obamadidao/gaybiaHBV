@@ -226,13 +226,13 @@ Xóa toàn bộ giỏ hàng
 <!--End Cart Summary-->
 @else
 <!--Empty Cart-->
-<div class="page-section-space text-center">
+<div class="page-section-space text-center mb-4">
 <div class="empty-page-content">
-<img src="{{ asset('assets/images/empty-cart.svg') }}" alt="Giỏ hàng trống" width="300" height="300" />
+ <img src="{{ asset('assets/images/empty-img.gif') }}" alt="Giỏ hàng trống" width="300" height="300"/>
 <h2 class="mb-3">Giỏ hàng của bạn đang trống</h2>
 <p class="mb-4">Hãy thêm một số sản phẩm vào giỏ hàng để tiếp tục mua sắm.</p>
 <a href="{{ route('client.index') }}" class="btn btn-primary btn-lg">
-<i class="icon anm anm-angle-left-r"></i> Tiếp tục mua sắm
+  Tiếp tục mua sắm
 </a>
 </div>
 </div>
