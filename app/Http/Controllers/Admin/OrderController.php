@@ -100,8 +100,7 @@ throw new \Exception('Không thể chuyển từ trạng thái ' . $oldStatus . 
 // Xử lý hủy đơn hàng
 if ($newStatus === 'cancelled') {
 $order->cancellation_reason = $request->admin_notes;
-                $order->cancelled_by = auth()->id();
-                $order->cancelled_by = Auth::id();
+$order->cancelled_by = Auth::id();
 $order->cancelled_at = now();
 
 if ($request->hasFile('evidence_image')) {
@@ -110,21 +109,26 @@ $order->cancellation_evidence = $path;
 }
 }
 
-            // Xử lý giao hàng thành công
-            if ($newStatus === 'delivered') {
-                $order->delivered_at = now();
-            }
+// Xử lý giao hàng thành công
+if ($newStatus === 'delivered') {
+$order->delivered_at = now();
+                
+                // Đối với đơn hàng COD, tự động cập nhật payment_status thành paid
+                if ($order->payment_method === 'cod' && $order->payment_status !== 'paid') {
+                    $order->payment_status = 'paid';
+                    $order->paid_at = now();
+                }
+}
 
-            // Xử lý gửi hàng
-            if ($newStatus === 'shipped') {
-                $order->shipped_at = now();
-            }
+// Xử lý gửi hàng
+if ($newStatus === 'shipped') {
+$order->shipped_at = now();
+}
 
 // Xử lý hoàn tiền
 if ($newStatus === 'refunded') {
 $order->refund_reason = $request->admin_notes;
-                $order->refunded_by = auth()->user()->id;
-                $order->refunded_by = Auth::id();
+$order->refunded_by = Auth::id();
 $order->refunded_at = now();
 $order->refund_amount = $order->total_amount;
 
@@ -139,8 +143,7 @@ $order->admin_notes = $request->admin_notes;
 $order->save();
 
 // Thêm vào lịch sử trạng thái
-            $order->addStatusHistory($newStatus, $request->admin_notes, auth()->id());
-            $order->addStatusHistory($newStatus, $request->admin_notes, Auth::id());
+$order->addStatusHistory($newStatus, $request->admin_notes, Auth::id());
 
 DB::commit();
 return redirect()->back()->with('success', 'Cập nhật trạng thái đơn hàng thành công');
@@ -202,8 +205,7 @@ $order->save();
 $order->addStatusHistory(
 $order->status,
 'Cập nhật thông tin đơn hàng: ' . ($request->admin_notes ?? 'Không có ghi chú'),
-                auth()->id()
-                Auth::id()
+Auth::id()
 );
 
 DB::commit();
