@@ -50,7 +50,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label for="sku" class="form-label">SKU</label>
                                 <input type="text" class="form-control @error('sku') is-invalid @enderror" 
                                        id="sku" name="sku" value="{{ old('sku') }}" placeholder="Tự động tạo nếu để trống">
@@ -58,7 +58,7 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label for="category_id" class="form-label">Danh mục <span class="text-danger">*</span></label>
                                 <select class="form-select @error('category_id') is-invalid @enderror" 
                                         id="category_id" name="category_id" required>
@@ -176,7 +176,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                             <div class="col-md-3 mb-3">
                                 <label for="stock_quantity" class="form-label">Số lượng tồn kho <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control @error('stock_quantity') is-invalid @enderror" 
                                        id="stock_quantity" name="stock_quantity" value="{{ old('stock_quantity', 0) }}" 
@@ -185,7 +185,7 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-6 mb-3">
+                             <div class="col-md-3 mb-3">
                                 <label for="min_stock" class="form-label">Tồn kho tối thiểu <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control @error('min_stock') is-invalid @enderror" 
                                        id="min_stock" name="min_stock" value="{{ old('min_stock', 1) }}" 
@@ -400,13 +400,10 @@
             </div>
             <div class="col-md-6 mb-3">
                 <label class="form-label">Tên biến thể</label>
-                <input type="text" class="form-control" name="variants[__INDEX__][variant_name]" 
-                       placeholder="Ví dụ: Chất liệu chuôi">
+                <input type="text" class="form-control variant-name" name="variants[__INDEX__][variant_name]" 
+                       placeholder="Ví dụ: Chất liệu chuôi" onchange="checkDuplicateVariantName(this)">
             </div>
-        </div>
-        
-        <div class="row">
-            <div class="col-md-6 mb-3">
+          <div class="col-md-3 mb-3">
                 <label class="form-label">Giá trị <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" name="variants[__INDEX__][variant_value]" 
                        placeholder="Ví dụ: Gỗ Ebony" required>
@@ -419,7 +416,7 @@
         </div>
         
         <div class="row">
-            <div class="col-md-6 mb-3">
+          <div class="col-md-3 mb-3">
                 <label class="form-label">Điều chỉnh giá</label>
                 <div class="input-group">
                     <input type="number" class="form-control" name="variants[__INDEX__][price_adjustment]" 
@@ -434,7 +431,7 @@
             </div>
         </div>
         
-        <div class="mb-3">
+         <div class="col-md-3 mb-3">
             <label class="form-label">Mô tả</label>
             <textarea class="form-control" name="variants[__INDEX__][description]" rows="2" 
                       placeholder="Mô tả chi tiết về biến thể này"></textarea>
@@ -456,7 +453,95 @@
 @push('scripts')
 <script>
 let variantIndex = 0;
+// Check duplicate variant name
+function checkDuplicateVariantName(input) {
+    const currentValue = input.value.trim().toLowerCase();
+    if (!currentValue) return;
+    
+    const allVariantNames = document.querySelectorAll('.variant-name');
+    let duplicateFound = false;
+    
+    // Reset all variant name inputs
+    allVariantNames.forEach(nameInput => {
+        nameInput.classList.remove('is-invalid');
+        const feedback = nameInput.parentNode.querySelector('.invalid-feedback');
+        if (feedback) feedback.remove();
+    });
+    
+    // Check for duplicates
+    allVariantNames.forEach(nameInput => {
+        if (nameInput !== input && nameInput.value.trim().toLowerCase() === currentValue) {
+            duplicateFound = true;
+            
+            // Add error styling to both inputs
+            [input, nameInput].forEach(inp => {
+                inp.classList.add('is-invalid');
+                
+                // Add error message if not exists
+                if (!inp.parentNode.querySelector('.invalid-feedback')) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.textContent = 'Tên biến thể không được trùng lặp';
+                    inp.parentNode.appendChild(errorDiv);
+                }
+            });
+        }
+    });
+    
+    return !duplicateFound;
+}
 
+// Validate form before submit
+document.querySelector('form').addEventListener('submit', function(e) {
+    const variantNames = document.querySelectorAll('.variant-name');
+    const names = [];
+    let hasDuplicate = false;
+    
+    // Check for duplicate variant names
+    variantNames.forEach(input => {
+        const value = input.value.trim().toLowerCase();
+        if (value) {
+            if (names.includes(value)) {
+                hasDuplicate = true;
+                input.classList.add('is-invalid');
+                
+                // Add error message if not exists
+                if (!input.parentNode.querySelector('.invalid-feedback')) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.textContent = 'Tên biến thể không được trùng lặp';
+                    input.parentNode.appendChild(errorDiv);
+                }
+            } else {
+                names.push(value);
+            }
+        }
+    });
+    
+    if (hasDuplicate) {
+        e.preventDefault();
+        
+        // Show alert
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+        alertDiv.innerHTML = `
+            <h6><i class="fas fa-exclamation-triangle me-2"></i>Có lỗi xảy ra:</h6>
+            <ul class="mb-0">
+                <li>Tên biến thể không được trùng lặp. Vui lòng kiểm tra lại.</li>
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Insert alert at the top of the form
+        const form = document.querySelector('form');
+        form.insertBefore(alertDiv, form.firstChild);
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        return false;
+    }
+});
 // Add variant function
 function addVariant() {
     const template = document.getElementById('variant-template').content.cloneNode(true);

@@ -70,7 +70,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                           <div class="col-md-3 mb-3">
                                 <label for="sku" class="form-label">SKU</label>
                                 <input type="text" class="form-control @error('sku') is-invalid @enderror" 
                                        id="sku" name="sku" value="{{ old('sku', $product->sku) }}">
@@ -78,7 +78,7 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-6 mb-3">
+                         <div class="col-md-3 mb-3">
                                 <label for="category_id" class="form-label">Danh mục <span class="text-danger">*</span></label>
                                 <select class="form-select @error('category_id') is-invalid @enderror" 
                                         id="category_id" name="category_id" required>
@@ -197,7 +197,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                          <div class="col-md-3 mb-3">
                                 <label for="stock_quantity" class="form-label">Số lượng tồn kho <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control @error('stock_quantity') is-invalid @enderror" 
                                        id="stock_quantity" name="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity) }}" 
@@ -206,7 +206,7 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-6 mb-3">
+                           <div class="col-md-3 mb-3">
                                 <label for="min_stock" class="form-label">Tồn kho tối thiểu <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control @error('min_stock') is-invalid @enderror" 
                                        id="min_stock" name="min_stock" value="{{ old('min_stock', $product->min_stock) }}" 
@@ -324,7 +324,7 @@
                                         <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant->id }}">
                                         
                                         <div class="row">
-                                            <div class="col-md-6 mb-3">
+                                           <div class="col-md-3 mb-3">
                                                 <label class="form-label">Loại biến thể</label>
                                                 <select class="form-select" name="variants[{{ $index }}][variant_type]" required>
                                                     <option value="">Chọn loại</option>
@@ -335,57 +335,37 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">Tên biến thể</label>
-                                                <input type="text" class="form-control" name="variants[{{ $index }}][variant_name]" 
-                                                       value="{{ $variant->variant_name }}" placeholder="Ví dụ: Chất liệu chuôi">
-                                            </div>
+                                               <input type="text" class="form-control variant-name" name="variants[{{ $index }}][variant_name]" 
+                                                       value="{{ $variant->variant_name }}" placeholder="Ví dụ: Chất liệu chuôi" onchange="checkDuplicateVariantName(this)">
                                         </div>
                                         
                                         <div class="row">
-                                            <div class="col-md-6 mb-3">
+                                         <div class="col-md-3 mb-3">
                                                 <label class="form-label">Giá trị <span class="text-danger">*</span></label>
                                                 <input type="text" class="form-control" name="variants[{{ $index }}][variant_value]" 
                                                        value="{{ $variant->variant_value }}" placeholder="Ví dụ: Gỗ Ebony" required>
                                             </div>
-                                            <div class="col-md-6 mb-3">
+                                           <div class="col-md-3 mb-3">
                                                 <label class="form-label">SKU</label>
                                                 <input type="text" class="form-control" name="variants[{{ $index }}][sku]" 
                                                        value="{{ $variant->sku }}" placeholder="Mã SKU của biến thể">
                                             </div>
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">Điều chỉnh giá</label>
-                                                <div class="input-group">
-                                                    <input type="number" class="form-control" name="variants[{{ $index }}][price_adjustment]" 
-                                                           value="{{ $variant->price_adjustment }}" step="1000">
-                                                    <span class="input-group-text">VNĐ</span>
+                                         <div class="col-md-4 mb-3">
+                                                <label class="form-label">Mô tả</label>
+                                                <input type="text" class="form-control" name="variants[{{ $index }}][description]" 
+                                                       value="{{ $variant->description }}" placeholder="Mô tả chi tiết về biến thể này">
+                                            </div>
+                                            <div class="col-md-2 mb-3">
+                                                <label class="form-label d-block">Trạng thái</label>
+                                                <div class="form-check">
+                                                    <input type="hidden" name="variants[{{ $index }}][is_active]" value="0">
+                                                    <input class="form-check-input" type="checkbox" name="variants[{{ $index }}][is_active]" 
+                                                           value="1" id="variant_active_{{ $index }}" {{ $variant->is_active ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="variant_active_{{ $index }}">
+                                                        Kích hoạt
+                                                    </label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">Số lượng tồn kho</label>
-                                                <input type="number" class="form-control" name="variants[{{ $index }}][stock_quantity]" 
-                                                       value="{{ $variant->stock_quantity }}" min="0">
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="mb-3">
-                                            <label class="form-label">Mô tả</label>
-                                            <textarea class="form-control" name="variants[{{ $index }}][description]" rows="2" 
-                                                      placeholder="Mô tả chi tiết về biến thể này">{{ $variant->description }}</textarea>
-                                        </div>
-                                        
-                                        <div class="form-check">
-                                            <input type="hidden" name="variants[{{ $index }}][is_active]" value="0">
-                                            <input class="form-check-input" type="checkbox" name="variants[{{ $index }}][is_active]" 
-                                                   value="1" id="variant_active_{{ $index }}" {{ $variant->is_active ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="variant_active_{{ $index }}">
-                                                Kích hoạt biến thể này
-                                            </label>
-                                        </div>
-                                    </div>
                                 @endforeach
                             @else
                                 <p class="text-muted">Chưa có biến thể nào. Nhấn "Thêm biến thể" để bắt đầu.</p>
@@ -528,7 +508,7 @@
         </div>
         
         <div class="row">
-            <div class="col-md-6 mb-3">
+          <div class="col-md-3 mb-3">
                 <label class="form-label">Loại biến thể</label>
                 <select class="form-select" name="variants[__INDEX__][variant_type]" required>
                     <option value="">Chọn loại</option>
@@ -537,20 +517,20 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-6 mb-3">
+           <div class="col-md-3 mb-3">
                 <label class="form-label">Tên biến thể</label>
-                <input type="text" class="form-control" name="variants[__INDEX__][variant_name]" 
-                       placeholder="Ví dụ: Chất liệu chuôi">
+                 <input type="text" class="form-control variant-name" name="variants[__INDEX__][variant_name]" 
+                       placeholder="Ví dụ: Chất liệu chuôi" onchange="checkDuplicateVariantName(this)">
             </div>
         </div>
         
         <div class="row">
-            <div class="col-md-6 mb-3">
+          <div class="col-md-3 mb-3">
                 <label class="form-label">Giá trị <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" name="variants[__INDEX__][variant_value]" 
                        placeholder="Ví dụ: Gỗ Ebony" required>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-3 mb-3">
                 <label class="form-label">SKU</label>
                 <input type="text" class="form-control" name="variants[__INDEX__][sku]" 
                        placeholder="Mã SKU của biến thể">
@@ -558,7 +538,7 @@
         </div>
         
         <div class="row">
-            <div class="col-md-6 mb-3">
+           <div class="col-md-3 mb-3">
                 <label class="form-label">Điều chỉnh giá</label>
                 <div class="input-group">
                     <input type="number" class="form-control" name="variants[__INDEX__][price_adjustment]" 
@@ -566,26 +546,27 @@
                     <span class="input-group-text">VNĐ</span>
                 </div>
             </div>
-            <div class="col-md-6 mb-3">
+          <div class="col-md-3 mb-3">
                 <label class="form-label">Số lượng tồn kho</label>
                 <input type="number" class="form-control" name="variants[__INDEX__][stock_quantity]" 
                        value="0" min="0">
             </div>
-        </div>
-        
-        <div class="mb-3">
-            <label class="form-label">Mô tả</label>
-            <textarea class="form-control" name="variants[__INDEX__][description]" rows="2" 
-                      placeholder="Mô tả chi tiết về biến thể này"></textarea>
-        </div>
-        
-        <div class="form-check">
-            <input type="hidden" name="variants[__INDEX__][is_active]" value="0">
-            <input class="form-check-input" type="checkbox" name="variants[__INDEX__][is_active]" 
-                   value="1" id="variant_active___INDEX__" checked>
-            <label class="form-check-label" for="variant_active___INDEX__">
-                Kích hoạt biến thể này
-            </label>
+      <div class="col-md-4 mb-3">
+                <label class="form-label">Mô tả</label>
+                <input type="text" class="form-control" name="variants[__INDEX__][description]" 
+                       placeholder="Mô tả chi tiết về biến thể này">
+            </div>
+            <div class="col-md-2 mb-3">
+                <label class="form-label d-block">Trạng thái</label>
+                <div class="form-check">
+                    <input type="hidden" name="variants[__INDEX__][is_active]" value="0">
+                    <input class="form-check-input" type="checkbox" name="variants[__INDEX__][is_active]" 
+                           value="1" id="variant_active___INDEX__" checked>
+                    <label class="form-check-label" for="variant_active___INDEX__">
+                        Kích hoạt
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 </template>
