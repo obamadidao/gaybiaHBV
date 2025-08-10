@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Exports\OrdersExport;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -99,7 +100,8 @@ throw new \Exception('Không thể chuyển từ trạng thái ' . $oldStatus . 
 // Xử lý hủy đơn hàng
 if ($newStatus === 'cancelled') {
 $order->cancellation_reason = $request->admin_notes;
-$order->cancelled_by = auth()->id();
+                $order->cancelled_by = auth()->id();
+                $order->cancelled_by = Auth::id();
 $order->cancelled_at = now();
 
 if ($request->hasFile('evidence_image')) {
@@ -108,10 +110,21 @@ $order->cancellation_evidence = $path;
 }
 }
 
+            // Xử lý giao hàng thành công
+            if ($newStatus === 'delivered') {
+                $order->delivered_at = now();
+            }
+
+            // Xử lý gửi hàng
+            if ($newStatus === 'shipped') {
+                $order->shipped_at = now();
+            }
+
 // Xử lý hoàn tiền
 if ($newStatus === 'refunded') {
 $order->refund_reason = $request->admin_notes;
-$order->refunded_by = auth()->user()->id;
+                $order->refunded_by = auth()->user()->id;
+                $order->refunded_by = Auth::id();
 $order->refunded_at = now();
 $order->refund_amount = $order->total_amount;
 
@@ -126,7 +139,8 @@ $order->admin_notes = $request->admin_notes;
 $order->save();
 
 // Thêm vào lịch sử trạng thái
-$order->addStatusHistory($newStatus, $request->admin_notes, auth()->id());
+            $order->addStatusHistory($newStatus, $request->admin_notes, auth()->id());
+            $order->addStatusHistory($newStatus, $request->admin_notes, Auth::id());
 
 DB::commit();
 return redirect()->back()->with('success', 'Cập nhật trạng thái đơn hàng thành công');
@@ -165,7 +179,6 @@ $request->validate([
 'shipping_address.phone' => 'required|string|max:20',
 'shipping_address.address' => 'required|string|max:255',
 'shipping_address.ward' => 'required|string|max:255',
-            'shipping_address.district' => 'required|string|max:255',
 'shipping_address.city' => 'required|string|max:255',
 'admin_notes' => 'nullable|string|max:1000',
 ]);
@@ -179,7 +192,6 @@ $shippingAddress['name'] = $request->shipping_address['name'];
 $shippingAddress['phone'] = $request->shipping_address['phone'];
 $shippingAddress['address'] = $request->shipping_address['address'];
 $shippingAddress['ward'] = $request->shipping_address['ward'];
-            $shippingAddress['district'] = $request->shipping_address['district'];
 $shippingAddress['city'] = $request->shipping_address['city'];
 
 $order->shipping_address = $shippingAddress;
@@ -190,7 +202,8 @@ $order->save();
 $order->addStatusHistory(
 $order->status,
 'Cập nhật thông tin đơn hàng: ' . ($request->admin_notes ?? 'Không có ghi chú'),
-auth()->id()
+                auth()->id()
+                Auth::id()
 );
 
 DB::commit();
