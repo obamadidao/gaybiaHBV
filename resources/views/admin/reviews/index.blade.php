@@ -65,7 +65,7 @@
                     </div>
                     <div class="col-md-3 mb-3">
                         <label for="search" class="form-label">Tìm kiếm</label>
-                        <input type="text" class="form-control" id="search" name="search" 
+                        <input type="text" class="form-control" id="search" name="search"
                                value="{{ request('search') }}" placeholder="Tìm theo tiêu đề, nội dung...">
                     </div>
                     <div class="col-md-2 mb-3 d-flex align-items-end">
@@ -87,10 +87,10 @@
             <h6 class="m-0 font-weight-bold text-primary">
                 Danh sách đánh giá ({{ $reviews->total() }})
             </h6>
-            
+
             @if($reviews->count() > 0)
             <div class="dropdown ms-auto">
-                <button class="btn btn-outline-primary btn-sm dropdown-toggle " type="button" 
+                <button class="btn btn-outline-primary btn-sm dropdown-toggle " type="button"
                         id="bulkActionDropdown" data-bs-toggle="dropdown" aria-expanded="false" disabled>
                     <i class="fas fa-cogs me-1"></i>Thao tác hàng loạt
                 </button>
@@ -126,6 +126,7 @@
                                     <th>Nội dung</th>
                                     <th width="200">Sản phẩm</th>
                                     <th width="150">Người dùng</th>
+                                    <th width="120">Đơn hàng</th>
                                     <th width="120">Ngày tạo</th>
                                     <th width="100">Trạng thái</th>
                                     <th width="150">Thao tác</th>
@@ -135,7 +136,7 @@
                                 @foreach($reviews as $review)
                                 <tr>
                                     <td>
-                                        <input type="checkbox" name="selected_reviews[]" value="{{ $review->id }}" 
+                                        <input type="checkbox" name="selected_reviews[]" value="{{ $review->id }}"
                                                class="form-check-input review-checkbox">
                                     </td>
                                     <td class="text-center">
@@ -155,7 +156,7 @@
                                             <strong>{{ $review->title }}</strong><br>
                                         @endif
                                         <p class="mb-2">{{ Str::limit($review->content, 80) }}</p>
-                                        
+
                                         @if($review->hasPros())
                                             <div class="mb-1">
                                                 <small class="text-success">
@@ -164,7 +165,7 @@
                                                 </small>
                                             </div>
                                         @endif
-                                        
+
                                         @if($review->hasCons())
                                             <div class="mb-1">
                                                 <small class="text-danger">
@@ -173,7 +174,7 @@
                                                 </small>
                                             </div>
                                         @endif
-                                        
+
                                         @if($review->admin_notes)
                                             <div class="mt-2 p-2 bg-light rounded">
                                                 <small class="text-muted">
@@ -186,17 +187,17 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             @if($review->product->images->count() > 0)
-                                                <img src="{{ $review->product->images->first()->url }}" 
-                                                     alt="{{ $review->product->name }}" 
+                                                <img src="{{ $review->product->images->first()->url }}"
+                                                     alt="{{ $review->product->name }}"
                                                      class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
                                             @else
-                                                <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" 
+                                                <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center"
                                                      style="width: 40px; height: 40px;">
                                                     <i class="fas fa-image text-muted"></i>
                                                 </div>
                                             @endif
                                             <div>
-                                                <a href="{{ route('admin.products.show', $review->product) }}" 
+                                                <a href="{{ route('admin.products.show', $review->product) }}"
                                                    class="text-decoration-none">
                                                     <strong>{{ Str::limit($review->product->name, 30) }}</strong>
                                                 </a>
@@ -208,7 +209,7 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="me-2">
-                                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center"
                                                      style="width: 32px; height: 32px;">
                                                     <small class="text-white fw-bold">
                                                         {{ substr($review->user_display_name, 0, 1) }}
@@ -224,6 +225,36 @@
                                                 @endif
                                             </div>
                                         </div>
+                                    </td>
+                                     <td>
+                                        @if($review->order)
+                                            <div class="d-flex align-items-center">
+                                                <div>
+                                                    <a href="{{ route('admin.orders.show', $review->order) }}"
+                                                       class="text-decoration-none text-primary fw-bold">
+                                                        #{{ $review->order->order_number }}
+                                                    </a>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        {{ $review->order->created_at->format('d/m/Y') }}
+                                                    </small>
+                                                    <br>
+                                                    <span class="badge badge-sm
+                                                        @if($review->order->status === 'delivered') bg-success
+                                                        @elseif($review->order->status === 'processing') bg-info
+                                                        @elseif($review->order->status === 'cancelled') bg-danger
+                                                        @else bg-secondary
+                                                        @endif">
+                                                        {{ $review->order->status_text }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <small class="text-muted">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                                Không có đơn hàng
+                                            </small>
+                                        @endif
                                     </td>
                                     <td>
                                         <small>{{ $review->created_at->format('d/m/Y H:i') }}</small>
@@ -253,7 +284,7 @@
                                                     </button>
                                                 </form>
                                             @endif
-                                            
+
                                             @if($review->is_approved)
                                                 @if($review->is_hidden)
                                                     <form action="{{ route('admin.product-reviews.unhide', $review) }}" method="POST" style="display: inline;">
@@ -271,13 +302,13 @@
                                                     </form>
                                                 @endif
                                             @endif
-                                            
-                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+
+                                            <button type="button" class="btn btn-sm btn-outline-primary"
                                                     onclick="editNotes({{ $review->id }}, '{{ addslashes($review->admin_notes) }}')" title="Ghi chú">
                                                 <i class="fas fa-sticky-note"></i>
                                             </button>
-                                            
-                                            <form action="{{ route('admin.product-reviews.destroy', $review) }}" method="POST" 
+
+                                            <form action="{{ route('admin.product-reviews.destroy', $review) }}" method="POST"
                                                   style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')">
                                                 @csrf
                                                 @method('DELETE')
@@ -293,12 +324,12 @@
                         </table>
                     </div>
                 </form>
-                
+
                 <!-- Pagination -->
                 <div class="d-flex justify-content-between align-items-center mt-3">
                     <div>
                         <small class="text-muted">
-                            Hiển thị {{ $reviews->firstItem() }} đến {{ $reviews->lastItem() }} 
+                            Hiển thị {{ $reviews->firstItem() }} đến {{ $reviews->lastItem() }}
                             trong tổng số {{ $reviews->total() }} đánh giá
                         </small>
                     </div>
@@ -330,7 +361,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="admin_notes" class="form-label">Ghi chú</label>
-                        <textarea class="form-control" id="admin_notes" name="admin_notes" rows="4" 
+                        <textarea class="form-control" id="admin_notes" name="admin_notes" rows="4"
                                   placeholder="Nhập ghi chú cho đánh giá này..."></textarea>
                     </div>
                 </div>
@@ -372,7 +403,7 @@ function bulkAction(action) {
         alert('Vui lòng chọn ít nhất một đánh giá');
         return;
     }
-    
+
     let actionText = '';
     switch(action) {
         case 'approve': actionText = 'duyệt'; break;
@@ -381,18 +412,18 @@ function bulkAction(action) {
         case 'unhide': actionText = 'hiện'; break;
         case 'delete': actionText = 'xóa'; break;
     }
-    
+
     if (confirm(`Bạn có chắc chắn muốn ${actionText} ${checkedBoxes.length} đánh giá đã chọn?`)) {
         const form = document.getElementById('bulk-form');
         form.action = `{{ route('admin.product-reviews.bulk-action') }}`;
-        
+
         // Add action input
         const actionInput = document.createElement('input');
         actionInput.type = 'hidden';
         actionInput.name = 'action';
         actionInput.value = action;
         form.appendChild(actionInput);
-        
+
         form.submit();
     }
 }
@@ -402,11 +433,11 @@ function editNotes(reviewId, currentNotes) {
     const modal = new bootstrap.Modal(document.getElementById('editNotesModal'));
     const form = document.getElementById('edit-notes-form');
     const notesTextarea = document.getElementById('admin_notes');
-    
+
     form.action = `{{ url('admin/product-reviews') }}/${reviewId}/update-notes`;
     notesTextarea.value = currentNotes;
-    
+
     modal.show();
 }
 </script>
-@endpush 
+@endpush

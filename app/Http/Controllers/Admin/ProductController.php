@@ -395,7 +395,7 @@ class ProductController extends Controller
      */
     public function reviews(Product $product, Request $request)
     {
-        $query = $product->reviews()->with('user');
+        $query = $product->reviews()->with(['user', 'order']);
 
         // Filter by status
         if ($request->filled('status')) {

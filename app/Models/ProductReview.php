@@ -13,6 +13,7 @@ class ProductReview extends Model
         'rating',
         'title',
         'content',
+          'order_id',
         'pros',
         'cons',
         'is_approved',
@@ -67,6 +68,13 @@ class ProductReview extends Model
     public function scopeApproved($query)
     {
         return $query->where('is_approved', true);
+    }
+  /**
+     * Relationship với Order
+     */
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
     }
 
     /**
@@ -136,6 +144,13 @@ class ProductReview extends Model
 
         return $ratings[$this->rating] ?? 'Chưa đánh giá';
     }
+   /**
+     * Scope: Đánh giá bị ẩn
+     */
+    public function scopeHidden($query)
+    {
+        return $query->where('is_hidden', true);
+    }
 
     /**
      * Lấy số ngày từ khi đánh giá
@@ -162,7 +177,7 @@ class ProductReview extends Model
         if ($total === 0) {
             return 0;
         }
-        
+
         return round(($this->helpful_count / $total) * 100);
     }
 
@@ -205,7 +220,7 @@ class ProductReview extends Model
         if (strlen($name) > 2) {
             return substr($name, 0, 1) . str_repeat('*', strlen($name) - 2) . substr($name, -1);
         }
-        
+
         return $name;
     }
 
@@ -240,7 +255,7 @@ class ProductReview extends Model
     }
 
     /**
-     * Kiểm tra có nhược điểm không  
+     * Kiểm tra có nhược điểm không
      */
     public function hasCons()
     {
