@@ -17,8 +17,23 @@ class AdminController extends Controller
 /**
     * Display a listing of the resource.
     */
-public function index()
+    public function index()
+    public function index(Request $request)
 {
+        // Lấy thông tin bộ lọc
+        $type = $request->input('type', 'monthly');
+        $year = $request->input('year', Carbon::now()->year);
+        $month = $request->input('month', Carbon::now()->month);
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        
+        // Tính toán khoảng thời gian dựa trên bộ lọc
+        $dateRange = $this->getDateRangeByType($type, $year, $month, $startDate, $endDate);
+        
+        // Nếu là AJAX request và có bộ lọc, xử lý dữ liệu theo bộ lọc
+        if ($request->ajax() && $request->has('type')) {
+            return $this->getFilteredDashboardData($type, $year, $month, $startDate, $endDate);
+        }
 // Thống kê doanh thu
 $currentMonth = Carbon::now()->month;
 $currentYear = Carbon::now()->year;
@@ -26,22 +41,18 @@ $lastMonth = Carbon::now()->subMonth();
 
 // Doanh thu tháng hiện tại
 $monthlyRevenue = Order::where('status', 'delivered')
-            ->whereMonth('created_at', $currentMonth)
-            ->whereYear('created_at', $currentYear)
-            ->where('payment_status', 'paid')
-            ->whereNotNull('delivered_at')
-            ->whereMonth('delivered_at', $currentMonth)
-            ->whereYear('delivered_at', $currentYear)
+->where('payment_status', 'paid')
+->whereNotNull('delivered_at')
+->whereMonth('delivered_at', $currentMonth)
+->whereYear('delivered_at', $currentYear)
 ->sum('total_amount');
 
 // Doanh thu tháng trước
 $lastMonthRevenue = Order::where('status', 'delivered')
-            ->whereMonth('created_at', $lastMonth->month)
-            ->whereYear('created_at', $lastMonth->year)
-            ->where('payment_status', 'paid')
-            ->whereNotNull('delivered_at')
-            ->whereMonth('delivered_at', $lastMonth->month)
-            ->whereYear('delivered_at', $lastMonth->year)
+->where('payment_status', 'paid')
+->whereNotNull('delivered_at')
+->whereMonth('delivered_at', $lastMonth->month)
+->whereYear('delivered_at', $lastMonth->year)
 ->sum('total_amount');
 
 // Tính phần trăm tăng/giảm
@@ -52,18 +63,16 @@ $revenueChange = (($monthlyRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 1
 
 // Doanh thu năm hiện tại
 $yearlyRevenue = Order::where('status', 'delivered')
-            ->whereYear('created_at', $currentYear)
-            ->where('payment_status', 'paid')
-            ->whereNotNull('delivered_at')
-            ->whereYear('delivered_at', $currentYear)
+->where('payment_status', 'paid')
+->whereNotNull('delivered_at')
+->whereYear('delivered_at', $currentYear)
 ->sum('total_amount');
 
 // Doanh thu năm so với năm trước
 $lastYearRevenue = Order::where('status', 'delivered')
-            ->whereYear('created_at', $currentYear - 1)
-            ->where('payment_status', 'paid')
-            ->whereNotNull('delivered_at')
-            ->whereYear('delivered_at', $currentYear - 1)
+->where('payment_status', 'paid')
+->whereNotNull('delivered_at')
+->whereYear('delivered_at', $currentYear - 1)
 ->sum('total_amount');
 if($lastYearRevenue <= 0 ){
 $yearTargetPercent = ($yearlyRevenue / 1000) * 100;
@@ -87,24 +96,17 @@ $totalCustomers = User::whereHas('role', function($q) {
 $q->where('name', 'customer');
 })->count();
 
-        // Khách hàng mới trong tháng
-        $newCustomers = User::whereHas('role', function($q) {
-            $q->where('name', 'customer');
-        })
-        ->whereMonth('created_at', $currentMonth)
-        ->whereYear('created_at', $currentYear)
-        ->count();
-        // Đơn hàng đã giao thành công trong tháng (thay vì khách hàng mới)
-        $deliveredOrders = Order::where('status', 'delivered')
-            ->whereNotNull('delivered_at')
-            ->whereMonth('delivered_at', $currentMonth)
-            ->whereYear('delivered_at', $currentYear)
-            ->count();
-            
-        // Tổng đơn hàng đã giao thành công
-        $totalDeliveredOrders = Order::where('status', 'delivered')
-            ->whereNotNull('delivered_at')
-            ->count();
+// Đơn hàng đã giao thành công trong tháng (thay vì khách hàng mới)
+$deliveredOrders = Order::where('status', 'delivered')
+->whereNotNull('delivered_at')
+->whereMonth('delivered_at', $currentMonth)
+->whereYear('delivered_at', $currentYear)
+->count();
+
+// Tổng đơn hàng đã giao thành công
+$totalDeliveredOrders = Order::where('status', 'delivered')
+->whereNotNull('delivered_at')
+->count();
 
 // Đơn hàng mới nhất
 $latestOrders = Order::with('user')
@@ -131,8 +133,8 @@ $revenue = DB::table('orders')
 ->join('products', 'order_items.product_id', '=', 'products.id')
 ->where('products.category_id', $category->id)
 ->where('orders.status', 'delivered')
-                ->where('orders.payment_status', 'paid')
-                ->whereNotNull('orders.delivered_at')
+->where('orders.payment_status', 'paid')
+->whereNotNull('orders.delivered_at')
 ->sum(DB::raw('order_items.unit_price * order_items.quantity'));
 
 $categoryRevenue[$category->id] = $revenue;
@@ -160,9 +162,8 @@ return view('admin.Dashboard', compact(
 'processingOrders',
 'processingPercent',
 'totalCustomers',
-            'newCustomers',
-            'deliveredOrders',
-            'totalDeliveredOrders',
+'deliveredOrders',
+'totalDeliveredOrders',
 'latestOrders',
 'categoryStats',
 'categoryRevenue',
@@ -178,21 +179,18 @@ return view('admin.Dashboard', compact(
 
 /**
     * Lấy dữ liệu doanh thu cho biểu đồ
-     * @param string $type (daily, monthly, yearly)
-     * @param string $type (daily, monthly, yearly, date_range)
+    * @param string $type (daily, monthly, yearly, date_range)
     * @param int $year
     * @param int|null $month
-     * @param string|null $startDate
-     * @param string|null $endDate
+    * @param string|null $startDate
+    * @param string|null $endDate
     * @return array
     */
-    private function getRevenueChartData($type = 'monthly', $year = null, $month = null)
-    private function getRevenueChartData($type = 'monthly', $year = null, $month = null, $startDate = null, $endDate = null)
+private function getRevenueChartData($type = 'monthly', $year = null, $month = null, $startDate = null, $endDate = null)
 {
 if (!$year) {
 $year = Carbon::now()->year;
 }
-        
 
 if (!$month) {
 $month = Carbon::now()->month;
@@ -212,31 +210,31 @@ $data = [
 ];
 
 switch ($type) {
-            case 'date_range':
-                if (!$startDate || !$endDate) {
-                    // Mặc định lấy 30 ngày gần nhất
-                    $endDate = Carbon::now();
-                    $startDate = Carbon::now()->subDays(29);
-                } else {
-                    $startDate = Carbon::parse($startDate);
-                    $endDate = Carbon::parse($endDate);
-                }
-                
-                $currentDate = $startDate->copy();
-                while ($currentDate <= $endDate) {
-                    $data['labels'][] = $currentDate->format('d/m');
-                    
-                    $revenue = Order::where('status', 'delivered')
-                        ->where('payment_status', 'paid')
-                        ->whereNotNull('delivered_at')
-                        ->whereDate('delivered_at', $currentDate)
-                        ->sum('total_amount');
-                        
-                    $data['datasets'][0]['data'][] = $revenue;
-                    $currentDate->addDay();
-                }
-                break;
-                
+case 'date_range':
+if (!$startDate || !$endDate) {
+// Mặc định lấy 30 ngày gần nhất
+$endDate = Carbon::now();
+$startDate = Carbon::now()->subDays(29);
+} else {
+$startDate = Carbon::parse($startDate);
+$endDate = Carbon::parse($endDate);
+}
+
+$currentDate = $startDate->copy();
+while ($currentDate <= $endDate) {
+$data['labels'][] = $currentDate->format('d/m');
+
+$revenue = Order::where('status', 'delivered')
+->where('payment_status', 'paid')
+->whereNotNull('delivered_at')
+->whereDate('delivered_at', $currentDate)
+->sum('total_amount');
+
+$data['datasets'][0]['data'][] = $revenue;
+$currentDate->addDay();
+}
+break;
+
 case 'daily':
 // Lấy số ngày trong tháng
 $daysInMonth = Carbon::createFromDate($year, $month, 1)->daysInMonth;
@@ -246,10 +244,9 @@ $date = Carbon::createFromDate($year, $month, $day);
 $data['labels'][] = $day;
 
 $revenue = Order::where('status', 'delivered')
-                        ->whereDate('created_at', $date)
-                        ->where('payment_status', 'paid')
-                        ->whereNotNull('delivered_at')
-                        ->whereDate('delivered_at', $date)
+->where('payment_status', 'paid')
+->whereNotNull('delivered_at')
+->whereDate('delivered_at', $date)
 ->sum('total_amount');
 
 $data['datasets'][0]['data'][] = $revenue;
@@ -262,12 +259,10 @@ for ($m = 1; $m <= 12; $m++) {
 $data['labels'][] = Carbon::create($year, $m)->format('m/Y');
 
 $revenue = Order::where('status', 'delivered')
-                        ->whereYear('created_at', $year)
-                        ->whereMonth('created_at', $m)
-                        ->where('payment_status', 'paid')
-                        ->whereNotNull('delivered_at')
-                        ->whereYear('delivered_at', $year)
-                        ->whereMonth('delivered_at', $m)
+->where('payment_status', 'paid')
+->whereNotNull('delivered_at')
+->whereYear('delivered_at', $year)
+->whereMonth('delivered_at', $m)
 ->sum('total_amount');
 
 $data['datasets'][0]['data'][] = $revenue;
@@ -275,8 +270,7 @@ $data['datasets'][0]['data'][] = $revenue;
 break;
 
 case 'yearly':
-                // Lấy doanh thu 5 năm gần đây
-                
+
 $currentYear = Carbon::now()->year;
 $startYear = $currentYear - 4;
 
@@ -284,10 +278,9 @@ for ($y = $startYear; $y <= $currentYear; $y++) {
 $data['labels'][] = $y;
 
 $revenue = Order::where('status', 'delivered')
-                        ->whereYear('created_at', $y)
-                        ->where('payment_status', 'paid')
-                        ->whereNotNull('delivered_at')
-                        ->whereYear('delivered_at', $y)
+->where('payment_status', 'paid')
+->whereNotNull('delivered_at')
+->whereYear('delivered_at', $y)
 ->sum('total_amount');
 
 $data['datasets'][0]['data'][] = $revenue;
@@ -306,11 +299,10 @@ public function getRevenueChart(Request $request)
 $type = $request->input('type', 'monthly');
 $year = $request->input('year', Carbon::now()->year);
 $month = $request->input('month', Carbon::now()->month);
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
+$startDate = $request->input('start_date');
+$endDate = $request->input('end_date');
 
-        $data = $this->getRevenueChartData($type, $year, $month);
-        $data = $this->getRevenueChartData($type, $year, $month, $startDate, $endDate);
+$data = $this->getRevenueChartData($type, $year, $month, $startDate, $endDate);
 
 return response()->json($data);
 }
@@ -362,4 +354,94 @@ public function destroy(string $id)
 {
 //
 }
+    
+    /**
+     * Tính toán khoảng thời gian dựa trên loại bộ lọc
+     */
+    private function getDateRangeByType($type, $year, $month, $startDate = null, $endDate = null)
+    {
+        switch ($type) {
+            case 'daily':
+                // Lấy tháng được chọn
+                $start = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+                $end = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+                break;
+                
+            case 'monthly':
+                // Lấy năm được chọn
+                $start = Carbon::createFromDate($year, 1, 1)->startOfYear();
+                $end = Carbon::createFromDate($year, 12, 31)->endOfYear();
+                break;
+                
+            case 'yearly':
+                // Lấy 5 năm gần nhất
+                $start = Carbon::createFromDate($year - 4, 1, 1)->startOfYear();
+                $end = Carbon::createFromDate($year, 12, 31)->endOfYear();
+                break;
+                
+            case 'date_range':
+                if ($startDate && $endDate) {
+                    $start = Carbon::parse($startDate)->startOfDay();
+                    $end = Carbon::parse($endDate)->endOfDay();
+                } else {
+                    // Mặc định 30 ngày gần nhất
+                    $start = Carbon::now()->subDays(30)->startOfDay();
+                    $end = Carbon::now()->endOfDay();
+                }
+                break;
+                
+            default:
+                $start = Carbon::createFromDate($year, 1, 1)->startOfYear();
+                $end = Carbon::createFromDate($year, 12, 31)->endOfYear();
+        }
+        
+        return ['start' => $start, 'end' => $end];
+    }
+    
+    /**
+     * Lấy dữ liệu Dashboard theo bộ lọc (AJAX)
+     */
+    private function getFilteredDashboardData($type, $year, $month, $startDate = null, $endDate = null)
+    {
+        $dateRange = $this->getDateRangeByType($type, $year, $month, $startDate, $endDate);
+        
+        // Doanh thu theo bộ lọc
+        $totalRevenue = Order::where('status', 'delivered')
+            ->where('payment_status', 'paid')
+            ->whereNotNull('delivered_at')
+            ->whereBetween('delivered_at', [$dateRange['start'], $dateRange['end']])
+            ->sum('total_amount');
+        
+        // Số sản phẩm bán được
+        $totalProductsSold = DB::table('orders')
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->where('orders.status', 'delivered')
+            ->where('orders.payment_status', 'paid')
+            ->whereNotNull('orders.delivered_at')
+            ->whereBetween('orders.delivered_at', [$dateRange['start'], $dateRange['end']])
+            ->sum('order_items.quantity');
+        
+        // Đơn hàng đang xử lý
+        $processingOrders = Order::whereIn('status', ['pending', 'processing'])
+            ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']])
+            ->count();
+        
+        // Đơn hàng đã giao thành công
+        $deliveredOrders = Order::where('status', 'delivered')
+            ->whereNotNull('delivered_at')
+            ->whereBetween('delivered_at', [$dateRange['start'], $dateRange['end']])
+            ->count();
+        
+        // Lấy dữ liệu biểu đồ
+        $chartData = $this->getRevenueChartData($type, $year, $month, $startDate, $endDate);
+        
+        return response()->json([
+            'success' => true,
+            'totalRevenue' => $totalRevenue,
+            'totalProductsSold' => $totalProductsSold,
+            'processingOrders' => $processingOrders,
+            'deliveredOrders' => $deliveredOrders,
+            'chartData' => $chartData
+        ]);
+    }
 }
