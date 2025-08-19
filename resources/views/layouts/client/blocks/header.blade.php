@@ -73,14 +73,36 @@
 </div>
 </div>
 <!--End Account-->
+                
+                <!--Notifications (for logged in users)-->
+                @auth
+                <div class="notifications-parent iconset">
+                    <div class="notifications-link" title="Thông báo" onclick="toggleNotifications()">
+                        <i class="hdr-icon icon anm anm-bell"></i>
+                        <span class="notification-count" id="client-notifications-count" style="display: none;">0</span>
+                    </div>
+                    <div id="notificationsBox" style="display: none;">
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <h6>Thông báo đơn hàng</h6>
+                            </div>
+                            <div class="notification-list" id="client-notifications-list">
+                                <div class="no-notifications text-center text-muted">
+                                    Không có thông báo mới
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endauth
+                <!--End Notifications-->
+                
 <!--Minicart-->
 <div class="header-cart iconset" title="Cart">
-                    <a href="{{ route('client.cart.index') }}" class="header-cart btn-minicart clr-none"><i class="hdr-icon icon anm anm-cart-l"></i><span class="cart-count">2</span></a>
-                    {{-- <a href="#;" class="header-cart btn-minicart clr-none" data-bs-toggle="offcanvas" data-bs-target="#minicart-drawer"><i class="hdr-icon icon anm anm-cart-l"></i><span class="cart-count">2</span></a> --}}
-                    <a href="{{ route('client.cart.index') }}" class="header-cart btn-minicart clr-none">
-                        <i class="hdr-icon icon anm anm-cart-l"></i>
-                        <span class="cart-count" data-cart-count="0" style="display: none;">0</span>
-                    </a>
+<a href="{{ route('client.cart.index') }}" class="header-cart btn-minicart clr-none">
+<i class="hdr-icon icon anm anm-cart-l"></i>
+<span class="cart-count" data-cart-count="0" style="display: none;">0</span>
+</a>
 </div>
 <!--End Minicart-->
 <!--Mobile Toggle-->

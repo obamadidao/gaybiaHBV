@@ -115,8 +115,7 @@
 </div>
 
 <div class="table-bottom-brd table-responsive" style="max-height: 400px; overflow-y: auto;">
-                                <table class="table align-middle text-center order-table">
-                                <table class="table align-middle text-center order-table" id="orderTable">
+<table class="table align-middle text-center order-table" id="orderTable">
 <thead>
 <tr class="table-head text-nowrap">
 <th scope="col">Mã đơn hàng</th>
@@ -129,8 +128,7 @@
 </thead>
 <tbody>
 @foreach ($orders as $order)
-                                            <tr>
-                                            <tr id="order-row-{{ $order->id }}">
+<tr id="order-row-{{ $order->id }}">
 <td><span class="id">#{{ substr($order->order_number, -7) }}</span></td>
 <td><span class="name">{{ $order->created_at->format('d/m/Y') }}</span></td>
 <td><span class="price fw-500">{{ number_format($order->total_amount, 0, ',', '.') }} VNĐ</span></td>
@@ -140,8 +138,7 @@
 </span>
 </td>
 <td>
-                                                    <span class="badge bg-{{ $order->status === 'pending' ? 'warning' : ($order->status === 'processing' ? 'info' : ($order->status === 'shipped' ? 'primary' : ($order->status === 'delivered' ? 'success' : 'danger'))) }}">
-                                                    <span class="badge bg-{{ $order->status === 'pending' ? 'warning' : ($order->status === 'processing' ? 'info' : ($order->status === 'shipped' ? 'primary' : ($order->status === 'delivered' ? 'success' : 'danger'))) }}" id="order-status-{{ $order->id }}">
+<span class="badge bg-{{ $order->status === 'pending' ? 'warning' : ($order->status === 'processing' ? 'info' : ($order->status === 'shipped' ? 'primary' : ($order->status === 'delivered' ? 'success' : 'danger'))) }}" id="order-status-{{ $order->id }}">
 {{ $order->status === 'pending' ? 'Chờ xử lý' : ($order->status === 'processing' ? 'Đang xử lý' : ($order->status === 'shipped' ? 'Đã gửi hàng' : ($order->status === 'delivered' ? 'Đã giao' : 'Đã hủy'))) }}
 </span>
 </td>
@@ -544,6 +541,9 @@ placeholder="Vui lòng cho biết lý do hủy đơn hàng..." required maxlengt
            // Update modal title
            document.getElementById('orderDetailModalLabel').textContent = `Chi tiết đơn hàng #${order.order_number}`;
            
+            // Store order ID for realtime updates
+            modalContent.setAttribute('data-order-id', order.id);
+            
            // Show/hide cancel button based on order status
            if (order.can_be_cancelled) {
                cancelOrderBtn.style.display = 'inline-block';
@@ -794,15 +794,9 @@ placeholder="Vui lòng cho biết lý do hủy đơn hàng..." required maxlengt
                    
                    // Show success message
                    showSuccessMessage(data.message || 'Hủy đơn hàng thành công!');
-                    
-                    // Reload page to refresh order list
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                    
 
-                    // Cập nhật trạng thái đơn hàng trên bảng mà không reload trang
-                    updateOrderRowAfterCancel(orderId, reason);
+                   // Cập nhật trạng thái đơn hàng trên bảng mà không reload trang
+                   updateOrderRowAfterCancel(orderId, reason);
 
                } else {
                    showFieldError('cancellationReason', data.message || 'Có lỗi xảy ra khi hủy đơn hàng');
@@ -820,21 +814,21 @@ placeholder="Vui lòng cho biết lý do hủy đơn hàng..." required maxlengt
            });
        });
 
-        // Cập nhật trạng thái đơn hàng trên bảng sau khi hủy
-        function updateOrderRowAfterCancel(orderId, reason) {
-            // Cập nhật badge trạng thái
-            var statusBadge = document.getElementById('order-status-' + orderId);
-            if (statusBadge) {
-                statusBadge.className = 'badge bg-danger';
-                statusBadge.textContent = 'Đã hủy';
-            }
-            // Optionally, disable the "Chi tiết" link or add a tooltip
-            var row = document.getElementById('order-row-' + orderId);
-            if (row) {
-                // Optionally, you can add a class to gray out the row
-                row.classList.add('table-danger');
-            }
-        }
+       // Cập nhật trạng thái đơn hàng trên bảng sau khi hủy
+       function updateOrderRowAfterCancel(orderId, reason) {
+           // Cập nhật badge trạng thái
+           var statusBadge = document.getElementById('order-status-' + orderId);
+           if (statusBadge) {
+               statusBadge.className = 'badge bg-danger';
+               statusBadge.textContent = 'Đã hủy';
+           }
+           // Optionally, disable the "Chi tiết" link or add a tooltip
+           var row = document.getElementById('order-row-' + orderId);
+           if (row) {
+               // Optionally, you can add a class to gray out the row
+               row.classList.add('table-danger');
+           }
+       }
 
        function showFieldError(fieldId, message) {
            const field = document.getElementById(fieldId);
@@ -864,5 +858,86 @@ placeholder="Vui lòng cho biết lý do hủy đơn hàng..." required maxlengt
                }
            }, 5000);
        }
+
+        // Cập nhật modal chi tiết đơn hàng khi có thay đổi realtime
+        function updateOrderDetailModal(data) {
+            const modalContent = document.getElementById('orderDetailContent');
+            if (!modalContent) return;
+            
+            const orderIdInModal = modalContent.getAttribute('data-order-id');
+            if (orderIdInModal != data.order_id) return;
+            
+            // Cập nhật badge trạng thái trong modal
+            const statusBadges = modalContent.querySelectorAll('.badge');
+            statusBadges.forEach(badge => {
+                if (badge.textContent.includes('Chờ xử lý') || 
+                    badge.textContent.includes('Đang xử lý') || 
+                    badge.textContent.includes('Đã gửi hàng') ||
+                    badge.textContent.includes('Đã giao') ||
+                    badge.textContent.includes('Đã hủy')) {
+                    
+                    badge.className = `badge bg-${getClientStatusBadgeClass(data.new_status)}`;
+                    badge.textContent = data.status_text;
+                }
+            });
+            
+            // Cập nhật nút hủy đơn hàng
+            const cancelOrderBtn = document.getElementById('cancelOrderBtn');
+            if (cancelOrderBtn) {
+                if (data.new_status === 'pending' || data.new_status === 'processing') {
+                    cancelOrderBtn.style.display = 'inline-block';
+                } else {
+                    cancelOrderBtn.style.display = 'none';
+                }
+            }
+            
+            // Thêm thông tin hủy đơn nếu trạng thái là cancelled
+            if (data.new_status === 'cancelled') {
+                addCancellationInfo(modalContent, data);
+            }
+        }
+
+        function addCancellationInfo(modalContent, data) {
+            // Tìm phần thông tin đơn hàng để thêm thông tin hủy
+            const orderInfoCard = modalContent.querySelector('.card-body');
+            if (!orderInfoCard) return;
+            
+            // Kiểm tra xem thông tin hủy đã có chưa
+            if (orderInfoCard.querySelector('.cancellation-info')) return;
+            
+            const cancellationDiv = document.createElement('div');
+            cancellationDiv.className = 'cancellation-info mt-3 pt-3 border-top';
+            cancellationDiv.innerHTML = `
+                <div class="row mb-2">
+                    <div class="col-5"><strong>Lý do hủy:</strong></div>
+                    <div class="col-7 text-danger">${data.cancellation_reason || 'Đơn hàng đã bị hủy'}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-5"><strong>Thời gian hủy:</strong></div>
+                    <div class="col-7">${new Date().toLocaleString('vi-VN')}</div>
+                </div>
+            `;
+            
+            orderInfoCard.appendChild(cancellationDiv);
+        }
+
+        function getClientStatusBadgeClass(status) {
+            const statusClasses = {
+                'pending': 'warning',
+                'confirmed': 'info',
+                'processing': 'info',
+                'shipped': 'primary',
+                'delivered': 'success',
+                'cancelled': 'danger',
+                'refunded': 'secondary'
+            };
+            return statusClasses[status] || 'secondary';
+        }
+
+        // Thêm listener cho realtime updates trong client layout
+        window.addEventListener('load', function() {
+            // Thêm function này vào global scope để có thể gọi từ client layout
+            window.updateProfileOrderDetail = updateOrderDetailModal;
+        });
    </script>
 @endpush

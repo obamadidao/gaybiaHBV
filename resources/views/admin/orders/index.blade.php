@@ -118,7 +118,7 @@ Danh sách đơn hàng ({{ $orders->total() }} đơn hàng)
 <strong>{{ number_format($order->total_amount) }}đ</strong>
 </td>
 <td>
-<span class="badge {{ $order->status_badge_class }}">
+<span class="badge bg-{{ $order->status_badge_class }}">
 {{ $order->status_text }}
 </span>
 </td>
@@ -190,56 +190,49 @@ onclick="showEditModal({{ $order->id }})">
 <input type="text" name="shipping_address[address]" class="form-control" required>
 </div>
 <div class="row mb-3">
-                        <div class="col-md-4">
-                        <div class="col-md-6">
+<div class="col-md-6">
 <label class="form-label">Phường/Xã <span class="text-danger">*</span></label>
 <input type="text" name="shipping_address[ward]" class="form-control" required>
 </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Quận/Huyện <span class="text-danger">*</span></label>
-                            <input type="text" name="shipping_address[district]" class="form-control" required>
-                        </div>
-                        <div class="col-md-4">
-                        <div class="col-md-6">
+<div class="col-md-6">
 <label class="form-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
-                            <input type="text" name="shipping_address[city]" class="form-control" required>
-                            <select name="shipping_address[city]" class="form-control" required>
-                                <option value="">Chọn tỉnh/thành phố</option>
-                                <option value="Tuyên Quang">Tuyên Quang</option>
-                                <option value="Lào Cai">Lào Cai</option>
-                                <option value="Thái Nguyên">Thái Nguyên</option>
-                                <option value="Phú Thọ">Phú Thọ</option>
-                                <option value="Bắc Ninh">Bắc Ninh</option>
-                                <option value="Hưng Yên">Hưng Yên</option>
-                                <option value="Thành phố Hải Phòng">Thành phố Hải Phòng</option>
-                                <option value="Ninh Bình">Ninh Bình</option>
-                                <option value="Quảng Trị">Quảng Trị</option>
-                                <option value="Thành phố Đà Nẵng">Thành phố Đà Nẵng</option>
-                                <option value="Quảng Ngãi">Quảng Ngãi</option>
-                                <option value="Gia Lai">Gia Lai</option>
-                                <option value="Khánh Hoà">Khánh Hoà</option>
-                                <option value="Lâm Đồng">Lâm Đồng</option>
-                                <option value="Đắk Lắk">Đắk Lắk</option>
-                                <option value="Thành phố Hồ Chí Minh">Thành phố Hồ Chí Minh</option>
-                                <option value="Đồng Nai">Đồng Nai</option>
-                                <option value="Tây Ninh">Tây Ninh</option>
-                                <option value="Thành phố Cần Thơ">Thành phố Cần Thơ</option>
-                                <option value="Vĩnh Long">Vĩnh Long</option>
-                                <option value="Đồng Tháp">Đồng Tháp</option>
-                                <option value="Cà Mau">Cà Mau</option>
-                                <option value="An Giang">An Giang</option>
-                                <option value="Thành phố Hà Nội">Thành phố Hà Nội</option>
-                                <option value="Thành phố Huế">Thành phố Huế</option>
-                                <option value="Lai Châu">Lai Châu</option>
-                                <option value="Điện Biên">Điện Biên</option>
-                                <option value="Sơn La">Sơn La</option>
-                                <option value="Lạng Sơn">Lạng Sơn</option>
-                                <option value="Quảng Ninh">Quảng Ninh</option>
-                                <option value="Thanh Hoá">Thanh Hoá</option>
-                                <option value="Nghệ An">Nghệ An</option>
-                                <option value="Hà Tĩnh">Hà Tĩnh</option>
-                                <option value="Cao Bằng">Cao Bằng</option>
-                            </select>
+<select name="shipping_address[city]" class="form-control" required>
+<option value="">Chọn tỉnh/thành phố</option>
+<option value="Tuyên Quang">Tuyên Quang</option>
+<option value="Lào Cai">Lào Cai</option>
+<option value="Thái Nguyên">Thái Nguyên</option>
+<option value="Phú Thọ">Phú Thọ</option>
+<option value="Bắc Ninh">Bắc Ninh</option>
+<option value="Hưng Yên">Hưng Yên</option>
+<option value="Thành phố Hải Phòng">Thành phố Hải Phòng</option>
+<option value="Ninh Bình">Ninh Bình</option>
+<option value="Quảng Trị">Quảng Trị</option>
+<option value="Thành phố Đà Nẵng">Thành phố Đà Nẵng</option>
+<option value="Quảng Ngãi">Quảng Ngãi</option>
+<option value="Gia Lai">Gia Lai</option>
+<option value="Khánh Hoà">Khánh Hoà</option>
+<option value="Lâm Đồng">Lâm Đồng</option>
+<option value="Đắk Lắk">Đắk Lắk</option>
+<option value="Thành phố Hồ Chí Minh">Thành phố Hồ Chí Minh</option>
+<option value="Đồng Nai">Đồng Nai</option>
+<option value="Tây Ninh">Tây Ninh</option>
+<option value="Thành phố Cần Thơ">Thành phố Cần Thơ</option>
+<option value="Vĩnh Long">Vĩnh Long</option>
+<option value="Đồng Tháp">Đồng Tháp</option>
+<option value="Cà Mau">Cà Mau</option>
+<option value="An Giang">An Giang</option>
+<option value="Thành phố Hà Nội">Thành phố Hà Nội</option>
+<option value="Thành phố Huế">Thành phố Huế</option>
+<option value="Lai Châu">Lai Châu</option>
+<option value="Điện Biên">Điện Biên</option>
+<option value="Sơn La">Sơn La</option>
+<option value="Lạng Sơn">Lạng Sơn</option>
+<option value="Quảng Ninh">Quảng Ninh</option>
+<option value="Thanh Hoá">Thanh Hoá</option>
+<option value="Nghệ An">Nghệ An</option>
+<option value="Hà Tĩnh">Hà Tĩnh</option>
+<option value="Cao Bằng">Cao Bằng</option>
+</select>
 </div>
 </div>
 <div class="mb-3">
@@ -272,7 +265,6 @@ function showEditModal(orderId) {
            form.querySelector('[name="shipping_address[phone]"]').value = data.shipping_address.phone;
            form.querySelector('[name="shipping_address[address]"]').value = data.shipping_address.address;
            form.querySelector('[name="shipping_address[ward]"]').value = data.shipping_address.ward;
-            form.querySelector('[name="shipping_address[district]"]').value = data.shipping_address.district;
            form.querySelector('[name="shipping_address[city]"]').value = data.shipping_address.city;
            form.querySelector('[name="admin_notes"]').value = data.admin_notes;
 
@@ -289,3 +281,71 @@ function showEditModal(orderId) {
 @endsection
 
 @push('styles')
+<style>
+.new-order-row {
+    position: relative;
+}
+
+.new-order-row::before {
+    content: "MỚI";
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #28a745;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-weight: bold;
+    z-index: 1;
+    animation: fadeInOut 5s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: scale(0.8); }
+    20% { opacity: 1; transform: scale(1); }
+    80% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.8); }
+}
+
+.table tr {
+    transition: background-color 0.3s ease;
+}
+
+.highlight-new {
+    animation: highlightPulse 2s ease-in-out;
+}
+
+@keyframes highlightPulse {
+    0% { background-color: #d4edda; }
+    50% { background-color: #c3e6cb; }
+    100% { background-color: #d4edda; }
+}
+
+.customer-cancelled-icon {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+.customer-cancellation-info {
+    animation: slideInDown 0.5s ease-out;
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+@endpush 

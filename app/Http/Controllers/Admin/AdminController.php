@@ -17,23 +17,22 @@ class AdminController extends Controller
 /**
     * Display a listing of the resource.
     */
-    public function index()
-    public function index(Request $request)
+public function index(Request $request)
 {
-        // Lấy thông tin bộ lọc
-        $type = $request->input('type', 'monthly');
-        $year = $request->input('year', Carbon::now()->year);
-        $month = $request->input('month', Carbon::now()->month);
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-        
-        // Tính toán khoảng thời gian dựa trên bộ lọc
-        $dateRange = $this->getDateRangeByType($type, $year, $month, $startDate, $endDate);
-        
-        // Nếu là AJAX request và có bộ lọc, xử lý dữ liệu theo bộ lọc
-        if ($request->ajax() && $request->has('type')) {
-            return $this->getFilteredDashboardData($type, $year, $month, $startDate, $endDate);
-        }
+// Lấy thông tin bộ lọc
+$type = $request->input('type', 'monthly');
+$year = $request->input('year', Carbon::now()->year);
+$month = $request->input('month', Carbon::now()->month);
+$startDate = $request->input('start_date');
+$endDate = $request->input('end_date');
+
+// Tính toán khoảng thời gian dựa trên bộ lọc
+$dateRange = $this->getDateRangeByType($type, $year, $month, $startDate, $endDate);
+
+// Nếu là AJAX request và có bộ lọc, xử lý dữ liệu theo bộ lọc
+if ($request->ajax() && $request->has('type')) {
+return $this->getFilteredDashboardData($type, $year, $month, $startDate, $endDate);
+}
 // Thống kê doanh thu
 $currentMonth = Carbon::now()->month;
 $currentYear = Carbon::now()->year;
@@ -354,94 +353,179 @@ public function destroy(string $id)
 {
 //
 }
-    
+
     /**
-     * Tính toán khoảng thời gian dựa trên loại bộ lọc
+     * API endpoint cho fallback polling - lấy notifications cho admin
      */
-    private function getDateRangeByType($type, $year, $month, $startDate = null, $endDate = null)
+    public function getNotifications(Request $request)
     {
-        switch ($type) {
-            case 'daily':
-                // Lấy tháng được chọn
-                $start = Carbon::createFromDate($year, $month, 1)->startOfMonth();
-                $end = Carbon::createFromDate($year, $month, 1)->endOfMonth();
-                break;
-                
-            case 'monthly':
-                // Lấy năm được chọn
-                $start = Carbon::createFromDate($year, 1, 1)->startOfYear();
-                $end = Carbon::createFromDate($year, 12, 31)->endOfYear();
-                break;
-                
-            case 'yearly':
-                // Lấy 5 năm gần nhất
-                $start = Carbon::createFromDate($year - 4, 1, 1)->startOfYear();
-                $end = Carbon::createFromDate($year, 12, 31)->endOfYear();
-                break;
-                
-            case 'date_range':
-                if ($startDate && $endDate) {
-                    $start = Carbon::parse($startDate)->startOfDay();
-                    $end = Carbon::parse($endDate)->endOfDay();
-                } else {
-                    // Mặc định 30 ngày gần nhất
-                    $start = Carbon::now()->subDays(30)->startOfDay();
-                    $end = Carbon::now()->endOfDay();
-                }
-                break;
-                
-            default:
-                $start = Carbon::createFromDate($year, 1, 1)->startOfYear();
-                $end = Carbon::createFromDate($year, 12, 31)->endOfYear();
+        $lastUpdate = $request->query('last_update', now()->subMinutes(5)->toISOString());
+        
+        // Lấy đơn hàng mới sau thời điểm cuối cùng
+        $newOrders = Order::where('created_at', '>', $lastUpdate)
+            ->with(['user', 'customer.user'])
+            ->latest('created_at')
+            ->limit(5)
+            ->get();
+        
+        // Lấy đơn hàng có thay đổi trạng thái sau thời điểm cuối cùng
+        $updatedOrders = Order::where('updated_at', '>', $lastUpdate)
+            ->where('created_at', '<=', $lastUpdate) // Loại trừ đơn hàng mới
+            ->with(['user', 'customer.user'])
+            ->latest('updated_at')
+            ->limit(10)
+            ->get();
+        
+        $notifications = [];
+        
+        // Thêm thông báo đơn hàng mới
+        foreach ($newOrders as $order) {
+            $notifications[] = [
+                'type' => 'new_order',
+                'order_id' => $order->id,
+                'order_code' => $order->order_number,
+                'customer_name' => $order->user->name ?? $order->customer->full_name ?? 'Guest',
+                'customer_email' => $order->user->email ?? '',
+                'total_amount' => $order->total_amount,
+                'payment_method' => $order->payment_method,
+                'created_at' => $order->created_at->toISOString(),
+                'message' => "Đơn hàng mới #{$order->order_number}"
+            ];
         }
         
-        return ['start' => $start, 'end' => $end];
-    }
-    
-    /**
-     * Lấy dữ liệu Dashboard theo bộ lọc (AJAX)
-     */
-    private function getFilteredDashboardData($type, $year, $month, $startDate = null, $endDate = null)
-    {
-        $dateRange = $this->getDateRangeByType($type, $year, $month, $startDate, $endDate);
+        // Thêm thông báo thay đổi trạng thái
+        foreach ($updatedOrders as $order) {
+            $notifications[] = [
+                'type' => 'status_changed',
+                'order_id' => $order->id,
+                'order_code' => $order->order_number,
+                'customer_name' => $order->user->name ?? $order->customer->full_name ?? 'Guest',
+                'total_amount' => $order->total_amount,
+                'new_status' => $order->status,
+                'updated_at' => $order->updated_at->toISOString(),
+                'status_text' => $this->getStatusText($order->status),
+                'message' => "Đơn hàng #{$order->order_number} đã cập nhật"
+            ];
+        }
         
-        // Doanh thu theo bộ lọc
-        $totalRevenue = Order::where('status', 'delivered')
-            ->where('payment_status', 'paid')
-            ->whereNotNull('delivered_at')
-            ->whereBetween('delivered_at', [$dateRange['start'], $dateRange['end']])
-            ->sum('total_amount');
-        
-        // Số sản phẩm bán được
-        $totalProductsSold = DB::table('orders')
-            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
-            ->where('orders.status', 'delivered')
-            ->where('orders.payment_status', 'paid')
-            ->whereNotNull('orders.delivered_at')
-            ->whereBetween('orders.delivered_at', [$dateRange['start'], $dateRange['end']])
-            ->sum('order_items.quantity');
-        
-        // Đơn hàng đang xử lý
-        $processingOrders = Order::whereIn('status', ['pending', 'processing'])
-            ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']])
-            ->count();
-        
-        // Đơn hàng đã giao thành công
-        $deliveredOrders = Order::where('status', 'delivered')
-            ->whereNotNull('delivered_at')
-            ->whereBetween('delivered_at', [$dateRange['start'], $dateRange['end']])
-            ->count();
-        
-        // Lấy dữ liệu biểu đồ
-        $chartData = $this->getRevenueChartData($type, $year, $month, $startDate, $endDate);
+        // Sắp xếp theo thời gian
+        usort($notifications, function($a, $b) {
+            $timeA = $a['created_at'] ?? $a['updated_at'];
+            $timeB = $b['created_at'] ?? $b['updated_at'];
+            return strtotime($timeB) - strtotime($timeA);
+        });
         
         return response()->json([
             'success' => true,
-            'totalRevenue' => $totalRevenue,
-            'totalProductsSold' => $totalProductsSold,
-            'processingOrders' => $processingOrders,
-            'deliveredOrders' => $deliveredOrders,
-            'chartData' => $chartData
+            'notifications' => array_slice($notifications, 0, 10),
+            'timestamp' => now()->toISOString()
         ]);
     }
+
+    /**
+     * Helper để lấy status text
+     */
+    private function getStatusText(string $status): string
+    {
+        return match($status) {
+            'pending' => 'Chờ xử lý',
+            'confirmed' => 'Đã xác nhận',
+            'processing' => 'Đang xử lý',
+            'shipped' => 'Đang giao hàng',
+            'delivered' => 'Đã giao hàng',
+            'cancelled' => 'Đã hủy',
+            'refunded' => 'Đã hoàn tiền',
+            default => 'Không xác định'
+        };
+    }
+
+/**
+    * Tính toán khoảng thời gian dựa trên loại bộ lọc
+    */
+private function getDateRangeByType($type, $year, $month, $startDate = null, $endDate = null)
+{
+switch ($type) {
+case 'daily':
+// Lấy tháng được chọn
+$start = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+$end = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+break;
+
+case 'monthly':
+// Lấy năm được chọn
+$start = Carbon::createFromDate($year, 1, 1)->startOfYear();
+$end = Carbon::createFromDate($year, 12, 31)->endOfYear();
+break;
+
+case 'yearly':
+// Lấy 5 năm gần nhất
+$start = Carbon::createFromDate($year - 4, 1, 1)->startOfYear();
+$end = Carbon::createFromDate($year, 12, 31)->endOfYear();
+break;
+
+case 'date_range':
+if ($startDate && $endDate) {
+$start = Carbon::parse($startDate)->startOfDay();
+$end = Carbon::parse($endDate)->endOfDay();
+} else {
+// Mặc định 30 ngày gần nhất
+$start = Carbon::now()->subDays(30)->startOfDay();
+$end = Carbon::now()->endOfDay();
+}
+break;
+
+default:
+$start = Carbon::createFromDate($year, 1, 1)->startOfYear();
+$end = Carbon::createFromDate($year, 12, 31)->endOfYear();
+}
+
+return ['start' => $start, 'end' => $end];
+}
+
+/**
+    * Lấy dữ liệu Dashboard theo bộ lọc (AJAX)
+    */
+private function getFilteredDashboardData($type, $year, $month, $startDate = null, $endDate = null)
+{
+$dateRange = $this->getDateRangeByType($type, $year, $month, $startDate, $endDate);
+
+// Doanh thu theo bộ lọc
+$totalRevenue = Order::where('status', 'delivered')
+->where('payment_status', 'paid')
+->whereNotNull('delivered_at')
+->whereBetween('delivered_at', [$dateRange['start'], $dateRange['end']])
+->sum('total_amount');
+
+// Số sản phẩm bán được
+$totalProductsSold = DB::table('orders')
+->join('order_items', 'orders.id', '=', 'order_items.order_id')
+->where('orders.status', 'delivered')
+->where('orders.payment_status', 'paid')
+->whereNotNull('orders.delivered_at')
+->whereBetween('orders.delivered_at', [$dateRange['start'], $dateRange['end']])
+->sum('order_items.quantity');
+
+// Đơn hàng đang xử lý
+$processingOrders = Order::whereIn('status', ['pending', 'processing'])
+->whereBetween('created_at', [$dateRange['start'], $dateRange['end']])
+->count();
+
+// Đơn hàng đã giao thành công
+$deliveredOrders = Order::where('status', 'delivered')
+->whereNotNull('delivered_at')
+->whereBetween('delivered_at', [$dateRange['start'], $dateRange['end']])
+->count();
+
+// Lấy dữ liệu biểu đồ
+$chartData = $this->getRevenueChartData($type, $year, $month, $startDate, $endDate);
+
+return response()->json([
+'success' => true,
+'totalRevenue' => $totalRevenue,
+'totalProductsSold' => $totalProductsSold,
+'processingOrders' => $processingOrders,
+'deliveredOrders' => $deliveredOrders,
+'chartData' => $chartData
+]);
+}
 }
