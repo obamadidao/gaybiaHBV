@@ -4,19 +4,20 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
+use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Coupon;
 use App\Models\Product;
+use App\Models\ProductReview;
 use App\Models\User;
-use App\Models\CartItem;
 use App\Models\CustomerProfile;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ClientController extends Controller
@@ -127,29 +128,31 @@ $user = Auth::user();
 if ($user->role_id == 2) {
 $request->session()->regenerate();
 
-    // Đồng bộ giỏ hàng từ localStorage (nếu có dữ liệu được gửi từ frontend)
-    $successMessage = 'Đăng nhập thành công! Chào mừng ' . $user->name;
-    $mergedCount = 0;
+// Đồng bộ giỏ hàng từ localStorage (nếu có dữ liệu được gửi từ frontend)
+$mergedCount = 0;
 
-    if ($request->has('cart_data')) {
-        $cartDataInput = $request->input('cart_data');
-        $cartData = is_string($cartDataInput) ? json_decode($cartDataInput, true) : $cartDataInput;
+if ($request->has('cart_data')) {
+$cartDataInput = $request->input('cart_data');
+$cartData = is_string($cartDataInput) ? json_decode($cartDataInput, true) : $cartDataInput;
 
-        $mergedCount = $this->mergeLocalStorageCartToUser($user->id, $cartData);
-        if ($mergedCount > 0) {
-            $successMessage .= " Đã đồng bộ {$mergedCount} sản phẩm từ giỏ hàng trước đó.";
-        }
-    }
+$mergedCount = $this->mergeLocalStorageCartToUser($user->id, $cartData);
+}
 
-    return redirect()->intended(route('client.index'))
-        ->with('success', $successMessage);
+$successMessage = 'Đăng nhập thành công! Chào mừng ' . $user->name;
+if ($mergedCount > 0) {
+$successMessage .= " Đã đồng bộ {$mergedCount} sản phẩm từ giỏ hàng trước đó.";
+}
+
+return redirect()->intended(route('client.index'))
+->with('success', $successMessage);
 } else {
-    // Đăng xuất nếu không phải customer
-    Auth::logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+// Đăng xuất nếu không phải customer
+Auth::logout();
+$request->session()->invalidate();
+$request->session()->regenerateToken();
 
-    return back()->with('error', 'Tài khoản này không có quyền truy cập vào trang khách hàng.');
+return back()->with('error', 'Tài khoản này không có quyền truy cập vào trang khách hàng.');
+}
 }
 
 return back()->withErrors([
@@ -399,12 +402,9 @@ return [
 'quantity' => $item->quantity,
 'unit_price' => $item->unit_price,
 'total_price' => $item->total_price,
-                    'product_image' => $item->product && $item->product->images->isNotEmpty() 
-                        ? $item->product->images->first()->image_url
-                        : null,
-                    'product_primary_image' => $item->product && $item->product->primaryImage
-                        ? $item->product->primaryImage->url 
-                        : null
+'product_image' => $item->product && $item->product->primaryImage
+? $item->product->primaryImage->url 
+: null
 ];
 })
 ];
@@ -578,7 +578,17 @@ $relatedProduct->stats = [
 return $relatedProduct;
 });
 
-return view('client.product', compact('product', 'reviewStats', 'variantsByType', 'relatedProducts'));
+        return view('client.product', compact('product', 'reviewStats', 'variantsByType', 'relatedProducts'));
+        // Lấy số lượng sản phẩm hiện tại trong giỏ hàng của user
+        $quantityInCart = $this->getProductQuantityInCart($product->id);
+        
+        // Lấy số lượng theo từng variant combination trong cart
+        $cartQuantitiesByVariants = $this->getCartQuantitiesByVariants($product->id);
+
+        // Lấy thông tin review cho user hiện tại
+        $reviewInfo = $this->getReviewInfoForUser($product->id);
+
+        return view('client.product', compact('product', 'reviewStats', 'variantsByType', 'relatedProducts', 'quantityInCart', 'cartQuantitiesByVariants', 'reviewInfo'));
 }
 
 /**
@@ -628,63 +638,196 @@ public function destroy(string $id)
 {
 //
 }
-/**
-     * Đồng bộ giỏ hàng từ localStorage sang user account
+
+    /**
+     * Lấy số lượng sản phẩm cụ thể trong giỏ hàng của user hiện tại
      *
-     * @param int $userId
-     * @param array $cartData
-     * @return int Số lượng sản phẩm đã được đồng bộ
+     * @param int $productId
+     * @return int
      */
-    private function mergeLocalStorageCartToUser($userId, $cartData)
+    private function getProductQuantityInCart($productId)
     {
-        try {
-            DB::beginTransaction();
+        $userId = Auth::id();
+        $sessionId = session()->getId();
 
-            if (empty($cartData) || !is_array($cartData)) {
-                DB::commit();
-                return 0;
-            }
+        if ($userId) {
+            // User đã đăng nhập - lấy từ user cart
+            return CartItem::where('user_id', $userId)
+                ->where('product_id', $productId)
+                ->sum('quantity');
+        } else {
+            // User chưa đăng nhập - lấy từ session cart
+            return CartItem::where('session_id', $sessionId)
+                ->whereNull('user_id')
+                ->where('product_id', $productId)
+                ->sum('quantity');
+        }
+    }
+
+    /**
+     * Lấy thông tin quantity trong cart theo từng variant combination
+     */
+    private function getCartQuantitiesByVariants($productId)
+    {
+        $userId = Auth::id();
+        $sessionId = session()->getId();
+
+        $cartItems = collect();
+        
+        if ($userId) {
+            $cartItems = CartItem::where('user_id', $userId)
+                ->where('product_id', $productId)
+                ->get();
+        } else {
+            $cartItems = CartItem::where('session_id', $sessionId)
+                ->whereNull('user_id')
+                ->where('product_id', $productId)
+                ->get();
+        }
+
+        $result = [];
+        foreach ($cartItems as $item) {
+            $variantKey = $this->generateVariantKey($item->selected_variants ?: []);
+            $result[$variantKey] = ($result[$variantKey] ?? 0) + $item->quantity;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Generate unique key cho variant combination
+     */
+    private function generateVariantKey($variants)
+    {
+        if (empty($variants)) {
+            return 'no_variants';
+        }
+        
+        ksort($variants);
+        return implode('|', array_map(function($k, $v) {
+            return "{$k}:{$v}";
+        }, array_keys($variants), array_values($variants)));
+    }
+
+    /**
+     * Lấy thông tin review cho user hiện tại
+     */
+    private function getReviewInfoForUser($productId)
+    {
+        if (!Auth::check()) {
+            return [
+                'can_review' => false,
+                'eligible_orders' => [],
+                'existing_reviews' => [],
+                'message' => 'Vui lòng đăng nhập để đánh giá sản phẩm'
+            ];
+        }
+
+        $userId = Auth::id();
+
+        // Lấy các đơn hàng đã giao có chứa sản phẩm này
+        $eligibleOrders = Order::where('user_id', $userId)
+            ->where('status', 'delivered')
+            ->whereHas('orderItems', function($query) use ($productId) {
+                $query->where('product_id', $productId);
+            })
+            ->with(['orderItems' => function($query) use ($productId) {
+                $query->where('product_id', $productId);
+            }])
+            ->get();
+
+        // Lấy các review đã có
+        $existingReviews = ProductReview::where('user_id', $userId)
+            ->where('product_id', $productId)
+            ->with('order')
+            ->get()
+            ->keyBy('order_id');
+
+        // Lọc các đơn hàng chưa được review
+        $availableOrders = $eligibleOrders->reject(function($order) use ($existingReviews) {
+            return $existingReviews->has($order->id);
+        });
+
+        return [
+            'can_review' => $availableOrders->count() > 0,
+            'eligible_orders' => $availableOrders,
+            'existing_reviews' => $existingReviews,
+            'message' => $availableOrders->count() > 0 ? '' : 'Bạn cần mua và nhận hàng để có thể đánh giá sản phẩm này'
+        ];
+    }
+
+/**
+    * Đồng bộ giỏ hàng từ localStorage sang user account
+    *
+    * @param int $userId
+    * @param array $cartData
+    * @return int Số lượng sản phẩm đã được đồng bộ
+    */
+private function mergeLocalStorageCartToUser($userId, $cartData)
+{
+try {
+DB::beginTransaction();
+
+if (empty($cartData) || !is_array($cartData)) {
+DB::commit();
+return 0;
+}
 
 
 
-            $mergedCount = 0;
+$mergedCount = 0;
 
-            // Lấy giỏ hàng hiện tại của user
-            $userCartItems = CartItem::where('user_id', $userId)->get();
+// Lấy giỏ hàng hiện tại của user
+$userCartItems = CartItem::where('user_id', $userId)->get();
 
-            foreach ($cartData as $cartItemData) {
-                // Validate dữ liệu
-                if (!isset($cartItemData['product_id']) || !isset($cartItemData['quantity'])) {
-                    continue;
-                }
+foreach ($cartData as $cartItemData) {
+// Validate dữ liệu
+if (!isset($cartItemData['product_id']) || !isset($cartItemData['quantity'])) {
+continue;
+}
 
-                $productId = $cartItemData['product_id'];
-                $quantity = (int) $cartItemData['quantity'];
-                $unitPrice = $cartItemData['unit_price'] ?? 0;
-                $selectedVariants = $cartItemData['selected_variants'] ?? [];
+$productId = $cartItemData['product_id'];
+$quantity = (int) $cartItemData['quantity'];
+$unitPrice = $cartItemData['unit_price'] ?? 0;
+$selectedVariants = $cartItemData['selected_variants'] ?? [];
 
-                // Kiểm tra xem sản phẩm có cùng variant đã có trong giỏ hàng user chưa
-                $existingUserItem = null;
-                foreach ($userCartItems as $userItem) {
-                    if ($userItem->product_id == $productId) {
-                        // So sánh variants
-                        $userVariants = $userItem->selected_variants ?: [];
+// Kiểm tra xem sản phẩm có cùng variant đã có trong giỏ hàng user chưa
+$existingUserItem = null;
+foreach ($userCartItems as $userItem) {
+if ($userItem->product_id == $productId) {
+// So sánh variants
+$userVariants = $userItem->selected_variants ?: [];
+
+if ($selectedVariants == $userVariants) {
+$existingUserItem = $userItem;
+break;
+}
+}
+}
+
+if ($existingUserItem) {
+                    // Nếu đã có, cộng số lượng
+                    // Nếu đã có, cộng số lượng nhưng kiểm tra tồn kho
+$newQuantity = $existingUserItem->quantity + $quantity;
+                    
+                    // Kiểm tra tồn kho
+                    $product = \App\Models\Product::find($productId);
+                    if ($product && $product->track_quantity) {
+                        $currentTotalInCart = $this->getTotalProductQuantityInUserCart($userId, $productId);
+                        $totalAfterMerge = $currentTotalInCart - $existingUserItem->quantity + $newQuantity;
                         
-                        if ($selectedVariants == $userVariants) {
-                            $existingUserItem = $userItem;
-                            break;
+                        if ($totalAfterMerge > $product->stock_quantity) {
+                            // Nếu vượt quá tồn kho, chỉ thêm số lượng có thể
+                            $availableQuantity = $product->stock_quantity - ($currentTotalInCart - $existingUserItem->quantity);
+                            $newQuantity = $existingUserItem->quantity + max(0, $availableQuantity);
                         }
                     }
-                }
-
-                if ($existingUserItem) {
-                    // Nếu đã có, cộng số lượng
-                    $newQuantity = $existingUserItem->quantity + $quantity;
-                    $existingUserItem->update([
-                        'quantity' => $newQuantity,
-                        'total_price' => $existingUserItem->unit_price * $newQuantity
-                    ]);
-                } else {
+                    
+$existingUserItem->update([
+'quantity' => $newQuantity,
+'total_price' => $existingUserItem->unit_price * $newQuantity
+]);
+} else {
                     // Nếu chưa có, tạo cart item mới cho user
                     CartItem::create([
                         'user_id' => $userId,
@@ -695,122 +838,160 @@ public function destroy(string $id)
                         'unit_price' => $unitPrice,
                         'total_price' => $unitPrice * $quantity
                     ]);
-                }
-                
-                $mergedCount++;
-            }
+                    // Nếu chưa có, tạo cart item mới cho user nhưng kiểm tra tồn kho
+                    $finalQuantity = $quantity;
+                    
+                    // Kiểm tra tồn kho
+                    $product = \App\Models\Product::find($productId);
+                    if ($product && $product->track_quantity) {
+                        $currentTotalInCart = $this->getTotalProductQuantityInUserCart($userId, $productId);
+                        $totalAfterAdd = $currentTotalInCart + $quantity;
+                        
+                        if ($totalAfterAdd > $product->stock_quantity) {
+                            // Nếu vượt quá tồn kho, chỉ thêm số lượng có thể
+                            $availableQuantity = $product->stock_quantity - $currentTotalInCart;
+                            $finalQuantity = max(0, $availableQuantity);
+                        }
+                    }
+                    
+                    // Chỉ tạo nếu có số lượng hợp lệ
+                    if ($finalQuantity > 0) {
+                        CartItem::create([
+                            'user_id' => $userId,
+                            'session_id' => null,
+                            'product_id' => $productId,
+                            'selected_variants' => $selectedVariants,
+                            'quantity' => $finalQuantity,
+                            'unit_price' => $unitPrice,
+                            'total_price' => $unitPrice * $finalQuantity
+                        ]);
+                    }
+}
 
-            DB::commit();
-            
-            if ($mergedCount > 0) {
-                Log::info("Đồng bộ giỏ hàng từ localStorage thành công: {$mergedCount} sản phẩm cho user {$userId}");
-            }
-            
-            return $mergedCount;
+$mergedCount++;
+}
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            // Log error nhưng không throw exception để không ảnh hưởng đến quá trình đăng nhập
-            Log::error('Lỗi khi đồng bộ giỏ hàng từ localStorage: ' . $e->getMessage(), [
-                'user_id' => $userId,
-                'cart_data_count' => count($cartData ?? [])
-            ]);
-            return 0;
-        }
-    }
+DB::commit();
+
+if ($mergedCount > 0) {
+Log::info("Đồng bộ giỏ hàng từ localStorage thành công: {$mergedCount} sản phẩm cho user {$userId}");
+}
+
+return $mergedCount;
+
+} catch (\Exception $e) {
+DB::rollBack();
+// Log error nhưng không throw exception để không ảnh hưởng đến quá trình đăng nhập
+Log::error('Lỗi khi đồng bộ giỏ hàng từ localStorage: ' . $e->getMessage(), [
+'user_id' => $userId,
+'cart_data_count' => count($cartData ?? [])
+]);
+return 0;
+}
+}
+
+/**
+    * Debug method để kiểm tra session cart
+    */
+public function debugSessionCart(Request $request)
+{
+$sessionId = $request->session()->getId();
+$userId = Auth::id();
+$checkSessionId = $request->get('old_session_id', $sessionId);
+
+// Kiểm tra session cart
+$sessionCartItems = CartItem::where('session_id', $checkSessionId)
+->whereNull('user_id')
+->get();
+
+// Kiểm tra user cart nếu đã đăng nhập
+$userCartItems = [];
+if ($userId) {
+$userCartItems = CartItem::where('user_id', $userId)->get();
+}
+
+// Kiểm tra tất cả session cart items (để debug)
+$allSessionCartItems = CartItem::whereNull('user_id')
+->whereNotNull('session_id')
+->get();
+
+return response()->json([
+'current_session_id' => $sessionId,
+'checking_session_id' => $checkSessionId,
+'user_id' => $userId,
+'session_cart_count' => $sessionCartItems->count(),
+'session_cart_items' => $sessionCartItems->toArray(),
+'user_cart_count' => count($userCartItems),
+'user_cart_items' => $userCartItems,
+'all_session_carts' => $allSessionCartItems->toArray()
+]);
+}
+
+/**
+    * Test method để thêm sản phẩm vào session cart
+    */
+public function testAddToSessionCart(Request $request)
+{
+$sessionId = $request->session()->getId();
+
+// Thêm một sản phẩm test vào session cart
+$cartItem = CartItem::create([
+'user_id' => null,
+'session_id' => $sessionId,
+'product_id' => 1, // Giả sử có product với ID 1
+'selected_variants' => [],
+'quantity' => 1,
+'unit_price' => 100000,
+'total_price' => 100000
+]);
+
+return response()->json([
+'message' => 'Đã thêm sản phẩm test vào session cart',
+'session_id' => $sessionId,
+'cart_item_id' => $cartItem->id,
+'debug_url' => route('client.cart.debug')
+]);
+}
+
+/**
+    * API để lấy session cart hiện tại (để lưu vào localStorage)
+    */
+public function getCurrentSessionCart(Request $request)
+{
+$sessionId = $request->session()->getId();
+
+// Lấy giỏ hàng từ session hiện tại
+$sessionCartItems = CartItem::with('product')
+->where('session_id', $sessionId)
+->whereNull('user_id')
+->get();
+
+// Chuyển đổi thành format đơn giản cho localStorage
+$cartData = $sessionCartItems->map(function ($item) {
+return [
+'product_id' => $item->product_id,
+'quantity' => $item->quantity,
+'unit_price' => $item->unit_price,
+'total_price' => $item->total_price,
+'selected_variants' => $item->selected_variants,
+'product_name' => $item->product->name ?? 'Unknown Product'
+];
+});
+
+return response()->json([
+'success' => true,
+'cart_data' => $cartData,
+'count' => $cartData->count()
+]);
+}
 
     /**
-     * Debug method để kiểm tra session cart
+     * Tính tổng số lượng của một sản phẩm (tất cả biến thể) trong giỏ hàng của user
      */
-    public function debugSessionCart(Request $request)
+    private function getTotalProductQuantityInUserCart($userId, $productId)
     {
-        $sessionId = $request->session()->getId();
-        $userId = Auth::id();
-        $checkSessionId = $request->get('old_session_id', $sessionId);
-        
-        // Kiểm tra session cart
-        $sessionCartItems = CartItem::where('session_id', $checkSessionId)
-            ->whereNull('user_id')
-            ->get();
-            
-        // Kiểm tra user cart nếu đã đăng nhập
-        $userCartItems = [];
-        if ($userId) {
-            $userCartItems = CartItem::where('user_id', $userId)->get();
-        }
-        
-        // Kiểm tra tất cả session cart items (để debug)
-        $allSessionCartItems = CartItem::whereNull('user_id')
-            ->whereNotNull('session_id')
-            ->get();
-        
-        return response()->json([
-            'current_session_id' => $sessionId,
-            'checking_session_id' => $checkSessionId,
-            'user_id' => $userId,
-            'session_cart_count' => $sessionCartItems->count(),
-            'session_cart_items' => $sessionCartItems->toArray(),
-            'user_cart_count' => count($userCartItems),
-            'user_cart_items' => $userCartItems,
-            'all_session_carts' => $allSessionCartItems->toArray()
-        ]);
-    }
-
-    /**
-     * Test method để thêm sản phẩm vào session cart
-     */
-    public function testAddToSessionCart(Request $request)
-    {
-        $sessionId = $request->session()->getId();
-        
-        // Thêm một sản phẩm test vào session cart
-        $cartItem = CartItem::create([
-            'user_id' => null,
-            'session_id' => $sessionId,
-            'product_id' => 1, // Giả sử có product với ID 1
-            'selected_variants' => [],
-            'quantity' => 1,
-            'unit_price' => 100000,
-            'total_price' => 100000
-        ]);
-        
-        return response()->json([
-            'message' => 'Đã thêm sản phẩm test vào session cart',
-            'session_id' => $sessionId,
-            'cart_item_id' => $cartItem->id,
-            'debug_url' => route('client.cart.debug')
-        ]);
-    }
-
-    /**
-     * API để lấy session cart hiện tại (để lưu vào localStorage)
-     */
-    public function getCurrentSessionCart(Request $request)
-    {
-        $sessionId = $request->session()->getId();
-        
-        // Lấy giỏ hàng từ session hiện tại
-        $sessionCartItems = CartItem::with('product')
-            ->where('session_id', $sessionId)
-            ->whereNull('user_id')
-            ->get();
-
-        // Chuyển đổi thành format đơn giản cho localStorage
-        $cartData = $sessionCartItems->map(function ($item) {
-            return [
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'unit_price' => $item->unit_price,
-                'total_price' => $item->total_price,
-                'selected_variants' => $item->selected_variants,
-                'product_name' => $item->product->name ?? 'Unknown Product'
-            ];
-        });
-
-        return response()->json([
-            'success' => true,
-            'cart_data' => $cartData,
-            'count' => $cartData->count()
-        ]);
+        return CartItem::where('user_id', $userId)
+            ->where('product_id', $productId)
+            ->sum('quantity');
     }
 }

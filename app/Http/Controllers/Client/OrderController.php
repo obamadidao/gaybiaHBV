@@ -9,6 +9,8 @@ use App\Models\OrderItem;
 use App\Models\CustomerProfile;
 use App\Models\Coupon;
 use App\Services\ZaloPayService;
+use App\Events\NewOrderCreated;
+use App\Events\OrderStatusChanged;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +22,7 @@ class OrderController extends Controller
 /**
     * Hiển thị trang checkout
     */
-public function checkout()
+public function checkout(Request $request)
 {
 // Kiểm tra đăng nhập
 if (!Auth::check()) {
@@ -29,15 +31,27 @@ return redirect()->route('client.login-user')
 }
 
 // Lấy giỏ hàng
+$selectedItemIds = $request->input('selected_items', []);
+
+if (!empty($selectedItemIds)) {
+// Lấy chỉ những sản phẩm được chọn
+$cartItems = $this->getSelectedCartItems($selectedItemIds);
+
+// Lưu selected items vào session để sử dụng khi tạo đơn hàng
+session(['selected_cart_items' => $selectedItemIds]);
+} else {
+// Nếu không có selected items, lấy tất cả (backward compatibility)
 $cartItems = $this->getCartItems();
+session()->forget('selected_cart_items');
+}
 
 if ($cartItems->isEmpty()) {
 return redirect()->route('client.cart.index')
 ->with('error', 'Giỏ hàng của bạn đang trống.');
 }
 
-// Lấy thông tin tổng kết giỏ hàng
-$cartSummary = $this->getCartSummary();
+// Lấy thông tin tổng kết giỏ hàng dựa trên sản phẩm được chọn
+$cartSummary = $this->getCartSummary($cartItems);
 
 // Lấy thông tin khách hàng
 $user = Auth::user();
@@ -74,8 +88,15 @@ $request->validate([
 try {
 DB::beginTransaction();
 
-// Kiểm tra giỏ hàng
+// Kiểm tra giỏ hàng - sử dụng selected items nếu có
+$selectedItemIds = session('selected_cart_items', []);
+
+if (!empty($selectedItemIds)) {
+$cartItems = $this->getSelectedCartItems($selectedItemIds);
+} else {
 $cartItems = $this->getCartItems();
+}
+
 if ($cartItems->isEmpty()) {
 return response()->json([
 'success' => false,
@@ -83,8 +104,8 @@ return response()->json([
 ], 400);
 }
 
-// Lấy thông tin tổng kết
-$cartSummary = $this->getCartSummary();
+// Lấy thông tin tổng kết dựa trên selected items
+$cartSummary = $this->getCartSummary($cartItems);
 
 // Tạo địa chỉ giao hàng
 $shippingAddress = [
@@ -141,7 +162,13 @@ array_values($cartItem->selected_variants))) : null,
 
 // Cập nhật stock nếu sản phẩm track quantity
 if ($product->track_quantity) {
+                    // Trừ stock sản phẩm chính
 $product->decrement('stock_quantity', $cartItem->quantity);
+                    
+                    // Trừ stock biến thể nếu có
+                    if ($cartItem->selected_variants) {
+                        $this->decrementVariantStock($product, $cartItem->selected_variants, $cartItem->quantity);
+                    }
 }
 }
 
@@ -155,11 +182,20 @@ $coupon->increment('used');
 session()->forget('applied_coupon');
 }
 
-// Xóa giỏ hàng
-$this->clearCart();
+// Xóa giỏ hàng - chỉ xóa selected items
+$this->clearCart($selectedItemIds);
 
 // Add status history
 $order->addStatusHistory('pending', 'Đơn hàng được tạo', Auth::id());
+
+// Xóa selected items khỏi session
+session()->forget('selected_cart_items');
+
+            // Load relationships để đảm bảo data đầy đủ cho broadcast
+            $order->load(['user', 'customer.user']);
+            
+            // Trigger event để broadcast đơn hàng mới cho admin
+            event(new NewOrderCreated($order));
 
 DB::commit();
 
@@ -214,10 +250,14 @@ $order = Order::where('id', $orderId)
 if (!$order->canBeCancelled()) {
 return response()->json([
 'success' => false,
-'message' => 'Không thể hủy đơn hàng này.'
+                    'message' => 'Không thể hủy đơn hàng này.'
+                    'message' => 'Đơn hàng không thể hủy do sản phẩm đã được gửi.'
 ], 400);
 }
 
+            // Lưu trạng thái cũ trước khi cập nhật
+            $oldStatus = $order->status;
+            
 // Cập nhật trạng thái đơn hàng
 $order->status = 'cancelled';
 $order->cancellation_reason = $request->cancellation_reason;
@@ -228,12 +268,27 @@ $order->save();
 // Hoàn lại stock
 foreach ($order->orderItems as $orderItem) {
 if ($orderItem->product && $orderItem->product->track_quantity) {
+                    // Hoàn stock sản phẩm chính
 $orderItem->product->increment('stock_quantity', $orderItem->quantity);
+                    
+                    // Hoàn stock biến thể nếu có
+                    if ($orderItem->product_variant_id) {
+                        $variant = \App\Models\ProductVariant::find($orderItem->product_variant_id);
+                        if ($variant) {
+                            $variant->increment('stock_quantity', $orderItem->quantity);
+                        }
+                    } else if ($orderItem->variant_attributes) {
+                        // Xử lý với variant_attributes (JSON format)
+                        $this->restoreVariantStock($orderItem->product, $orderItem->variant_attributes, $orderItem->quantity);
+                    }
 }
 }
 
 // Add status history
 $order->addStatusHistory('cancelled', $request->cancellation_reason, Auth::id());
+
+            // Dispatch event để thông báo realtime cho admin
+            event(new \App\Events\OrderStatusChanged($order, $oldStatus, 'cancelled'));
 
 DB::commit();
 
@@ -251,6 +306,48 @@ return response()->json([
 }
 }
 
+    /**
+     * Trừ stock cho biến thể sản phẩm từ selected_variants
+     */
+    private function decrementVariantStock($product, $selectedVariants, $quantity)
+    {
+        if (!$selectedVariants || !is_array($selectedVariants)) {
+            return;
+        }
+
+        foreach ($selectedVariants as $variantType => $variantValue) {
+            $variant = \App\Models\ProductVariant::where('product_id', $product->id)
+                ->where('variant_type', $variantType)
+                ->where('variant_value', $variantValue)
+                ->first();
+            
+            if ($variant) {
+                $variant->decrement('stock_quantity', $quantity);
+            }
+        }
+    }
+
+    /**
+     * Hoàn stock cho biến thể sản phẩm từ variant_attributes
+     */
+    private function restoreVariantStock($product, $variantAttributes, $quantity)
+    {
+        if (!$variantAttributes || !is_array($variantAttributes)) {
+            return;
+        }
+
+        foreach ($variantAttributes as $variantType => $variantValue) {
+            $variant = \App\Models\ProductVariant::where('product_id', $product->id)
+                ->where('variant_type', $variantType)
+                ->where('variant_value', $variantValue)
+                ->first();
+            
+            if ($variant) {
+                $variant->increment('stock_quantity', $quantity);
+            }
+        }
+    }
+
 /**
     * Helper methods
     */
@@ -261,9 +358,19 @@ return CartItem::with('product.images')
 ->get();
 }
 
-private function getCartSummary()
+private function getSelectedCartItems($selectedItemIds)
 {
+return CartItem::with('product.images')
+->where('user_id', Auth::id())
+->whereIn('id', $selectedItemIds)
+->get();
+}
+
+private function getCartSummary($cartItems = null)
+{
+if ($cartItems === null) {
 $cartItems = $this->getCartItems();
+}
 $subtotal = $cartItems->sum('total_price');
 
 // Phí vận chuyển
@@ -350,9 +457,13 @@ $profile->ward = $request->shipping_ward;
 $profile->save();
 }
 
-private function clearCart()
+private function clearCart($selectedItemIds = [])
 {
+if (!empty($selectedItemIds)) {
+CartItem::where('user_id', Auth::id())->whereIn('id', $selectedItemIds)->delete();
+} else {
 CartItem::where('user_id', Auth::id())->delete();
+}
 }
 
 /**
@@ -452,6 +563,12 @@ $order->update([
 // Add status history
 $order->addStatusHistory('processing', 'Thanh toán ZaloPay thành công', null);
 
+                    // Load relationships để đảm bảo data đầy đủ cho broadcast  
+                    $order->load(['user', 'customer.user']);
+                    
+                    // Trigger event để broadcast thay đổi trạng thái
+                    event(new OrderStatusChanged($order, 'pending', 'processing'));
+
 DB::commit();
 
 Log::info('ZaloPay Payment Success for Order: ' . $order->id);
@@ -499,8 +616,7 @@ return redirect()->route('client.cart.index')
 ->with('error', 'Không tìm thấy đơn hàng.');
 }
 
-            // Verify checksum để đảm bảo tính hợp lệ
-            // Verify parameters để đảm bảo tính hợp lệ
+// Verify parameters để đảm bảo tính hợp lệ
 if ($this->verifyZaloPayReturn($request->all())) {
 if ($status == 1) {
 // Thanh toán thành công
@@ -516,31 +632,24 @@ $order->update([
 $order->addStatusHistory('processing', 'Thanh toán ZaloPay thành công (Return)', null);
 }
 
-                    return redirect()->route('client.order.success', $order->id)
-                        ->with('success', 'Thanh toán ZaloPay thành công!');
-                    // Redirect đến trang waiting với auto redirect success
-                    return view('client.zalopay-success', [
-                        'order' => $order,
-                        'message' => 'Thanh toán ZaloPay thành công!'
-                    ]);
+// Redirect đến trang waiting với auto redirect success
+return view('client.zalopay-success', [
+'order' => $order,
+'message' => 'Thanh toán ZaloPay thành công!'
+]);
 } else {
 // Thanh toán thất bại hoặc bị hủy
 Log::warning('ZaloPay Return: Payment failed', ['status' => $status, 'order_id' => $order->id]);
-                    return redirect()->route('client.cart.index')
-                        ->with('error', 'Thanh toán ZaloPay không thành công. Vui lòng thử lại.');
-                    return view('client.zalopay-failed', [
-                        'order' => $order,
-                        'message' => 'Thanh toán ZaloPay không thành công. Vui lòng thử lại.'
-                    ]);
+return view('client.zalopay-failed', [
+'order' => $order,
+'message' => 'Thanh toán ZaloPay không thành công. Vui lòng thử lại.'
+]);
 }
 } else {
-                Log::error('ZaloPay Return: Invalid checksum', $request->all());
-                return redirect()->route('client.cart.index')
-                    ->with('error', 'Thông tin thanh toán không hợp lệ (checksum).');
-                Log::error('ZaloPay Return: Invalid verification', $request->all());
-                return view('client.zalopay-failed', [
-                    'message' => 'Thông tin thanh toán không hợp lệ.'
-                ]);
+Log::error('ZaloPay Return: Invalid verification', $request->all());
+return view('client.zalopay-failed', [
+'message' => 'Thông tin thanh toán không hợp lệ.'
+]);
 }
 
 } catch (\Exception $e) {
@@ -588,58 +697,114 @@ return false;
 }
 }
 
-    /**
-     * Check payment status via AJAX
-     */
-    public function checkPaymentStatus($orderId)
-    {
-        try {
-            if (!Auth::check()) {
-                return response()->json(['success' => false, 'message' => 'Not authenticated']);
-            }
+/**
+    * Check payment status via AJAX
+    */
+public function checkPaymentStatus($orderId)
+{
+try {
+if (!Auth::check()) {
+return response()->json(['success' => false, 'message' => 'Not authenticated']);
+}
 
-            $order = Order::findOrFail($orderId);
-            
-            // Chỉ user sở hữu order mới có thể check
-            if ($order->user_id !== Auth::id()) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized']);
-            }
-            
-            return response()->json([
-                'success' => true,
-                'status' => $order->payment_status,
-                'order_status' => $order->status
-            ]);
-            
-        } catch (\Exception $e) {
-            Log::error('Check Payment Status Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Error checking status']);
+$order = Order::findOrFail($orderId);
+
+// Chỉ user sở hữu order mới có thể check
+if ($order->user_id !== Auth::id()) {
+return response()->json(['success' => false, 'message' => 'Unauthorized']);
+}
+
+return response()->json([
+'success' => true,
+'status' => $order->payment_status,
+'order_status' => $order->status
+]);
+
+} catch (\Exception $e) {
+Log::error('Check Payment Status Error: ' . $e->getMessage());
+return response()->json(['success' => false, 'message' => 'Error checking status']);
+}
+}
+
+/**
+    * Trang waiting cho ZaloPay
+    */
+public function zaloPayWaiting($orderId)
+{
+try {
+if (!Auth::check()) {
+return redirect()->route('client.login-user');
+}
+
+$order = Order::findOrFail($orderId);
+
+// Chỉ user sở hữu order mới có thể xem
+if ($order->user_id !== Auth::id()) {
+abort(403);
+}
+
+return view('client.zalopay-waiting', compact('order'));
+
+} catch (\Exception $e) {
+Log::error('ZaloPay Waiting Error: ' . $e->getMessage());
+return redirect()->route('client.cart.index')
+->with('error', 'Không tìm thấy đơn hàng.');
+}
+}
+
+    /**
+     * API endpoint cho fallback polling - lấy updates đơn hàng
+     */
+    public function getOrderUpdates(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Lấy timestamp cuối cùng client đã nhận updates (nếu có)
+        $lastUpdate = $request->query('last_update', now()->subMinutes(5)->toISOString());
+        
+        // Lấy các đơn hàng của user đã được update sau thời điểm đó
+        $recentOrders = Order::where('user_id', $user->id)
+            ->where('updated_at', '>', $lastUpdate)
+            ->with(['user', 'customer.user'])
+            ->latest('updated_at')
+            ->limit(10)
+            ->get();
+        
+        $updates = [];
+        
+        foreach ($recentOrders as $order) {
+            $updates[] = [
+                'order_id' => $order->id,
+                'order_code' => $order->order_number,
+                'customer_name' => $order->user->name ?? $order->customer->full_name ?? 'Guest',
+                'total_amount' => $order->total_amount,
+                'new_status' => $order->status,
+                'updated_at' => $order->updated_at->toISOString(),
+                'status_text' => $this->getStatusText($order->status),
+            ];
         }
+        
+        return response()->json([
+            'success' => true,
+            'updates' => $updates,
+            'timestamp' => now()->toISOString()
+        ]);
     }
 
     /**
-     * Trang waiting cho ZaloPay
+     * Helper để lấy status text
      */
-    public function zaloPayWaiting($orderId)
+    private function getStatusText(string $status): string
     {
-        try {
-            if (!Auth::check()) {
-                return redirect()->route('client.login-user');
-            }
-
-            $order = Order::findOrFail($orderId);
-            
-            // Chỉ user sở hữu order mới có thể xem
-            if ($order->user_id !== Auth::id()) {
-                abort(403);
-            }
-            
-            return view('client.zalopay-waiting', compact('order'));
-            
-        } catch (\Exception $e) {
-            Log::error('ZaloPay Waiting Error: ' . $e->getMessage());
-            return redirect()->route('client.cart.index')
-                ->with('error', 'Không tìm thấy đơn hàng.');
-        }
+        return match($status) {
+            'pending' => 'Chờ xử lý',
+            'confirmed' => 'Đã xác nhận',
+            'processing' => 'Đang xử lý',
+            'shipped' => 'Đang giao hàng',
+            'delivered' => 'Đã giao hàng',
+            'cancelled' => 'Đã hủy',
+            'refunded' => 'Đã hoàn tiền',
+            default => 'Không xác định'
+        };
     }
 }
