@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Exports\OrdersExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Events\OrderStatusChanged;
 
 class OrderController extends Controller
 {
@@ -107,17 +108,36 @@ if ($request->hasFile('evidence_image')) {
 $path = $request->file('evidence_image')->store('order-evidence', 'public');
 $order->cancellation_evidence = $path;
 }
+
+                // Hoàn lại stock khi hủy đơn
+                foreach ($order->orderItems as $orderItem) {
+                    if ($orderItem->product && $orderItem->product->track_quantity) {
+                        // Hoàn stock sản phẩm chính
+                        $orderItem->product->increment('stock_quantity', $orderItem->quantity);
+                        
+                        // Hoàn stock biến thể nếu có
+                        if ($orderItem->product_variant_id) {
+                            $variant = \App\Models\ProductVariant::find($orderItem->product_variant_id);
+                            if ($variant) {
+                                $variant->increment('stock_quantity', $orderItem->quantity);
+                            }
+                        } else if ($orderItem->variant_attributes) {
+                            // Xử lý với variant_attributes (JSON format)
+                            $this->restoreVariantStock($orderItem->product, $orderItem->variant_attributes, $orderItem->quantity);
+                        }
+                    }
+                }
 }
 
 // Xử lý giao hàng thành công
 if ($newStatus === 'delivered') {
 $order->delivered_at = now();
-                
-                // Đối với đơn hàng COD, tự động cập nhật payment_status thành paid
-                if ($order->payment_method === 'cod' && $order->payment_status !== 'paid') {
-                    $order->payment_status = 'paid';
-                    $order->paid_at = now();
-                }
+
+// Đối với đơn hàng COD, tự động cập nhật payment_status thành paid
+if ($order->payment_method === 'cod' && $order->payment_status !== 'paid') {
+$order->payment_status = 'paid';
+$order->paid_at = now();
+}
 }
 
 // Xử lý gửi hàng
@@ -136,6 +156,25 @@ if ($request->hasFile('evidence_image')) {
 $path = $request->file('evidence_image')->store('order-evidence', 'public');
 $order->refund_evidence = $path;
 }
+
+                // Hoàn lại stock khi refund
+                foreach ($order->orderItems as $orderItem) {
+                    if ($orderItem->product && $orderItem->product->track_quantity) {
+                        // Hoàn stock sản phẩm chính
+                        $orderItem->product->increment('stock_quantity', $orderItem->quantity);
+                        
+                        // Hoàn stock biến thể nếu có
+                        if ($orderItem->product_variant_id) {
+                            $variant = \App\Models\ProductVariant::find($orderItem->product_variant_id);
+                            if ($variant) {
+                                $variant->increment('stock_quantity', $orderItem->quantity);
+                            }
+                        } else if ($orderItem->variant_attributes) {
+                            // Xử lý với variant_attributes (JSON format)
+                            $this->restoreVariantStock($orderItem->product, $orderItem->variant_attributes, $orderItem->quantity);
+                        }
+                    }
+                }
 }
 
 $order->status = $newStatus;
@@ -144,6 +183,12 @@ $order->save();
 
 // Thêm vào lịch sử trạng thái
 $order->addStatusHistory($newStatus, $request->admin_notes, Auth::id());
+
+            // Load relationships để đảm bảo data đầy đủ cho broadcast
+            $order->load(['user', 'customer.user']);
+            
+            // Trigger event để broadcast realtime
+            event(new OrderStatusChanged($order, $oldStatus, $newStatus));
 
 DB::commit();
 return redirect()->back()->with('success', 'Cập nhật trạng thái đơn hàng thành công');
@@ -166,6 +211,27 @@ $validTransitions = [
 
 return in_array($newStatus, $validTransitions[$oldStatus] ?? []);
 }
+
+    /**
+     * Hoàn stock cho biến thể sản phẩm từ variant_attributes
+     */
+    private function restoreVariantStock($product, $variantAttributes, $quantity)
+    {
+        if (!$variantAttributes || !is_array($variantAttributes)) {
+            return;
+        }
+
+        foreach ($variantAttributes as $variantType => $variantValue) {
+            $variant = \App\Models\ProductVariant::where('product_id', $product->id)
+                ->where('variant_type', $variantType)
+                ->where('variant_value', $variantValue)
+                ->first();
+            
+            if ($variant) {
+                $variant->increment('stock_quantity', $quantity);
+            }
+        }
+    }
 
 /**
     * Cập nhật trạng thái thanh toán
