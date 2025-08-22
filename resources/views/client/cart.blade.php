@@ -6,43 +6,62 @@
            width: 1.2em;
            height: 1.2em;
        }
-       
+
        .checkout-btn.disabled {
            opacity: 0.6;
            cursor: not-allowed;
        }
-       
+
        .item-checkbox:checked + .cart-image,
        .item-checkbox:checked ~ .cart-meta {
            opacity: 1;
        }
-       
+
        .item-checkbox:not(:checked) + .cart-image,
        .item-checkbox:not(:checked) ~ .cart-meta {
            opacity: 0.6;
        }
-       
+
        .cart-row {
            transition: opacity 0.3s ease;
        }
-        
+
         .stock-info {
             margin-top: 0.25rem;
         }
-        
+
         .stock-status {
             font-size: 0.875rem;
             font-weight: 500;
         }
-        
+
         .stock-status.text-danger {
             animation: pulse-warning 2s infinite;
         }
-        
+
         @keyframes pulse-warning {
             0% { opacity: 1; }
             50% { opacity: 0.7; }
             100% { opacity: 1; }
+        }
+        .deleted-product-image {
+            position: relative;
+            display: inline-block;
+        }
+
+        .deleted-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
         }
    </style>
 
@@ -86,71 +105,133 @@
 </thead>
 <tbody>
 @foreach($cartItems as $item)
-<tr class="cart-row cart-flex position-relative" data-cart-item-id="{{ $item->id }}">
+       @php
+                            $isProductDeleted = !$item->product;
+                            $primaryImage = null;
+                            if (!$isProductDeleted) {
+                                $primaryImage = $item->product->images->where('is_primary', 1)->first() ?? $item->product->images->first();
+                            }
+                        @endphp
+                        <tr class="cart-row cart-flex position-relative {{ $isProductDeleted ? 'opacity-50' : '' }}" data-cart-item-id="{{ $item->id }}">
 <td class="text-center">
-<input type="checkbox" name="selected_items[]" value="{{ $item->id }}" 
-class="form-check-input item-checkbox" checked>
+<input type="checkbox" name="selected_items[]" value="{{ $item->id }}"
+class="form-check-input item-checkbox"
+                                       {{ $isProductDeleted ? 'disabled' : 'checked' }}>
 </td>
 <td class="cart-image cart-flex-item">
-@php $primaryImage = $item->product->images->where('is_primary', 1)->first() ?? $item->product->images->first() @endphp
-<a href="{{ route('client.product', $item->product->slug) }}">
-<img class="cart-image blur-up lazyload" 
-data-src="{{ $primaryImage ? $primaryImage->url : asset('assets/images/collection/category.jpg') }}" 
-src="{{ $primaryImage ? $primaryImage->url : asset('assets/images/collection/category.jpg') }}" 
-alt="{{ $item->product->name }}" 
-width="120" height="170" />
-</a>
+ @if($isProductDeleted)
+                                    <div class="deleted-product-image">
+                                        <img class="cart-image blur-up lazyload"
+                                             src="{{ asset('assets/images/collection/category.jpg') }}"
+                                             alt="Sản phẩm đã bị xóa"
+                                             width="120" height="170" />
+                                        <div class="deleted-overlay">
+                                            <i class="fas fa-ban text-danger"></i>
+                                        </div>
+                                    </div>
+                                @else
+                                    <a href="{{ route('client.product', $item->product->slug) }}">
+                                        <img class="cart-image blur-up lazyload"
+                                             data-src="{{ $primaryImage ? $primaryImage->url : asset('assets/images/collection/category.jpg') }}"
+                                             src="{{ $primaryImage ? $primaryImage->url : asset('assets/images/collection/category.jpg') }}"
+                                             alt="{{ $item->product->name }}"
+                                             width="120" height="170" />
+                                    </a>
+                                @endif
 </td>
 <td class="cart-meta small-text-left cart-flex-item">
-<div class="list-view-item-title">
-<a href="{{ route('client.product', $item->product->slug) }}">{{ $item->product->name }}</a>
-</div>
-<div class="cart-meta-text">
-<div class="product-sku">SKU: {{ $item->product->sku }}</div>
-@if($item->selected_variants)
-<div class="variant-info">
-@foreach($item->selected_variants as $type => $value)
-<span class="variant-item">{{ $value }}</span>
-@if(!$loop->last) | @endif
-@endforeach
+    @if($isProductDeleted)
+                                    <div class="list-view-item-title">
+                                        <span class="text-muted text-decoration-line-through">Sản phẩm đã bị xóa</span>
+                                        <span class="badge bg-danger ms-2">Không khả dụng</span>
+                                    </div>
+                                    <div class="cart-meta-text">
+                                        <div class="text-muted small">Sản phẩm này đã không còn tồn tại trong hệ thống</div>
+                                        @if($item->selected_variants)
+                                            <div class="variant-info text-muted">
+                                                @foreach($item->selected_variants as $type => $value)
+                                                    <span class="variant-item">{{ $value }}</span>
+                                                    @if(!$loop->last) | @endif
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        <div class="cart-price mobile-cart-price d-md-none">
+                                            <span class="money text-muted">{{ number_format($item->unit_price, 0, ',', '.') }}đ</span>
 </div>
 @endif
-                                    @if($item->product->track_quantity)
-                                        <div class="stock-info small text-muted">
-                                            <span class="stock-status" id="stock-status-{{ $item->id }}">
-                                                <i class="fas fa-circle text-success"></i> Tính toán...
-                                            </span>
+                                     <div class="cart-delete d-md-none">
+                                            <button type="button" class="btn btn-link text-danger remove-item" data-item-id="{{ $item->id }}">
+                                                <i class="icon anm anm-times-l"></i> Xóa
+                                            </button>
                                         </div>
                                     @endif
 <div class="cart-price mobile-cart-price d-md-none">
 <span class="money">{{ number_format($item->unit_price, 0, ',', '.') }}đ</span>
 </div>
-<div class="cart-delete d-md-none">
-<button type="button" class="btn btn-link text-danger remove-item" data-item-id="{{ $item->id }}">
-<i class="icon anm anm-times-l"></i> Xóa
+   @else
+<div class="list-view-item-title">
+<a href="{{ route('client.product', $item->product->slug) }}">{{ $item->product->name }}</a>
 </button>
-</div>
+ <div class="cart-meta-text">
+                                        <div class="product-sku">SKU: {{ $item->product->sku }}</div>
+                                        @if($item->selected_variants)
+                                            <div class="variant-info">
+                                                @foreach($item->selected_variants as $type => $value)
+                                                    <span class="variant-item">{{ $value }}</span>
+                                                    @if(!$loop->last) | @endif
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        @if($item->product->track_quantity)
+                                            <div class="stock-info small text-muted">
+                                                <span class="stock-status" id="stock-status-{{ $item->id }}">
+                                                    <i class="fas fa-circle text-success"></i> Tính toán...
+                                                </span>
+                                            </div>
+                                        @endif
+                                        <div class="cart-price mobile-cart-price d-md-none">
+                                            <span class="money">{{ number_format($item->unit_price, 0, ',', '.') }}đ</span>
+                                        </div>
+                                        <div class="cart-delete d-md-none">
+                                            <button type="button" class="btn btn-link text-danger remove-item" data-item-id="{{ $item->id }}">
+                                                <i class="icon anm anm-times-l"></i> Xóa
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endif
 </div>
 </td>
 <td class="cart-price cart-flex-item text-center small-hide">
-<span class="money">{{ number_format($item->unit_price, 0, ',', '.') }}đ</span>
+<span class="money {{ $isProductDeleted ? 'text-muted' : '' }}">
+                                    {{ number_format($item->unit_price, 0, ',', '.') }}đ
+                                </span>
 </td>
 <td class="cart-update-wrapper cart-flex-item text-center">
-<div class="cart-qty d-flex justify-content-center align-items-center">
-<div class="qtyField">
-<button type="button" class="qtyBtn minus" data-item-id="{{ $item->id }}">
-<i class="icon anm anm-minus-r"></i>
-</button>
-<input type="text" name="quantity[]" value="{{ $item->quantity }}" 
-class="cart-qty-input qty" data-item-id="{{ $item->id }}" readonly />
-<button type="button" class="qtyBtn plus" data-item-id="{{ $item->id }}">
-<i class="icon anm anm-plus-r"></i>
-</button>
+   @if($isProductDeleted)
+                                    <div class="cart-qty d-flex justify-content-center align-items-center">
+                                        <div class="text-muted small">
+                                            <i class="fas fa-ban"></i> Không khả dụng
+                                        </div>
 </div>
-</div>
+@else
+                                    <div class="cart-qty d-flex justify-content-center align-items-center">
+                                        <div class="qtyField">
+                                            <button type="button" class="qtyBtn minus" data-item-id="{{ $item->id }}">
+                                                <i class="icon anm anm-minus-r"></i>
+                                            </button>
+                                            <input type="text" name="quantity[]" value="{{ $item->quantity }}"
+                                                   class="cart-qty-input qty" data-item-id="{{ $item->id }}" readonly />
+                                            <button type="button" class="qtyBtn plus" data-item-id="{{ $item->id }}">
+                                                <i class="icon anm anm-plus-r"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endif
 </td>
 <td class="cart-price cart-flex-item text-end">
-<span class="money item-total-{{ $item->id }}">{{ number_format($item->total_price, 0, ',', '.') }}đ</span>
+<span class="money item-total-{{ $item->id }} {{ $isProductDeleted ? 'text-muted' : '' }}">
+                                    {{ number_format($item->total_price, 0, ',', '.') }}đ
+                                </span>
 </td>
 <td class="cart-delete text-center small-hide">
 <button type="button" class="btn btn-link text-danger remove-item" data-item-id="{{ $item->id }}">
@@ -211,7 +292,7 @@ Xóa toàn bộ giỏ hàng
 <div class="d-flex justify-content-between align-items-center">
 <div>
 <strong class="text-success">
-<i class="fas fa-check-circle"></i> 
+<i class="fas fa-check-circle"></i>
 Mã "{{ $cartSummary['applied_coupon']['code'] }}" đã được áp dụng
 </strong>
 @if($cartSummary['applied_coupon']['description'])
@@ -315,15 +396,17 @@ Tiếp tục mua sắm
            // Handle select all checkbox
            const selectAllCheckbox = document.getElementById('select-all');
            const itemCheckboxes = document.querySelectorAll('.item-checkbox');
-           
+
            // Select/Deselect all items
            selectAllCheckbox?.addEventListener('change', function() {
                itemCheckboxes.forEach(checkbox => {
-                   checkbox.checked = this.checked;
+                    if (!checkbox.disabled) {
+                        checkbox.checked = this.checked;
+                    }
                });
                updateSelectedItemsSummary();
            });
-           
+
            // Handle individual item checkbox changes
            itemCheckboxes.forEach(checkbox => {
                checkbox.addEventListener('change', function() {
@@ -331,11 +414,11 @@ Tiếp tục mua sắm
                    updateSelectedItemsSummary();
                });
            });
-           
+
            // Initialize select all state
            updateSelectAllState();
            updateSelectedItemsSummary();
-            
+
             // Initialize stock info for all items
             initializeStockInfo();
 
@@ -345,7 +428,7 @@ Tiếp tục mua sắm
                    const itemId = this.getAttribute('data-item-id');
                    const input = document.querySelector(`input[data-item-id="${itemId}"]`);
                    let currentQty = parseInt(input.value);
-                   
+
                    if (this.classList.contains('plus')) {
                         currentQty++;
                         checkMaxQuantityAndUpdate(itemId, currentQty);
@@ -353,7 +436,7 @@ Tiếp tục mua sắm
                         currentQty--;
                         updateQuantity(itemId, currentQty);
                    }
-                    
+
                     updateQuantity(itemId, currentQty);
                });
            });
@@ -393,9 +476,9 @@ Tiếp tục mua sắm
 
        function updateSelectAllState() {
            const selectAllCheckbox = document.getElementById('select-all');
-           const itemCheckboxes = document.querySelectorAll('.item-checkbox');
-           const checkedItems = document.querySelectorAll('.item-checkbox:checked');
-           
+           const itemCheckboxes = document.querySelectorAll('.item-checkbox:not(:disabled)');
+            const checkedItems = document.querySelectorAll('.item-checkbox:checked:not(:disabled)');
+
            if (selectAllCheckbox) {
                if (checkedItems.length === 0) {
                    selectAllCheckbox.checked = false;
@@ -411,9 +494,9 @@ Tiếp tục mua sắm
        }
 
        function calculateSelectedItemsTotal() {
-           const checkedItems = document.querySelectorAll('.item-checkbox:checked');
+          const checkedItems = document.querySelectorAll('.item-checkbox:checked:not(:disabled)');
            let selectedSubtotal = 0;
-           
+
            checkedItems.forEach(checkbox => {
                const itemId = checkbox.value;
                const itemRow = document.querySelector(`tr[data-cart-item-id="${itemId}"]`);
@@ -425,10 +508,10 @@ Tiếp tục mua sắm
                    }
                }
            });
-           
+
            // Store selected subtotal for future use (e.g., when proceeding to checkout)
            window.selectedItemsSubtotal = selectedSubtotal;
-           
+
            // Update display with selected items total
            updateCartTotalsDisplay(selectedSubtotal);
        }
@@ -439,24 +522,24 @@ Tiếp tục mua sắm
            if (subtotalElement) {
                subtotalElement.textContent = formatCurrency(selectedSubtotal);
            }
-           
+
            // Calculate shipping fee based on selected subtotal (free if >= 500K)
            const shippingFee = selectedSubtotal >= 500000 ? 0 : 0;
-           
+
            // Update shipping fee display
            const shippingElement = document.querySelector('.cart-shipping-fee');
            if (shippingElement) {
                shippingElement.textContent = shippingFee > 0 ? formatCurrency(shippingFee) : 'Miễn phí';
            }
-           
+
            // Get current discount amount and recalculate based on selected items
            let discountAmount = 0;
-           
+
            // Check if there's an applied coupon by looking at the coupon section
            const appliedCouponInfo = document.querySelector('.applied-coupon-info');
            if (appliedCouponInfo && selectedSubtotal > 0) {
                // Try to get coupon info from the current cart summary
-               // This is a simplified approach - in real implementation, 
+               // This is a simplified approach - in real implementation,
                // you might want to store coupon details in data attributes or make an API call
                fetch('/cart/summary', {
                    method: 'GET',
@@ -469,7 +552,7 @@ Tiếp tục mua sắm
                .then(data => {
                    if (data.success && data.cart_summary.applied_coupon) {
                        const coupon = data.cart_summary.applied_coupon;
-                       
+
                        // Recalculate discount based on selected subtotal
                        if (coupon.type === 'percent') {
                            discountAmount = (selectedSubtotal * coupon.value) / 100;
@@ -479,7 +562,7 @@ Tiếp tục mua sắm
                        } else if (coupon.type === 'fixed') {
                            discountAmount = Math.min(coupon.value, selectedSubtotal);
                        }
-                       
+
                        // Update discount display
                        const discountElement = document.querySelector('.cart-discount-amount');
                        if (discountElement) {
@@ -491,13 +574,13 @@ Tiếp tục mua sắm
                                discountElement.classList.remove('text-success');
                            }
                        }
-                       
+
                        // Update discount amount in coupon info
                        const couponDiscountText = appliedCouponInfo.querySelector('p.text-success');
                        if (couponDiscountText) {
                            couponDiscountText.textContent = `Giảm: ${formatCurrency(discountAmount)}`;
                        }
-                       
+
                        // Calculate and update final total
                        const finalTotal = Math.max(0, selectedSubtotal + shippingFee - discountAmount);
                        const finalTotalElement = document.querySelector('.cart-final-total');
@@ -526,13 +609,13 @@ Tiếp tục mua sắm
                discountElement.textContent = '0đ';
                discountElement.classList.remove('text-success');
            }
-           
+
            // Update shipping fee display
            const shippingElement = document.querySelector('.cart-shipping-fee');
            if (shippingElement) {
                shippingElement.textContent = shippingFee > 0 ? formatCurrency(shippingFee) : 'Miễn phí';
            }
-           
+
            // Calculate final total without discount
            const finalTotal = selectedSubtotal + shippingFee;
            const finalTotalElement = document.querySelector('.cart-final-total');
@@ -551,9 +634,10 @@ Tiếp tục mua sắm
        }
 
        function updateSelectedItemsSummary() {
-           const checkedItems = document.querySelectorAll('.item-checkbox:checked');
+            // Get selected items (exclude disabled ones)
+            const checkedItems = document.querySelectorAll('.item-checkbox:checked:not(:disabled)');
            const checkoutBtn = document.querySelector('.checkout-btn');
-           
+
            if (checkedItems.length === 0) {
                // Disable checkout if no items selected
                if (checkoutBtn) {
@@ -561,7 +645,7 @@ Tiếp tục mua sắm
                    checkoutBtn.style.pointerEvents = 'none';
                    checkoutBtn.innerHTML = '<i class="fas fa-credit-card me-2"></i>Chọn sản phẩm để thanh toán';
                }
-               
+
                // Reset totals to 0 when no items selected
                updateCartTotalsDisplay(0);
            } else {
@@ -571,7 +655,7 @@ Tiếp tục mua sắm
                    checkoutBtn.style.pointerEvents = 'auto';
                    checkoutBtn.innerHTML = `<i class="fas fa-credit-card me-2"></i>Thanh toán (${checkedItems.length} sản phẩm)`;
                }
-               
+
                // Calculate selected items total
                calculateSelectedItemsTotal();
            }
@@ -591,24 +675,28 @@ Tiếp tục mua sắm
                if (data.success) {
                    // Update quantity input
                    document.querySelector(`input[data-item-id="${itemId}"]`).value = quantity;
-                   
+
                    // Update item total
                    document.querySelector(`.item-total-${itemId}`).textContent = data.item_total;
-                   
+
                    // Update cart totals and summary (recalculate coupon if applied)
                    refreshCartSummary();
-                   
+
                    // Update selected items summary
                    updateSelectedItemsSummary();
-                   
+
                    // Update global cart count
                    if (typeof window.updateCartCount === 'function') {
                        window.updateCartCount(data.cart_count);
                    }
-                   
+
                     // Update stock info for this item and potentially others
+                          const checkbox = document.querySelector(`input[value="${itemId}"].item-checkbox`);
+                // Only update stock info for products that are not deleted (not disabled)
+                if (checkbox && !checkbox.disabled) {
                     updateStockInfo(itemId);
-                    
+                }
+
                    showNotification(data.message, 'success');
                } else {
                    showNotification(data.message, 'error');
@@ -636,27 +724,27 @@ Tiếp tục mua sắm
                if (data.success) {
                    // Remove item row
                    document.querySelector(`tr[data-cart-item-id="${itemId}"]`).remove();
-                   
+
                    // Update select all state and selected items summary
                    updateSelectAllState();
                    updateSelectedItemsSummary();
-                   
+
                    // Update cart totals and summary (recalculate coupon if applied)
                    refreshCartSummary();
-                   
+
                    // Update global cart count
                    if (typeof window.updateCartCount === 'function') {
                        window.updateCartCount(data.cart_count);
                    }
-                   
+
                     // Update stock info for all remaining items
                     initializeStockInfo();
-                    
+
                    // Check if cart is empty
                    if (data.cart_count === 0) {
                        location.reload(); // Reload to show empty cart
                    }
-                   
+
                    showNotification(data.message, 'success');
                } else {
                    showNotification(data.message, 'error');
@@ -722,7 +810,7 @@ Tiếp tục mua sắm
            // Calculate selected items subtotal
            const checkedItems = document.querySelectorAll('.item-checkbox:checked');
            let selectedSubtotal = 0;
-           
+
            checkedItems.forEach(checkbox => {
                const itemId = checkbox.value;
                const itemRow = document.querySelector(`tr[data-cart-item-id="${itemId}"]`);
@@ -793,10 +881,10 @@ Tiếp tục mua sắm
                                    <div class="d-flex justify-content-between align-items-center">
                                        <div>
                                            <strong class="text-success">
-                                               <i class="fas fa-check-circle"></i> 
+                                               <i class="fas fa-check-circle"></i>
                                                Mã "${cartSummary.applied_coupon.code}" đã được áp dụng
                                            </strong>
-                                           ${cartSummary.applied_coupon.description ? 
+                                           ${cartSummary.applied_coupon.description ?
                                                `<p class="mb-0 text-muted small">${cartSummary.applied_coupon.description}</p>` : ''}
                                            <p class="mb-0 text-success">
                                                Giảm: ${formatCurrency(discountAmount)}
@@ -818,7 +906,7 @@ Tiếp tục mua sắm
                            <div class="row">
                                <div class="col-8">
                                    <div class="input-group mb-3">
-                                       <input type="text" class="form-control" placeholder="Nhập mã giảm giá" 
+                                       <input type="text" class="form-control" placeholder="Nhập mã giảm giá"
                                               aria-label="Nhập mã giảm giá" aria-describedby="button-addon2" id="coupon-code">
                                        <button class="btn btn-outline-secondary" type="button" id="apply-coupon">
                                            <span class="button-text">Áp dụng</span>
@@ -936,7 +1024,7 @@ Tiếp tục mua sắm
                min-width: 300px;
                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
            `;
-           
+
            notification.innerHTML = `
                <strong>${type === 'success' ? 'Thành công!' : 'Lỗi!'}</strong> ${message}
                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -954,30 +1042,30 @@ Tiếp tục mua sắm
 
        function proceedToCheckout(event) {
            event.preventDefault();
-           
+
            // Get selected items
            const checkedItems = document.querySelectorAll('.item-checkbox:checked');
-           
+
            if (checkedItems.length === 0) {
                showNotification('Vui lòng chọn ít nhất một sản phẩm để thanh toán!', 'error');
                return;
            }
-           
+
            // Get selected item IDs
            const selectedItemIds = Array.from(checkedItems).map(checkbox => checkbox.value);
-           
+
            // Create form to submit selected items
            const form = document.createElement('form');
            form.method = 'POST';
            form.action = '{{ route("client.order.checkout") }}';
-           
+
            // Add CSRF token
            const csrfInput = document.createElement('input');
            csrfInput.type = 'hidden';
            csrfInput.name = '_token';
            csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
            form.appendChild(csrfInput);
-           
+
            // Add selected item IDs
            selectedItemIds.forEach(itemId => {
                const input = document.createElement('input');
@@ -986,13 +1074,13 @@ Tiếp tục mua sắm
                input.value = itemId;
                form.appendChild(input);
            });
-           
+
            // Submit form
            document.body.appendChild(form);
            form.submit();
        }
 
-        // Initialize stock info for all cart items
+        // Initialize stock info for all cart items (skip deleted products)
         function initializeStockInfo() {
             document.querySelectorAll('[id^="stock-status-"]').forEach(element => {
                 const itemId = element.id.replace('stock-status-', '');
@@ -1048,11 +1136,11 @@ Tiếp tục mua sắm
                     if (stockElement) {
                         let statusHtml = '';
                         let statusClass = '';
-                        
+
                         const maxQty = data.max_quantity;
                         const currentQty = data.current_quantity;
                         const availableToAdd = maxQty - currentQty;
-                        
+
                         if (availableToAdd <= 0) {
                             statusClass = 'text-danger';
                             statusHtml = '<i class="fas fa-exclamation-triangle"></i> Đã đạt giới hạn';
@@ -1063,12 +1151,12 @@ Tiếp tục mua sắm
                             statusClass = 'text-success';
                             statusHtml = `<i class="fas fa-check-circle"></i> Có thể thêm ${availableToAdd} nữa`;
                         }
-                        
+
                         // Add bottleneck info if applicable
                         if (data.bottleneck_info && data.bottleneck_info.is_bottleneck) {
                             statusHtml += `<br><small class="text-muted">Giới hạn: ${data.bottleneck_info.name}</small>`;
                         }
-                        
+
                         stockElement.className = `stock-status ${statusClass}`;
                         stockElement.innerHTML = statusHtml;
                     }

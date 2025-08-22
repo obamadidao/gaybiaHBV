@@ -94,9 +94,9 @@ Cập nhật trạng thái
 <tr>
 <td>
 <div class="d-flex align-items-start">
-@if($item->product)
-                                                <img src="{{ $item->product->primaryImage?->url }}" alt="{{ $item->product_name }}" 
-                                                <img src="{{ $item->product->primaryImage->url }}" alt="{{ $item->product_name }}" 
+@if($item->product && $item->product->primaryImage)
+                                                <img src="{{ $item->product->primaryImage?->url }}" alt="{{ $item->product_name }}"
+                                                <img src="{{ $item->product->primaryImage->url }}" alt="{{ $item->product_name }}"
 class="me-3" style="width: 50px; height: 50px; object-fit: cover;">
 @endif
 <div>
@@ -188,7 +188,7 @@ class="me-3" style="width: 50px; height: 50px; object-fit: cover;">
 <i class="fas fa-map-marker-alt me-2 text-primary mt-1"></i>
 <div>
 <p class="mb-1">{{ $order->shipping_address['address'] }}
-{{ $order->shipping_address['ward'] }}, 
+{{ $order->shipping_address['ward'] }},
 {{ $order->shipping_address['city'] }}
 </p>
 </div>
@@ -210,7 +210,7 @@ class="me-3" style="width: 50px; height: 50px; object-fit: cover;">
 </div>
 <div class="d-flex align-items-center mb-2">
 <i class="fas fa-info-circle me-2 text-primary"></i>
-<span>Trạng thái: 
+<span>Trạng thái:
 <span class="badge {{ $order->payment_status === 'paid' ? 'bg-success' : 'bg-warning' }}">
 {{ $order->payment_status_text }}
 </span>
@@ -242,7 +242,7 @@ class="me-3" style="width: 50px; height: 50px; object-fit: cover;">
 <i class="fas fa-image me-2 text-danger mt-1"></i>
 <div>
 <p class="mb-1"><strong>Ảnh minh chứng:</strong></p>
-<img src="{{ Storage::url($order->cancellation_evidence) }}" 
+<img src="{{ Storage::url($order->cancellation_evidence) }}"
 alt="Ảnh minh chứng" class="img-thumbnail" style="max-width: 200px;">
 </div>
 </div>
@@ -278,7 +278,7 @@ alt="Ảnh minh chứng" class="img-thumbnail" style="max-width: 200px;">
 <i class="fas fa-image me-2 text-warning mt-1"></i>
 <div>
 <p class="mb-1"><strong>Ảnh minh chứng:</strong></p>
-<img src="{{ Storage::url($order->refund_evidence) }}" 
+<img src="{{ Storage::url($order->refund_evidence) }}"
 alt="Ảnh minh chứng" class="img-thumbnail" style="max-width: 200px;">
 </div>
 </div>
@@ -297,7 +297,7 @@ alt="Ảnh minh chứng" class="img-thumbnail" style="max-width: 200px;">
 <span class="ms-2">{{ number_format($transaction->amount) }}đ</span>
 </div>
 <small class="text-muted ms-4">
-{{ $transaction->created_at->format('d/m/Y H:i') }} - 
+{{ $transaction->created_at->format('d/m/Y H:i') }} -
 {{ $transaction->status_text }}
 </small>
 </div>
@@ -439,24 +439,24 @@ alt="Ảnh minh chứng" class="img-thumbnail" style="max-width: 200px;">
 <div class="row mb-3">
 <div class="col-md-6">
 <label class="form-label">Tên người nhận <span class="text-danger">*</span></label>
-<input type="text" name="shipping_address[name]" class="form-control" 
+<input type="text" name="shipping_address[name]" class="form-control"
 value="{{ $order->shipping_address['name'] }}" required>
 </div>
 <div class="col-md-6">
 <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-<input type="text" name="shipping_address[phone]" class="form-control" 
+<input type="text" name="shipping_address[phone]" class="form-control"
 value="{{ $order->shipping_address['phone'] }}" required>
 </div>
 </div>
 <div class="mb-3">
 <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
-<input type="text" name="shipping_address[address]" class="form-control" 
+<input type="text" name="shipping_address[address]" class="form-control"
 value="{{ $order->shipping_address['address'] }}" required>
 </div>
 <div class="row mb-3">
 <div class="col-md-6">
 <label class="form-label">Phường/Xã <span class="text-danger">*</span></label>
-<input type="text" name="shipping_address[ward]" class="form-control" 
+<input type="text" name="shipping_address[ward]" class="form-control"
 value="{{ $order->shipping_address['ward'] }}" required>
 </div>
 <div class="col-md-6">

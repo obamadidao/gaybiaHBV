@@ -1,7 +1,7 @@
 @extends('layouts.client.ClientLayout')
 
 @section('content')
-<div id="page-content">               
+<div id="page-content">
 <!--Home Slideshow-->
 <section class="slideshow slideshow-wrapper">
 <div class="home-slideshow slick-arrow-dots circle-dots">
@@ -84,14 +84,20 @@
 <div class="tab-pane show active" id="bestsellers" role="tabpanel" aria-labelledby="bestsellers-tab">
 <!--Product Grid-->
 <div class="grid-products grid-view-items">
-<div class="row col-row product-options row-cols-xl-4 row-cols-lg-4 row-cols-md-3 row-cols-sm-3 row-cols-2">                                   
+<div class="row col-row product-options row-cols-xl-4 row-cols-lg-4 row-cols-md-3 row-cols-sm-3 row-cols-2">
 @foreach($newProducts as $product)
 <div class="item col-item">
 <div class="product-box">
 <!-- Start Product Image -->
 <div class="product-image">
 <!-- Start Product Image -->
-<a href="{{ route('client.product', $product->slug) }}" class="product-img"><img style="min-height: 300px;" class="blur-up lazyload" src="{{ $product->primaryImage->url }}" data-src="{{ $product->primaryImage->url }}" alt="Product" title="Product" width="625" height="781" /></a>
+ <a href="{{ route('client.product', $product->slug) }}" class="product-img">
+                                                        @if(isset($product->primaryImage) && !empty($product->primaryImage->url))
+                                                            <img style="min-height: 300px;" class="blur-up lazyload" src="{{ $product->primaryImage->url }}" data-src="{{ $product->primaryImage->url }}" alt="Product" title="Product" width="625" height="781" />
+                                                        @else
+                                                            <img style="min-height: 300px;" class="blur-up lazyload" src="{{ asset('assets/images/collection/category.jpg') }}" data-src="{{ asset('assets/images/collection/category.jpg') }}" alt="Product" title="Product" width="625" height="781" />
+                                                        @endif
+                                                    </a>
 <!-- End Product Image -->
 <!-- Product label -->
 <div class="product-labels"><span class="lbl pr-label3">New</span></div>
@@ -141,7 +147,7 @@
 </div>
 </div>
 @endforeach
-</div>  
+</div>
 </div>
 <!--End Product Grid-->
 </div>
@@ -149,14 +155,20 @@
 <div class="tab-pane" id="newarrivals" role="tabpanel" aria-labelledby="newarrivals-tab">
 <!--Product Grid-->
 <div class="grid-products grid-view-items">
-<div class="row col-row product-options row-cols-xl-4 row-cols-lg-4 row-cols-md-3 row-cols-sm-3 row-cols-2">                                                                              
+<div class="row col-row product-options row-cols-xl-4 row-cols-lg-4 row-cols-md-3 row-cols-sm-3 row-cols-2">
 @foreach($saleProducts as $product)
 <div class="item col-item">
 <div class="product-box">
 <!-- Start Product Image -->
 <div class="product-image">
 <!-- Start Product Image -->
-<a href="{{ route('client.product', $product->slug) }}" class="product-img"><img style="min-height: 300px;" class="blur-up lazyload" src="{{ $product->primaryImage->url }}" data-src="{{ $product->primaryImage->url }}" alt="Product" title="Product" width="625" height="781" /></a>
+<a href="{{ route('client.product', $product->slug) }}" class="product-img">
+                                                        @if(isset($product->primaryImage) && !empty($product->primaryImage->url))
+                                                            <img style="min-height: 300px;" class="blur-up lazyload" src="{{ $product->primaryImage->url }}" data-src="{{ $product->primaryImage->url }}" alt="Product" title="Product" width="625" height="781" />
+                                                        @else
+                                                            <img style="min-height: 300px;" class="blur-up lazyload" src="{{ asset('assets/images/collection/category.jpg') }}" data-src="{{ asset('assets/images/collection/category.jpg') }}" alt="Product" title="Product" width="625" height="781" />
+                                                        @endif
+                                                    </a>
 <!-- End Product Image -->
 <!-- Product label -->
 <div class="product-labels"><span class="lbl pr-label3">Sale</span></div>
@@ -214,14 +226,19 @@
 <div class="tab-pane" id="toprated" role="tabpanel" aria-labelledby="toprated-tab">
 <!--Product Grid-->
 <div class="grid-products grid-view-items">
-<div class="row col-row product-options row-cols-xl-4 row-cols-lg-4 row-cols-md-3 row-cols-sm-3 row-cols-2">                                                                            
+<div class="row col-row product-options row-cols-xl-4 row-cols-lg-4 row-cols-md-3 row-cols-sm-3 row-cols-2">
 @foreach($featuredProducts as $product)
 <div class="item col-item">
 <div class="product-box">
 <!-- Start Product Image -->
 <div class="product-image">
 <!-- Start Product Image -->
-<a href="{{ route('client.product', $product->slug) }}" class="product-img"><img style="min-height: 300px;" class="blur-up lazyload" src="{{ $product->primaryImage->url }}" data-src="{{ $product->primaryImage->url }}" alt="Product" title="Product" width="625" height="781" /></a>
+ <a href="{{ route('client.product', $product->slug) }}" class="product-img">
+                                                        @if(isset($product->primaryImage) && !empty($product->primaryImage->url))
+                                                            <img style="min-height: 300px;" class="blur-up lazyload" src="{{ $product->primaryImage->url }}" data-src="{{ $product->primaryImage->url }}" alt="Product" title="Product" width="625" height="781" />
+                                                        @else
+                                                            <img style="min-height: 300px;" class="blur-up lazyload" src="{{ asset('assets/images/collection/category.jpg') }}" data-src="{{ asset('assets/images/collection/category.jpg') }}" alt="Product" title="Product" width="625" height="781" />
+                                                        @endif
 <!-- End Product Image -->
 <!-- Product label -->
 <div class="product-labels"><span class="lbl pr-label3">Hot</span></div>

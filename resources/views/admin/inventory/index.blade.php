@@ -90,13 +90,13 @@
                             <td>{{ $variant->id }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    @if($variant->product->images->isNotEmpty())
-                                    <img src="{{ asset('storage/' . $variant->product->images->first()->path) }}"
-                                        class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                       @if($variant->product)
+                                            <img src="{{ $variant->product->primaryImage->url }}" alt="{{ $variant->product }}"
+                                            class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
                                     @endif
                                     <div>
-                                        <div class="fw-bold">{{ $variant->product->name }}</div>
-                                        <small class="text-muted">{{ $variant->product->sku }}</small>
+                                           <div class="fw-bold">{{ $variant->product->name ?? 'Sản phẩm không tồn tại/đã xóa' }}</div>
+                                            <small class="text-muted">{{ $variant->product->sku ?? 'N/A' }}</small>
                                     </div>
                                 </div>
                             </td>
@@ -112,7 +112,12 @@
                                     <span class="badge bg-danger">Thấp</span>
                                     @endif
                             </td>
-                            <td>{{ number_format($variant->product->base_price + $variant->price_adjustment) }}đ</td>
+                                  @if($variant->product)
+                                        {{ number_format($variant->product->base_price + $variant->price_adjustment) }}đ <br>
+                                        <small class="text-muted">{{ number_format($variant->price_adjustment) }}đ</small>
+                                    @else
+                                        N/A
+                                    @endif
                         </tr>
                         @endforeach
                     </tbody>
