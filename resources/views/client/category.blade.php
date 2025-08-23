@@ -16,6 +16,16 @@
                 </div>
                 <!--Breadcrumbs-->
                 <div class="breadcrumbs"><a href="{{ route('client.index') }}" title="Back to the home page">Trang chủ</a><span class="title"><i class="icon anm anm-angle-right-l"></i>Danh mục</span><span class="main-title"><i class="icon anm anm-angle-right-l"></i>{{ $category->name }}</span></div>
+                <div class="breadcrumbs">
+                    <a href="{{ route('client.index') }}" title="Back to the home page">Trang chủ</a>
+                    @if(isset($query))
+                    <span class="title"><i class="icon anm anm-angle-right-l"></i>Tìm kiếm</span>
+                    <span class="main-title"><i class="icon anm anm-angle-right-l"></i>{{ $query }}</span>
+                    @else
+                    <span class="title"><i class="icon anm anm-angle-right-l"></i>Danh mục</span>
+                    <span class="main-title"><i class="icon anm anm-angle-right-l"></i>{{ $category->name }}</span>
+                    @endif
+                </div>
                 <!--End Breadcrumbs-->
             </div>
         </div>
@@ -25,6 +35,7 @@
 
 <!--Main Content-->
 <div class="container">
+    @if(!isset($query) && $category->children->count() > 0)
     <!--Category Slider-->
     <div class="collection-slider-6items gp10 slick-arrow-dots sub-collection section pt-0">
         @foreach ($category->children as $child)
@@ -40,6 +51,21 @@
         @endforeach
     </div>
     <!--End Category Slider-->
+    @endif
+
+    @if(isset($query))
+    <!--Search Info-->
+    <div class="search-results-info mb-4">
+        <div class="alert alert-info">
+            <i class="fas fa-search me-2"></i>
+            <strong>{{ $products->total() }}</strong> sản phẩm được tìm thấy cho từ khóa "<strong>{{ $query }}</strong>"
+            @if($products->total() == 0)
+            <br><small class="text-muted mt-2">Thử tìm kiếm với từ khóa khác hoặc <a href="{{ route('client.index') }}">xem tất cả sản phẩm</a></small>
+            @endif
+        </div>
+    </div>
+    <!--End Search Info-->
+    @endif
     @if($products->count() > 0)
     <!--Toolbar-->
     <div class="toolbar toolbar-wrapper shop-toolbar">
@@ -55,26 +81,28 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-4 col-md-4 col-lg-4 text-center product-count order-0 order-md-1 mb-3 mb-sm-0">
-            </div>
-            <div class="col-8 col-sm-6 col-md-4 col-lg-4 text-right filters-toolbar-item d-flex justify-content-end order-2 order-sm-2">
+
+            <div class="col-8 col-sm-10 col-md-8 col-lg-8 text-right filters-toolbar-item d-flex justify-content-end order-0 order-sm-1">
                 <div class="filters-item d-flex align-items-center">
-                    <label for="ShowBy" class="mb-0 me-2 text-nowrap d-none d-sm-inline-flex">Show:</label>
-                    <select name="ShowBy" id="ShowBy" class="filters-toolbar-show">
-                        <option value="title-ascending" selected="selected">10</option>
-                        <option>15</option>
-                        <option>20</option>
-                        <option>25</option>
-                        <option>30</option>
-                    </select>
-                </div>
-                <div class="filters-item d-flex align-items-center ms-2 ms-lg-3">
-                    <label for="SortBy" class="mb-0 me-2 text-nowrap d-none">Sắp xếp:</label>
-                    <select name="SortBy" id="SortBy" class="filters-toolbar-sort">
-                        <option value="featured" selected="selected">Mới nhất</option>
-                        <option value="title-ascending">Giá tăng dần</option>
-                        <option value="title-descending">Giá giảm dần</option>
-                    </select>
+                    <label class="mb-0 me-2 d-none d-lg-inline-block">Sắp xếp:</label>
+                    <div class="select-box">
+                        <select class="form-select" onchange="window.location.href=this.value">
+                            @if(isset($query))
+                            <option value="{{ route('client.search', ['query' => $query, 'sort' => 'relevance']) }}" {{ $sortBy == 'relevance' ? 'selected' : '' }}>Liên quan nhất</option>
+                            <option value="{{ route('client.search', ['query' => $query, 'sort' => 'featured']) }}" {{ $sortBy == 'featured' ? 'selected' : '' }}>Nổi bật</option>
+                            <option value="{{ route('client.search', ['query' => $query, 'sort' => 'name-asc']) }}" {{ $sortBy == 'name-asc' ? 'selected' : '' }}>Tên A-Z</option>
+                            <option value="{{ route('client.search', ['query' => $query, 'sort' => 'name-desc']) }}" {{ $sortBy == 'name-desc' ? 'selected' : '' }}>Tên Z-A</option>
+                            <option value="{{ route('client.search', ['query' => $query, 'sort' => 'price-asc']) }}" {{ $sortBy == 'price-asc' ? 'selected' : '' }}>Giá thấp đến cao</option>
+                            <option value="{{ route('client.search', ['query' => $query, 'sort' => 'price-desc']) }}" {{ $sortBy == 'price-desc' ? 'selected' : '' }}>Giá cao đến thấp</option>
+                            @else
+                            <option value="{{ route('client.category', ['slug' => $category->slug, 'sort' => 'featured']) }}" {{ $sortBy == 'featured' ? 'selected' : '' }}>Mới nhất</option>
+                            <option value="{{ route('client.category', ['slug' => $category->slug, 'sort' => 'name-asc']) }}" {{ $sortBy == 'name-asc' ? 'selected' : '' }}>Tên A-Z</option>
+                            <option value="{{ route('client.category', ['slug' => $category->slug, 'sort' => 'name-desc']) }}" {{ $sortBy == 'name-desc' ? 'selected' : '' }}>Tên Z-A</option>
+                            <option value="{{ route('client.category', ['slug' => $category->slug, 'sort' => 'price-asc']) }}" {{ $sortBy == 'price-asc' ? 'selected' : '' }}>Giá thấp đến cao</option>
+                            <option value="{{ route('client.category', ['slug' => $category->slug, 'sort' => 'price-desc']) }}" {{ $sortBy == 'price-desc' ? 'selected' : '' }}>Giá cao đến thấp</option>
+                            @endif
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -95,22 +123,24 @@
                             <div class="product-image">
                                 <!-- Start Product Image -->
                                 <a href="{{ route('client.product', ['slug'=>$product->slug]) }}" class="product-img rounded-0"><img style="min-height: 250px;" class="rounded-0 blur-up lazyload" src="{{ $product->primaryImage->url }}" alt="{{ $product->name }}" title="{{ $product->name }}" width="625" height="808" /></a>
+                                @if($product->primaryImage)
+                                <a href="{{ route('client.product', ['slug'=>$product->slug]) }}" class="product-img rounded-0"><img style="min-height: 250px;" class="rounded-0 blur-up lazyload" src="{{ $product->primaryImage->url }}" alt="{{ $product->name }}" title="{{ $product->name }}" width="625" height="808" /></a>
+                                @else
+                                <a href="{{ route('client.product', ['slug'=>$product->slug]) }}" class="product-img rounded-0"><img style="min-height: 250px;" class="rounded-0 blur-up lazyload" src="{{ asset('assets/images/collection/category.jpg') }}" alt="{{ $product->name }}" title="{{ $product->name }}" width="625" height="808" /></a>
+                                @endif
                                 <!-- End Product Image -->
                                 <!-- Product label -->
                                 <div class="product-labels">
                                     @if($product->base_price !== $product->compare_price)
-                                    <span class="lbl on-sale">Giảm giá</span>
                                     <span class="lbl on-sale">Sale</span>
                                     @endif
                                     @if($product->is_featured)
-                                    <span class="lbl pr-label2">Nổi bật</span>
                                     <span class="lbl pr-label2">HOT</span>
                                     @endif
                                 </div>
                                 <!-- End Product label -->
                                 <!--Product Button-->
                                 <div class="button-set style2">
-                                    <a href="#" class="btn btn-success">Mua ngay</a>
                                     <a href="{{ route('client.product', ['slug'=>$product->slug]) }}" class="btn btn-primary">Mua ngay</a>
                                 </div>
                                 <!--End Product Button-->
@@ -163,6 +193,7 @@
                 <nav class="clearfix pagination-bottom">
                     <ul class="pagination justify-content-center">
                         {{ $products->links() }}
+                        {{ $products->appends(request()->query())->links() }}
                     </ul>
                 </nav>
                 <!-- End Pagination -->
