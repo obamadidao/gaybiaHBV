@@ -162,13 +162,13 @@ array_values($cartItem->selected_variants))) : null,
 
 // Cập nhật stock nếu sản phẩm track quantity
 if ($product->track_quantity) {
-                    // Trừ stock sản phẩm chính
+// Trừ stock sản phẩm chính
 $product->decrement('stock_quantity', $cartItem->quantity);
-                    
-                    // Trừ stock biến thể nếu có
-                    if ($cartItem->selected_variants) {
-                        $this->decrementVariantStock($product, $cartItem->selected_variants, $cartItem->quantity);
-                    }
+
+// Trừ stock biến thể nếu có
+if ($cartItem->selected_variants) {
+$this->decrementVariantStock($product, $cartItem->selected_variants, $cartItem->quantity);
+}
 }
 }
 
@@ -191,11 +191,11 @@ $order->addStatusHistory('pending', 'Đơn hàng được tạo', Auth::id());
 // Xóa selected items khỏi session
 session()->forget('selected_cart_items');
 
-            // Load relationships để đảm bảo data đầy đủ cho broadcast
-            $order->load(['user', 'customer.user']);
-            
-            // Trigger event để broadcast đơn hàng mới cho admin
-            event(new NewOrderCreated($order));
+// Load relationships để đảm bảo data đầy đủ cho broadcast
+$order->load(['user', 'customer.user']);
+
+// Trigger event để broadcast đơn hàng mới cho admin
+event(new NewOrderCreated($order));
 
 DB::commit();
 
@@ -250,14 +250,13 @@ $order = Order::where('id', $orderId)
 if (!$order->canBeCancelled()) {
 return response()->json([
 'success' => false,
-                    'message' => 'Không thể hủy đơn hàng này.'
-                    'message' => 'Đơn hàng không thể hủy do sản phẩm đã được gửi.'
+'message' => 'Đơn hàng không thể hủy do sản phẩm đã được gửi.'
 ], 400);
 }
 
-            // Lưu trạng thái cũ trước khi cập nhật
-            $oldStatus = $order->status;
-            
+// Lưu trạng thái cũ trước khi cập nhật
+$oldStatus = $order->status;
+
 // Cập nhật trạng thái đơn hàng
 $order->status = 'cancelled';
 $order->cancellation_reason = $request->cancellation_reason;
@@ -268,27 +267,27 @@ $order->save();
 // Hoàn lại stock
 foreach ($order->orderItems as $orderItem) {
 if ($orderItem->product && $orderItem->product->track_quantity) {
-                    // Hoàn stock sản phẩm chính
+// Hoàn stock sản phẩm chính
 $orderItem->product->increment('stock_quantity', $orderItem->quantity);
-                    
-                    // Hoàn stock biến thể nếu có
-                    if ($orderItem->product_variant_id) {
-                        $variant = \App\Models\ProductVariant::find($orderItem->product_variant_id);
-                        if ($variant) {
-                            $variant->increment('stock_quantity', $orderItem->quantity);
-                        }
-                    } else if ($orderItem->variant_attributes) {
-                        // Xử lý với variant_attributes (JSON format)
-                        $this->restoreVariantStock($orderItem->product, $orderItem->variant_attributes, $orderItem->quantity);
-                    }
+
+// Hoàn stock biến thể nếu có
+if ($orderItem->product_variant_id) {
+$variant = \App\Models\ProductVariant::find($orderItem->product_variant_id);
+if ($variant) {
+$variant->increment('stock_quantity', $orderItem->quantity);
+}
+} else if ($orderItem->variant_attributes) {
+// Xử lý với variant_attributes (JSON format)
+$this->restoreVariantStock($orderItem->product, $orderItem->variant_attributes, $orderItem->quantity);
+}
 }
 }
 
 // Add status history
 $order->addStatusHistory('cancelled', $request->cancellation_reason, Auth::id());
 
-            // Dispatch event để thông báo realtime cho admin
-            event(new \App\Events\OrderStatusChanged($order, $oldStatus, 'cancelled'));
+// Dispatch event để thông báo realtime cho admin
+event(new \App\Events\OrderStatusChanged($order, $oldStatus, 'cancelled'));
 
 DB::commit();
 
@@ -306,47 +305,47 @@ return response()->json([
 }
 }
 
-    /**
-     * Trừ stock cho biến thể sản phẩm từ selected_variants
-     */
-    private function decrementVariantStock($product, $selectedVariants, $quantity)
-    {
-        if (!$selectedVariants || !is_array($selectedVariants)) {
-            return;
-        }
+/**
+    * Trừ stock cho biến thể sản phẩm từ selected_variants
+    */
+private function decrementVariantStock($product, $selectedVariants, $quantity)
+{
+if (!$selectedVariants || !is_array($selectedVariants)) {
+return;
+}
 
-        foreach ($selectedVariants as $variantType => $variantValue) {
-            $variant = \App\Models\ProductVariant::where('product_id', $product->id)
-                ->where('variant_type', $variantType)
-                ->where('variant_value', $variantValue)
-                ->first();
-            
-            if ($variant) {
-                $variant->decrement('stock_quantity', $quantity);
-            }
-        }
-    }
+foreach ($selectedVariants as $variantType => $variantValue) {
+$variant = \App\Models\ProductVariant::where('product_id', $product->id)
+->where('variant_type', $variantType)
+->where('variant_value', $variantValue)
+->first();
 
-    /**
-     * Hoàn stock cho biến thể sản phẩm từ variant_attributes
-     */
-    private function restoreVariantStock($product, $variantAttributes, $quantity)
-    {
-        if (!$variantAttributes || !is_array($variantAttributes)) {
-            return;
-        }
+if ($variant) {
+$variant->decrement('stock_quantity', $quantity);
+}
+}
+}
 
-        foreach ($variantAttributes as $variantType => $variantValue) {
-            $variant = \App\Models\ProductVariant::where('product_id', $product->id)
-                ->where('variant_type', $variantType)
-                ->where('variant_value', $variantValue)
-                ->first();
-            
-            if ($variant) {
-                $variant->increment('stock_quantity', $quantity);
-            }
-        }
-    }
+/**
+    * Hoàn stock cho biến thể sản phẩm từ variant_attributes
+    */
+private function restoreVariantStock($product, $variantAttributes, $quantity)
+{
+if (!$variantAttributes || !is_array($variantAttributes)) {
+return;
+}
+
+foreach ($variantAttributes as $variantType => $variantValue) {
+$variant = \App\Models\ProductVariant::where('product_id', $product->id)
+->where('variant_type', $variantType)
+->where('variant_value', $variantValue)
+->first();
+
+if ($variant) {
+$variant->increment('stock_quantity', $quantity);
+}
+}
+}
 
 /**
     * Helper methods
@@ -563,11 +562,26 @@ $order->update([
 // Add status history
 $order->addStatusHistory('processing', 'Thanh toán ZaloPay thành công', null);
 
-                    // Load relationships để đảm bảo data đầy đủ cho broadcast  
-                    $order->load(['user', 'customer.user']);
+// Load relationships để đảm bảo data đầy đủ cho broadcast  
+$order->load(['user', 'customer.user']);
+
+                    // Log before triggering event
+                    Log::info('About to trigger OrderStatusChanged event for ZaloPay payment', [
+                        'order_id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'old_status' => 'pending',
+                        'new_status' => 'processing',
+                        'payment_status' => $order->payment_status,
+                        'payment_method' => $order->payment_method,
+                        'user_email' => $order->user->email ?? 'No email'
+                    ]);
                     
-                    // Trigger event để broadcast thay đổi trạng thái
-                    event(new OrderStatusChanged($order, 'pending', 'processing'));
+// Trigger event để broadcast thay đổi trạng thái
+event(new OrderStatusChanged($order, 'pending', 'processing'));
+                    
+                    Log::info('OrderStatusChanged event triggered successfully', [
+                        'order_id' => $order->id
+                    ]);
 
 DB::commit();
 
@@ -624,12 +638,31 @@ Log::info('ZaloPay Return: Payment successful', ['order_id' => $order->id]);
 
 // Cập nhật trạng thái nếu chưa được cập nhật bởi callback
 if ($order->payment_status === 'pending') {
+                        $oldStatus = $order->status;
+                        
 $order->update([
 'payment_status' => 'paid',
 'status' => 'processing',
 'paid_at' => now()
 ]);
 $order->addStatusHistory('processing', 'Thanh toán ZaloPay thành công (Return)', null);
+                        
+                        // Load relationships và trigger event nếu cần
+                        $order->load(['user', 'customer.user']);
+                        
+                        Log::info('ZaloPay Return: Triggering OrderStatusChanged event', [
+                            'order_id' => $order->id,
+                            'old_status' => $oldStatus,
+                            'new_status' => 'processing'
+                        ]);
+                        
+                        event(new OrderStatusChanged($order, $oldStatus, 'processing'));
+                    } else {
+                        Log::info('ZaloPay Return: Order already processed by callback, skipping event trigger', [
+                            'order_id' => $order->id,
+                            'payment_status' => $order->payment_status,
+                            'order_status' => $order->status
+                        ]);
 }
 
 // Redirect đến trang waiting với auto redirect success
@@ -752,59 +785,59 @@ return redirect()->route('client.cart.index')
 }
 }
 
-    /**
-     * API endpoint cho fallback polling - lấy updates đơn hàng
-     */
-    public function getOrderUpdates(Request $request)
-    {
-        $user = Auth::user();
-        
-        // Lấy timestamp cuối cùng client đã nhận updates (nếu có)
-        $lastUpdate = $request->query('last_update', now()->subMinutes(5)->toISOString());
-        
-        // Lấy các đơn hàng của user đã được update sau thời điểm đó
-        $recentOrders = Order::where('user_id', $user->id)
-            ->where('updated_at', '>', $lastUpdate)
-            ->with(['user', 'customer.user'])
-            ->latest('updated_at')
-            ->limit(10)
-            ->get();
-        
-        $updates = [];
-        
-        foreach ($recentOrders as $order) {
-            $updates[] = [
-                'order_id' => $order->id,
-                'order_code' => $order->order_number,
-                'customer_name' => $order->user->name ?? $order->customer->full_name ?? 'Guest',
-                'total_amount' => $order->total_amount,
-                'new_status' => $order->status,
-                'updated_at' => $order->updated_at->toISOString(),
-                'status_text' => $this->getStatusText($order->status),
-            ];
-        }
-        
-        return response()->json([
-            'success' => true,
-            'updates' => $updates,
-            'timestamp' => now()->toISOString()
-        ]);
-    }
+/**
+    * API endpoint cho fallback polling - lấy updates đơn hàng
+    */
+public function getOrderUpdates(Request $request)
+{
+$user = Auth::user();
 
-    /**
-     * Helper để lấy status text
-     */
-    private function getStatusText(string $status): string
-    {
-        return match($status) {
-            'pending' => 'Chờ xử lý',
-            'confirmed' => 'Đã xác nhận',
-            'processing' => 'Đang xử lý',
-            'shipped' => 'Đang giao hàng',
-            'delivered' => 'Đã giao hàng',
-            'cancelled' => 'Đã hủy',
-            'refunded' => 'Đã hoàn tiền',
-            default => 'Không xác định'
-        };
-    }
+// Lấy timestamp cuối cùng client đã nhận updates (nếu có)
+$lastUpdate = $request->query('last_update', now()->subMinutes(5)->toISOString());
+
+// Lấy các đơn hàng của user đã được update sau thời điểm đó
+$recentOrders = Order::where('user_id', $user->id)
+->where('updated_at', '>', $lastUpdate)
+->with(['user', 'customer.user'])
+->latest('updated_at')
+->limit(10)
+->get();
+
+$updates = [];
+
+foreach ($recentOrders as $order) {
+$updates[] = [
+'order_id' => $order->id,
+'order_code' => $order->order_number,
+'customer_name' => $order->user->name ?? $order->customer->full_name ?? 'Guest',
+'total_amount' => $order->total_amount,
+'new_status' => $order->status,
+'updated_at' => $order->updated_at->toISOString(),
+'status_text' => $this->getStatusText($order->status),
+];
+}
+
+return response()->json([
+'success' => true,
+'updates' => $updates,
+'timestamp' => now()->toISOString()
+]);
+}
+
+/**
+    * Helper để lấy status text
+    */
+private function getStatusText(string $status): string
+{
+return match($status) {
+'pending' => 'Chờ xử lý',
+'confirmed' => 'Đã xác nhận',
+'processing' => 'Đang xử lý',
+'shipped' => 'Đang giao hàng',
+'delivered' => 'Đã giao hàng',
+'cancelled' => 'Đã hủy',
+'refunded' => 'Đã hoàn tiền',
+default => 'Không xác định'
+};
+}
 }
