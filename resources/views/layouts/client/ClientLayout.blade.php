@@ -373,16 +373,16 @@
             function createClientNotificationElement(data) {
                 const statusColor = getStatusColor(data.type);
                 return `
-                       <div class="notification-item" data-type="${data.type}" data-order-id="${data.orderId}">
-                           <div class="d-flex justify-content-between">
-                               <div class="flex-grow-1">
-                                   <div class="notification-title fw-bold">${data.title}</div>
-                                   <div class="notification-message text-muted small">${data.message}</div>
-                               </div>
-                               <div class="notification-time text-muted small">${data.time}</div>
-                           </div>
-                       </div>
-                   `;
+                        <div class="notification-item" data-type="${data.type}" data-order-id="${data.orderId}">
+                            <div class="d-flex justify-content-between">
+                                <div class="flex-grow-1">
+                                    <div class="notification-title fw-bold">${data.title}</div>
+                                    <div class="notification-message text-muted small">${data.message}</div>
+                                </div>
+                                <div class="notification-time text-muted small">${data.time}</div>
+                            </div>
+                        </div>
+                    `;
             }
 
             function addClientNotificationToList(notificationHtml) {
@@ -429,12 +429,12 @@
             function showClientToast(title, message, type = 'info') {
                 const toastId = 'toast-' + Date.now();
                 const toastHtml = `
-                       <div class="client-toast ${type}" id="${toastId}">
-                           <div class="client-toast-close" onclick="removeClientToast('${toastId}')">&times;</div>
-                           <div class="client-toast-title fw-bold">${title}</div>
-                           <div class="client-toast-message">${message}</div>
-                       </div>
-                   `;
+                        <div class="client-toast ${type}" id="${toastId}">
+                            <div class="client-toast-close" onclick="removeClientToast('${toastId}')">&times;</div>
+                            <div class="client-toast-title fw-bold">${title}</div>
+                            <div class="client-toast-message">${message}</div>
+                        </div>
+                    `;
 
                 document.body.insertAdjacentHTML('beforeend', toastHtml);
 
@@ -511,11 +511,11 @@
             // CSS for slide out animation
             const style = document.createElement('style');
             style.textContent = `
-                   @keyframes slideOutRight {
-                       from { transform: translateX(0); opacity: 1; }
-                       to { transform: translateX(100%); opacity: 0; }
-                   }
-               `;
+                    @keyframes slideOutRight {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
             document.head.appendChild(style);
 
             // Global functions for debugging
@@ -574,24 +574,26 @@
                 const orderTable = document.getElementById('orderTable');
                 if (!orderTable) return;
 
-                const orderRows = orderTable.querySelectorAll('tbody tr');
-                orderRows.forEach(row => {
-                    const orderRow = row.id;
-                    if (orderRow === `order-row-${data.order_id}`) {
-                        // Cập nhật badge trạng thái
-                        const statusBadge = row.querySelector('.badge');
-                        if (statusBadge) {
-                            statusBadge.className = `badge bg-${getClientStatusBadgeClass(data.new_status)}`;
-                            statusBadge.textContent = data.status_text;
-                        }
+                // Cập nhật badge trạng thái đơn hàng bằng ID cụ thể
+                const statusBadge = document.getElementById(`order-status-${data.order_id}`);
+                if (statusBadge) {
+                    statusBadge.className = `badge bg-${getClientStatusBadgeClass(data.new_status)}`;
+                    statusBadge.textContent = getStatusTextInVietnamese(data.new_status);
+                }
 
-                        // Thêm hiệu ứng highlight
-                        row.style.backgroundColor = '#e7f3ff';
-                        setTimeout(() => {
-                            row.style.backgroundColor = '';
-                        }, 3000);
+                // Thêm hiệu ứng highlight cho row
+                const orderRow = document.getElementById(`order-row-${data.order_id}`);
+                if (orderRow) {
+                    orderRow.style.backgroundColor = '#e7f3ff';
+                    setTimeout(() => {
+                        orderRow.style.backgroundColor = '';
+                    }, 3000);
+
+                    // Nếu đơn hàng bị hủy, thêm class để làm mờ
+                    if (data.new_status === 'cancelled') {
+                        orderRow.classList.add('table-danger');
                     }
-                });
+                }
 
                 // Cập nhật modal chi tiết đơn hàng nếu đang mở
                 if (typeof window.updateProfileOrderDetail === 'function') {
@@ -621,6 +623,19 @@
                     'refunded': 'secondary'
                 };
                 return statusClasses[status] || 'secondary';
+            }
+
+            function getStatusTextInVietnamese(status) {
+                const statusTexts = {
+                    'pending': 'Chờ xử lý',
+                    'confirmed': 'Đã xác nhận',
+                    'processing': 'Đang xử lý',
+                    'shipped': 'Đã gửi hàng',
+                    'delivered': 'Đã giao hàng',
+                    'cancelled': 'Đã hủy',
+                    'refunded': 'Đã hoàn tiền'
+                };
+                return statusTexts[status] || status;
             }
         </script>
 
@@ -653,3 +668,5 @@
 </body>
 
 <!-- Mirrored from www.annimexweb.com/items/hema/index5-tools-parts.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 22 Jun 2025 15:18:29 GMT -->
+
+</html>
