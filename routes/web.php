@@ -74,20 +74,20 @@ Route::post('/{customer}/unverify', [CustomerController::class, 'unverify'])->na
 Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
 });
 
-        // Contact management routes
-        Route::prefix('contacts')->name('contacts.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\ContactController::class, 'index'])->name('index');
-            Route::get('/{contact}', [\App\Http\Controllers\Admin\ContactController::class, 'show'])->name('show');
-            Route::get('/{contact}/edit', [\App\Http\Controllers\Admin\ContactController::class, 'edit'])->name('edit');
-            Route::put('/{contact}', [\App\Http\Controllers\Admin\ContactController::class, 'update'])->name('update');
-            Route::delete('/{contact}', [\App\Http\Controllers\Admin\ContactController::class, 'destroy'])->name('destroy');
-            Route::post('/{contact}/reply', [\App\Http\Controllers\Admin\ContactController::class, 'reply'])->name('reply');
-            Route::post('/{contact}/status', [\App\Http\Controllers\Admin\ContactController::class, 'updateStatus'])->name('update-status');
-            Route::post('/{contact}/priority', [\App\Http\Controllers\Admin\ContactController::class, 'updatePriority'])->name('update-priority');
-            Route::post('/bulk-action', [\App\Http\Controllers\Admin\ContactController::class, 'bulkAction'])->name('bulk-action');
-            Route::get('/export', [\App\Http\Controllers\Admin\ContactController::class, 'export'])->name('export');
-        });
-        
+// Contact management routes
+Route::prefix('contacts')->name('contacts.')->group(function () {
+Route::get('/', [\App\Http\Controllers\Admin\ContactController::class, 'index'])->name('index');
+Route::get('/{contact}', [\App\Http\Controllers\Admin\ContactController::class, 'show'])->name('show');
+Route::get('/{contact}/edit', [\App\Http\Controllers\Admin\ContactController::class, 'edit'])->name('edit');
+Route::put('/{contact}', [\App\Http\Controllers\Admin\ContactController::class, 'update'])->name('update');
+Route::delete('/{contact}', [\App\Http\Controllers\Admin\ContactController::class, 'destroy'])->name('destroy');
+Route::post('/{contact}/reply', [\App\Http\Controllers\Admin\ContactController::class, 'reply'])->name('reply');
+Route::post('/{contact}/status', [\App\Http\Controllers\Admin\ContactController::class, 'updateStatus'])->name('update-status');
+Route::post('/{contact}/priority', [\App\Http\Controllers\Admin\ContactController::class, 'updatePriority'])->name('update-priority');
+Route::post('/bulk-action', [\App\Http\Controllers\Admin\ContactController::class, 'bulkAction'])->name('bulk-action');
+Route::get('/export', [\App\Http\Controllers\Admin\ContactController::class, 'export'])->name('export');
+});
+
 // Order management routes
 Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 Route::get('/orders/export', [OrderController::class, 'export'])->name('orders.export');
@@ -145,20 +145,19 @@ Route::put('/profile-user/password', [ClientController::class, 'updateProfilePas
 Route::get('/api/order/{orderId}/detail', [ClientController::class, 'getOrderDetail'])->name('order-detail-api');
 });
 
-        Route::get('/contact', [ClientController::class, 'contact'])->name('contact');
-        // Contact routes
-        Route::prefix('contact')->name('contact.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Client\ContactController::class, 'index'])->name('index');
-            Route::post('/', [\App\Http\Controllers\Client\ContactController::class, 'store'])->name('store');
-            Route::post('/check-status', [\App\Http\Controllers\Client\ContactController::class, 'checkStatus'])->name('check-status');
-            Route::get('/form', [\App\Http\Controllers\Client\ContactController::class, 'getContactForm'])->name('form');
-            
-            // Authenticated routes
-            Route::middleware('auth')->group(function () {
-                Route::get('/my-contacts', [\App\Http\Controllers\Client\ContactController::class, 'myContacts'])->name('my-contacts');
-                Route::get('/{contact}', [\App\Http\Controllers\Client\ContactController::class, 'show'])->name('show');
-            });
-        });
+// Contact routes
+Route::prefix('contact')->name('contact.')->group(function () {
+Route::get('/', [\App\Http\Controllers\Client\ContactController::class, 'index'])->name('index');
+Route::post('/', [\App\Http\Controllers\Client\ContactController::class, 'store'])->name('store');
+Route::post('/check-status', [\App\Http\Controllers\Client\ContactController::class, 'checkStatus'])->name('check-status');
+Route::get('/form', [\App\Http\Controllers\Client\ContactController::class, 'getContactForm'])->name('form');
+
+// Authenticated routes
+Route::middleware('auth')->group(function () {
+Route::get('/my-contacts', [\App\Http\Controllers\Client\ContactController::class, 'myContacts'])->name('my-contacts');
+Route::get('/{contact}', [\App\Http\Controllers\Client\ContactController::class, 'show'])->name('show');
+});
+});
 
 // Cart routes
 Route::prefix('cart')->name('cart.')->group(function () {
@@ -219,5 +218,23 @@ Route::middleware('auth')->group(function () {
 Route::get('/api/user/order-updates', [ClientOrderController::class, 'getOrderUpdates'])->name('api.user.order-updates');
 Route::get('/api/admin/notifications', [AdminController::class, 'getNotifications'])->name('api.admin.notifications');
 });
+
+// Debug route - tạm thời
+Route::get('/debug/contacts', function() {
+    if (!Auth::check()) {
+        return 'User not authenticated';
+    }
+    
+    $userId = Auth::id();
+    $contacts = \App\Models\Contact::where('user_id', $userId)->get(['id', 'subject', 'user_id', 'created_at']);
+    
+    return [
+        'user_id' => $userId,
+        'user_email' => Auth::user()->email,
+        'contacts_count' => $contacts->count(),
+        'contacts' => $contacts->toArray()
+    ];
+})->middleware('auth');
+
 
 
